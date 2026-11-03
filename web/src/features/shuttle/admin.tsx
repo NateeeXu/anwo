@@ -80,7 +80,7 @@ function AlertsTab({ campusId }: { campusId: string }) {
     {
       key: 'title', header: t('shuttle.admin.col.title'),
       render: (a) => (
-        <div className="min-w-[240px]">
+        <div className="min-w-[240px] max-w-[440px]">
           <p className="text-body text-ink">{alertTitle(a, locale)}</p>
           {locale === 'zh-CN' && a.titleZh ? <p className="truncate text-caption text-ink-3" lang="en">{a.title}</p> : a.titleZh && locale === 'en' ? <p className="truncate text-caption text-ink-3" lang="zh-CN">{a.titleZh}</p> : null}
         </div>

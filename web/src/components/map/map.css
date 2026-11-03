@@ -332,3 +332,41 @@
   .anwo-pin, .anwo-cluster, .anwo-stop__dot, .anwo-poi__dot { transition: none; animation: none; }
   .anwo-pin[data-selected="true"] { animation: none; }
 }
+
+/* =====================================================================
+   Additions by the `map` module (BRIEF §7 exception: add-only).
+   Draw-radius handles, nationwide campus bubbles, drawing cursor.
+   ===================================================================== */
+.anwo-map .leaflet-container.anwo-map--drawing { cursor: crosshair; }
+.anwo-draw__center {
+  position: absolute; left: 0; top: 0; width: 18px; height: 18px; transform: translate(-50%, -50%);
+  border-radius: 999px; background: var(--accent); border: 3px solid var(--surface); box-shadow: var(--sh-pin); cursor: grab;
+}
+.anwo-draw__handle {
+  position: absolute; left: 0; top: 0; width: 16px; height: 16px; transform: translate(-50%, -50%);
+  border-radius: 999px; background: var(--surface); border: 2px solid var(--accent); box-shadow: var(--sh-pin); cursor: ew-resize;
+}
+.anwo-draw__spoke { stroke: var(--accent); }
+.leaflet-marker-draggable .anwo-draw__center:active { cursor: grabbing; }
+
+/* campus bubble (nationwide mode): count circle with the campus short name under it */
+.anwo-bubble {
+  position: absolute; left: 0; top: 0; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer;
+}
+.anwo-bubble__count {
+  display: flex; align-items: center; justify-content: center;
+  width: var(--bubble-size, 40px); height: var(--bubble-size, 40px); border-radius: 999px;
+  background: var(--surface); color: var(--ink); border: 2px solid var(--ink); box-shadow: var(--sh-pin);
+  font-size: 0.8125rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  transition: transform var(--duration-fast) var(--e-out), background-color var(--duration-fast) var(--e-out), color var(--duration-fast) var(--e-out);
+}
+.anwo-bubble__label {
+  padding: 1px 7px; border-radius: var(--radius-pill); background: var(--surface); border: 1px solid var(--line);
+  color: var(--ink-2); font-size: 0.75rem; font-weight: 500; white-space: nowrap;
+}
+.anwo-bubble:hover .anwo-bubble__count, .anwo-bubble[data-hovered="true"] .anwo-bubble__count { background: var(--inverse); color: var(--ink-inverse); border-color: var(--inverse); transform: scale(1.06); }
+.anwo-bubble[data-selected="true"] .anwo-bubble__count { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.anwo-bubble[data-empty="true"] .anwo-bubble__count { background: var(--sunken); color: var(--ink-3); border-color: var(--line-strong); border-style: dashed; font-weight: 600; }
+.anwo-marker:focus-visible .anwo-bubble__count { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .anwo-bubble__count { transition: none; } }

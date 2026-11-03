@@ -6,6 +6,7 @@ import { AttributionControl, Circle, MapContainer, Marker, Polyline, TileLayer, 
 import { cn } from '@/lib/cn';
 import { bboxOf, bboxToLeaflet, US_CENTER, US_ZOOM, type Bbox, type LatLngTuple } from '@/lib/geo';
 import { clusterIcon, fixLeafletDefaultIcon, iconFor } from './icons';
+import { clusterMarkers as clusterMarkersZoom, type ClusterBucket } from './cluster';
 import { LocateControl } from './LocateControl';
 import type { MapMarkerKind } from './PricePin';
 
@@ -75,6 +76,15 @@ export type MapViewProps = {
   zoomControl?: boolean;
   /** Grid clustering kicks in above this many markers (default 60). `Infinity` disables. */
   clusterThreshold?: number;
+  /**
+   * Cluster cell size in px (default 64, fixed). Pass a function of zoom for supercluster-like behaviour
+   * (`clusterCellForZoom` from `./cluster`): large cells when zoomed out, small when zoomed in.
+   */
+  clusterCellPx?: number | ((zoom: number) => number);
+  /** Called when a cluster is clicked (after the default zoom-to-members). */
+  onClusterClick?: (members: MapMarker[]) => void;
+  /** Click on the map background (not on a pin). Used by draw tools / manual pin placement. */
+  onMapClick?: (point: { lat: number; lng: number }) => void;
   minZoom?: number;
   maxZoom?: number;
   height?: string | number;
@@ -109,36 +119,7 @@ function sortForDom(markers: MapMarker[]): MapMarker[] {
   return [...markers].sort((a, b) => rank(a.kind) - rank(b.kind) || labelValue(a.label) - labelValue(b.label));
 }
 
-type Cluster = { id: string; lat: number; lng: number; count: number; members: MapMarker[] };
-type Bucket = { kind: 'marker'; marker: MapMarker } | { kind: 'cluster'; cluster: Cluster };
-
-/** Grid clustering in projected pixel space at the current zoom (cell = 64 px). Selected / campus markers never cluster. */
-function clusterMarkers(map: L.Map, markers: MapMarker[], cellPx = 64): Bucket[] {
-  const zoom = map.getZoom();
-  const cells = new Map<string, MapMarker[]>();
-  const out: Bucket[] = [];
-  for (const m of markers) {
-    if (m.selected || m.kind === 'campus') {
-      out.push({ kind: 'marker', marker: m });
-      continue;
-    }
-    const p = map.project([m.lat, m.lng], zoom);
-    const key = `${Math.floor(p.x / cellPx)}:${Math.floor(p.y / cellPx)}`;
-    const list = cells.get(key);
-    if (list) list.push(m);
-    else cells.set(key, [m]);
-  }
-  for (const [key, list] of cells) {
-    if (list.length === 1) {
-      out.push({ kind: 'marker', marker: list[0] });
-      continue;
-    }
-    let lat = 0, lng = 0;
-    for (const m of list) { lat += m.lat; lng += m.lng; }
-    out.push({ kind: 'cluster', cluster: { id: `cluster:${zoom}:${key}`, lat: lat / list.length, lng: lng / list.length, count: list.length, members: list } });
-  }
-  return out;
-}
+type Bucket = ClusterBucket;
 
 // ---------------------------------------------------------------- inner components (need useMap)
 function ViewController({
@@ -217,11 +198,20 @@ function ResizeHandler({ host }: { host: React.RefObject<HTMLDivElement | null> 
   return null;
 }
 
+/** Background click → `onMapClick` (pins stop propagation through Leaflet's own marker handling). */
+function MapClickHandler({ onMapClick }: { onMapClick: (point: { lat: number; lng: number }) => void }) {
+  const ref = useRef(onMapClick);
+  ref.current = onMapClick;
+  useMapEvents({ click: (e) => ref.current({ lat: e.latlng.lat, lng: e.latlng.lng }) });
+  return null;
+}
+
 function MarkerLayer({
-  markers, hoveredId, interactive, clusterThreshold, onMarkerClick, onMarkerHover,
+  markers, hoveredId, interactive, clusterThreshold, clusterCellPx, onMarkerClick, onMarkerHover, onClusterClick,
 }: {
   markers: MapMarker[]; hoveredId?: string | null; interactive: boolean; clusterThreshold: number;
-  onMarkerClick?: (id: string) => void; onMarkerHover?: (id: string | null) => void;
+  clusterCellPx: number | ((zoom: number) => number);
+  onMarkerClick?: (id: string) => void; onMarkerHover?: (id: string | null) => void; onClusterClick?: (members: MapMarker[]) => void;
 }) {
   const map = useMap();
   const [zoomTick, setZoomTick] = useState(0);
@@ -230,9 +220,9 @@ function MarkerLayer({
   const sorted = useMemo(() => sortForDom(markers), [markers]);
   const buckets = useMemo<Bucket[]>(() => {
     if (sorted.length <= clusterThreshold) return sorted.map((marker) => ({ kind: 'marker', marker }));
-    return clusterMarkers(map, sorted);
+    return clusterMarkersZoom(map, sorted, clusterCellPx);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorted, clusterThreshold, map, zoomTick]);
+  }, [sorted, clusterThreshold, clusterCellPx, map, zoomTick]);
 
   return (
     <>
@@ -252,6 +242,7 @@ function MarkerLayer({
                 click: () => {
                   const bb = bboxOf(c.members, 0.1);
                   if (bb) map.fitBounds(bboxToLeaflet(bb), { padding: [40, 40], maxZoom: 17, animate: !prefersReducedMotion() });
+                  onClusterClick?.(c.members);
                 },
               }}
             />
@@ -295,8 +286,8 @@ function MarkerLayer({
  */
 export function MapView({
   center, zoom, bounds, markers = [], onMarkerClick, onMarkerHover, hoveredId, polylines = [], onPolylineClick, circles = [],
-  onBoundsChange, fitToMarkers = false, interactive = true, locate, zoomControl, clusterThreshold = 60, minZoom = 3, maxZoom = 19,
-  height = 320, className, style, children, overlay, onMapReady, 'aria-label': ariaLabel,
+  onBoundsChange, fitToMarkers = false, interactive = true, locate, zoomControl, clusterThreshold = 60, clusterCellPx = 64, onClusterClick, onMapClick,
+  minZoom = 3, maxZoom = 19, height = 320, className, style, children, overlay, onMapReady, 'aria-label': ariaLabel,
 }: MapViewProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const showZoom = zoomControl ?? interactive;
@@ -376,7 +367,8 @@ export function MapView({
           />
         ))}
 
-        <MarkerLayer markers={markers} hoveredId={hoveredId} interactive={interactive} clusterThreshold={clusterThreshold} onMarkerClick={onMarkerClick} onMarkerHover={onMarkerHover} />
+        <MarkerLayer markers={markers} hoveredId={hoveredId} interactive={interactive} clusterThreshold={clusterThreshold} clusterCellPx={clusterCellPx} onMarkerClick={onMarkerClick} onMarkerHover={onMarkerHover} onClusterClick={onClusterClick} />
+        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         {children}
       </MapContainer>
       {overlay && <div className="anwo-map__overlay">{overlay}</div>}

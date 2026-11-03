@@ -84,7 +84,7 @@ async function main() {
       const page = await ctx.newPage();
       watch(page, 'browse-anon');
       await page.goto('/shuttle');
-      await page.getByRole('heading', { level: 1 }).waitFor();
+      await page.locator('#main').getByRole('heading', { level: 1 }).waitFor();
       await page.getByText('Campus Loop', { exact: true }).first().waitFor();
       assert(await page.locator('[role="region"][aria-label]').count() >= 1, 'alerts banner rendered');
       assert(await page.locator('.leaflet-container').count() === 1, 'map rendered');
@@ -133,7 +133,7 @@ async function main() {
 
       // route detail + timetable day switch
       await page.goto(`/shuttle/${ROUTE_IC}`);
-      await page.getByRole('heading', { level: 1 }).waitFor();
+      await page.locator('#main').getByRole('heading', { level: 1 }).waitFor();
       await page.locator('table').waitFor();
       const weekdayCells = await page.locator('table tbody td').count();
       assert(weekdayCells > 0, 'weekday timetable has cells');
@@ -258,8 +258,9 @@ async function main() {
       const page = await ctx.newPage();
       watch(page, 'en');
       await page.goto(`/shuttle/${ROUTE_LOOP}`);
-      await page.getByRole('heading', { level: 1 }).waitFor();
+      // the PageHeader h1 is hidden below md (the mobile top bar carries the title) — wait on content instead
       await page.getByText(/Every 20 min/).first().waitFor();
+      await page.locator('table').waitFor();
       await shot(page, 'route-detail-en-mobile', { fullPage: true });
       await ctx.close();
     }
