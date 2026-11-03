@@ -37,6 +37,7 @@ import { shortDateLabel } from '../labels';
 const VISITED_KEY = 'anwo.map.visited';
 const CAMPUS_ZOOM = 14;
 const NATIONWIDE_HINT_ZOOM = 8;
+const CLUSTER_KINDS: ('listing' | 'item' | 'buddy')[] = ['listing', 'item', 'buddy'];
 
 function reducedMotion() {
   return typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -525,7 +526,8 @@ export default function MapExplorePage() {
           onBoundsChange={onBoundsChange}
           onMapReady={(m) => { mapRef.current = m; }}
           onMapClick={drawMode ? (p) => changeRadius({ center: p, radiusM: radius?.radiusM ?? 1000 }) : undefined}
-          clusterThreshold={40}
+          clusterThreshold={30}
+          clusterKinds={CLUSTER_KINDS}
           clusterCellPx={clusterCellForZoom}
           locate={false}
           zoomControl={isDesktop}

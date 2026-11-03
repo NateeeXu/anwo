@@ -81,6 +81,11 @@ export type MapViewProps = {
    * (`clusterCellForZoom` from `./cluster`): large cells when zoomed out, small when zoomed in.
    */
   clusterCellPx?: number | ((zoom: number) => number);
+  /**
+   * Restrict clustering to these marker kinds (default: every kind). E.g. `['listing', 'item', 'buddy']` keeps shuttle
+   * stops and POI dots visible while price pins group. Added by the `map` module.
+   */
+  clusterKinds?: MapMarkerKind[];
   /** Called when a cluster is clicked (after the default zoom-to-members). */
   onClusterClick?: (members: MapMarker[]) => void;
   /** Click on the map background (not on a pin). Used by draw tools / manual pin placement. */
@@ -207,10 +212,10 @@ function MapClickHandler({ onMapClick }: { onMapClick: (point: { lat: number; ln
 }
 
 function MarkerLayer({
-  markers, hoveredId, interactive, clusterThreshold, clusterCellPx, onMarkerClick, onMarkerHover, onClusterClick,
+  markers, hoveredId, interactive, clusterThreshold, clusterCellPx, clusterKinds, onMarkerClick, onMarkerHover, onClusterClick,
 }: {
   markers: MapMarker[]; hoveredId?: string | null; interactive: boolean; clusterThreshold: number;
-  clusterCellPx: number | ((zoom: number) => number);
+  clusterCellPx: number | ((zoom: number) => number); clusterKinds?: MapMarkerKind[];
   onMarkerClick?: (id: string) => void; onMarkerHover?: (id: string | null) => void; onClusterClick?: (members: MapMarker[]) => void;
 }) {
   const map = useMap();
@@ -219,10 +224,11 @@ function MarkerLayer({
 
   const sorted = useMemo(() => sortForDom(markers), [markers]);
   const buckets = useMemo<Bucket[]>(() => {
-    if (sorted.length <= clusterThreshold) return sorted.map((marker) => ({ kind: 'marker', marker }));
-    return clusterMarkersZoom(map, sorted, clusterCellPx);
+    const clusterable = clusterKinds ? sorted.filter((m) => clusterKinds.includes(m.kind ?? 'listing')).length : sorted.length;
+    if (clusterable <= clusterThreshold) return sorted.map((marker) => ({ kind: 'marker', marker }));
+    return clusterMarkersZoom(map, sorted, clusterCellPx, clusterKinds);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sorted, clusterThreshold, clusterCellPx, map, zoomTick]);
+  }, [sorted, clusterThreshold, clusterCellPx, clusterKinds?.join(','), map, zoomTick]);
 
   return (
     <>
@@ -286,7 +292,7 @@ function MarkerLayer({
  */
 export function MapView({
   center, zoom, bounds, markers = [], onMarkerClick, onMarkerHover, hoveredId, polylines = [], onPolylineClick, circles = [],
-  onBoundsChange, fitToMarkers = false, interactive = true, locate, zoomControl, clusterThreshold = 60, clusterCellPx = 64, onClusterClick, onMapClick,
+  onBoundsChange, fitToMarkers = false, interactive = true, locate, zoomControl, clusterThreshold = 60, clusterCellPx = 64, clusterKinds, onClusterClick, onMapClick,
   minZoom = 3, maxZoom = 19, height = 320, className, style, children, overlay, onMapReady, 'aria-label': ariaLabel,
 }: MapViewProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -367,7 +373,7 @@ export function MapView({
           />
         ))}
 
-        <MarkerLayer markers={markers} hoveredId={hoveredId} interactive={interactive} clusterThreshold={clusterThreshold} clusterCellPx={clusterCellPx} onMarkerClick={onMarkerClick} onMarkerHover={onMarkerHover} onClusterClick={onClusterClick} />
+        <MarkerLayer markers={markers} hoveredId={hoveredId} interactive={interactive} clusterThreshold={clusterThreshold} clusterCellPx={clusterCellPx} clusterKinds={clusterKinds} onMarkerClick={onMarkerClick} onMarkerHover={onMarkerHover} onClusterClick={onClusterClick} />
         {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
         {children}
       </MapContainer>

@@ -25,14 +25,20 @@ export function clusterCellForZoom(zoom: number): number {
  * Grid clustering in projected pixel space. Selected / campus markers never cluster. The cell key is offset by half
  * a cell on odd zooms so cluster centres do not sit on the same grid lines between zoom levels (less "jumping").
  */
-export function clusterMarkers(map: L.Map, markers: MapMarker[], cellPx: number | ((zoom: number) => number) = 64): ClusterBucket[] {
+export function clusterMarkers(
+  map: L.Map,
+  markers: MapMarker[],
+  cellPx: number | ((zoom: number) => number) = 64,
+  /** Only markers of these kinds are clustered (default: all). Small dots (stops, POIs) usually stay visible. */
+  kinds?: readonly string[],
+): ClusterBucket[] {
   const zoom = map.getZoom();
   const cell = typeof cellPx === 'function' ? cellPx(zoom) : cellPx;
   const shift = Math.round(zoom) % 2 === 1 ? cell / 2 : 0;
   const cells = new Map<string, MapMarker[]>();
   const out: ClusterBucket[] = [];
   for (const m of markers) {
-    if (m.selected || m.kind === 'campus') {
+    if (m.selected || m.kind === 'campus' || (kinds && !kinds.includes(m.kind ?? 'listing'))) {
       out.push({ kind: 'marker', marker: m });
       continue;
     }
