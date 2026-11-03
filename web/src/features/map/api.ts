@@ -2,7 +2,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { Poi } from '@shared/types';
 import type { PoiCategory } from '@shared/enums';
-import type { CampusBoundsResponse, CampusStatsResponse, GeocodeResponse, LayersResponse, MapLayer, PoiInput, PoiUpdateInput, ReverseResponse } from '@shared/schemas/map';
+import type { CampusBoundsResponse, CampusStatsResponse, GeocodeResponse, LayersResponse, MapLayer, PoiInput, PoiSuggestion, PoiSuggestionInput, PoiSuggestionStatus, PoiUpdateInput, ReverseResponse, SuggestionApproveInput } from '@shared/schemas/map';
 import { api, type Query } from '@/lib/api';
 
 export type LayersParams = {
@@ -25,6 +25,7 @@ export type AdminStats = {
   pois: { total: number; active: number };
   byCampus: { campusId: string; n: number }[];
   offline: boolean;
+  suggestions?: { pending: number };
 };
 
 export const keys = {
@@ -35,6 +36,8 @@ export const keys = {
   campusBounds: (id: string) => ['map', 'campusBounds', id] as const,
   adminPois: (q: Query) => ['map', 'admin', 'pois', q] as const,
   adminStats: ['map', 'admin', 'stats'] as const,
+  adminSuggestions: (status?: string) => ['map', 'admin', 'suggestions', status ?? 'all'] as const,
+  mySuggestions: ['map', 'suggestions', 'mine'] as const,
 };
 
 export const mapApi = {
@@ -47,7 +50,12 @@ export const mapApi = {
   reverse: (lat: number, lng: number) => api<ReverseResponse>('/api/map/reverse', { query: { lat, lng } }),
   campusStats: () => api<CampusStatsResponse>('/api/map/campus-stats'),
   campusBounds: (id: string) => api<CampusBoundsResponse>(`/api/map/campus/${id}/bounds`),
+  suggest: (body: PoiSuggestionInput) => api<PoiSuggestion>('/api/map/suggestions', { method: 'POST', body }),
+  mySuggestions: () => api<PoiSuggestion[]>('/api/map/suggestions/mine'),
   admin: {
+    suggestions: (status?: PoiSuggestionStatus) => api<{ items: PoiSuggestion[]; pending: number }>('/api/map/admin/suggestions', { query: { status } }),
+    approve: (id: string, body: SuggestionApproveInput = {}) => api<{ suggestion: PoiSuggestion; poi: Poi }>(`/api/map/admin/suggestions/${id}/approve`, { method: 'POST', body }),
+    reject: (id: string, reason: string) => api<PoiSuggestion>(`/api/map/admin/suggestions/${id}/reject`, { method: 'POST', body: { reason } }),
     pois: (q: { campusId?: string; category?: PoiCategory; q?: string }) => api<AdminPoi[]>('/api/map/admin/pois', { query: { ...q, includeInactive: true } }),
     stats: () => api<AdminStats>('/api/map/admin/stats'),
     create: (body: PoiInput) => api<Poi>('/api/map/admin/pois', { method: 'POST', body }),

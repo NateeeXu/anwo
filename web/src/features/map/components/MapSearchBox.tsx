@@ -43,6 +43,7 @@ export function MapSearchBox({ campuses, pois, campusId, near, onPick, onClear, 
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigated = useRef(false);
   useOnClickOutside(rootRef, () => setOpen(false), open);
 
   const q = norm(text);
@@ -69,12 +70,12 @@ export function MapSearchBox({ campuses, pois, campusId, near, onPick, onClear, 
     return out;
   }, [q, campuses, pois, geo.status, geo.results, isZh, t, text]);
 
-  useEffect(() => setActive(0), [q]);
+  useEffect(() => { setActive(0); navigated.current = false; }, [q]);
   useEffect(() => { if (geo.status !== 'idle') geo.reset(); }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const choose = (o: Option) => {
     onPick(o.pick);
-    setText(o.pick.kind === 'address' ? o.label : o.label);
+    setText(o.label);
     setOpen(false);
     inputRef.current?.blur();
   };
@@ -90,16 +91,16 @@ export function MapSearchBox({ campuses, pois, campusId, near, onPick, onClear, 
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true); setActive((i) => Math.min(options.length - 1, i + 1)); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((i) => Math.max(0, i - 1)); }
+    if (e.key === 'ArrowDown') { e.preventDefault(); navigated.current = true; setOpen(true); setActive((i) => Math.min(options.length - 1, i + 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); navigated.current = true; setActive((i) => Math.max(0, i - 1)); }
     else if (e.key === 'Escape') { setOpen(false); }
     else if (e.key === 'Enter') {
       e.preventDefault();
       const o = options[active];
-      if (open && o && o.group !== 'addresses' && active > 0) choose(o);
-      else if (open && o && o.group === 'addresses') choose(o);
-      else if (text.trim().length >= 3 && authStatus === 'authed') void runGeocode();
+      if (open && navigated.current && o) choose(o);
+      else if (authStatus === 'authed' && text.trim().length >= 3 && !options.some((x) => x.group !== 'addresses')) void runGeocode();
       else if (o) choose(o);
+      else void runGeocode();
     }
   };
 
