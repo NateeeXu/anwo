@@ -371,10 +371,10 @@ export function importCampusRoutes(campusId: string, routes: ImportRouteInput[],
   const stopIds = new Set<string>();
   q.tx(() => {
     if (opts.replace) {
+      // Routes and stops are matched by name below and updated in place, so their ids stay stable for alerts,
+      // favorites and listings.nearest_stop_id; whatever the payload no longer mentions is removed afterwards.
       q.run('DELETE FROM shuttle_schedule WHERE route_id IN (SELECT id FROM shuttle_routes WHERE campus_id = ?)', [campusId]);
       q.run('DELETE FROM shuttle_route_stops WHERE route_id IN (SELECT id FROM shuttle_routes WHERE campus_id = ?)', [campusId]);
-      q.run('DELETE FROM shuttle_routes WHERE campus_id = ?', [campusId]);
-      q.run('DELETE FROM shuttle_stops WHERE campus_id = ?', [campusId]);
     }
     const stopByKey = new Map<string, string>();
     for (const r of q.all<StopRow>('SELECT * FROM shuttle_stops WHERE campus_id = ?', [campusId])) stopByKey.set(r.name.toLowerCase(), r.id);
@@ -415,8 +415,12 @@ export function importCampusRoutes(campusId: string, routes: ImportRouteInput[],
           q.insert('shuttle_stops', { id: stopId, campus_id: campusId, name: s.name, name_zh: s.nameZh ?? null, code: s.code ?? null, lat: s.lat, lng: s.lng, address: s.address ?? null, is_active: 1 });
           stopByKey.set(key, stopId);
           stopByKey.set(s.name.toLowerCase(), stopId);
-        } else if (s.nameZh || s.address || s.code) {
-          q.update('shuttle_stops', { name_zh: s.nameZh ?? null, code: s.code ?? null, address: s.address ?? null }, 'id = ?', [stopId]);
+        } else {
+          const patch: Record<string, string | number | null> = { lat: s.lat, lng: s.lng, is_active: 1 };
+          if (s.nameZh !== undefined) patch.name_zh = s.nameZh;
+          if (s.code !== undefined) patch.code = s.code;
+          if (s.address !== undefined) patch.address = s.address;
+          q.update('shuttle_stops', patch, 'id = ?', [stopId]);
         }
         stopIds.add(stopId);
         q.run('INSERT INTO shuttle_route_stops (route_id, stop_id, sequence, minutes_from_start) VALUES (?, ?, ?, ?)', [routeId, stopId, seq, s.minutesFromStart ?? 0]);
@@ -435,6 +439,12 @@ export function importCampusRoutes(campusId: string, routes: ImportRouteInput[],
         });
       }
     });
+    if (opts.replace) {
+      const staleRoutes = q.all<{ id: string }>('SELECT id FROM shuttle_routes WHERE campus_id = ?', [campusId]).map((r) => r.id).filter((id) => !routeIds.includes(id));
+      if (staleRoutes.length) q.run(`DELETE FROM shuttle_routes WHERE id IN (${placeholders(staleRoutes.length)})`, staleRoutes);
+      const stale = q.all<{ id: string }>('SELECT id FROM shuttle_stops WHERE campus_id = ?', [campusId]).map((r) => r.id).filter((id) => !stopIds.has(id));
+      if (stale.length) q.run(`DELETE FROM shuttle_stops WHERE id IN (${placeholders(stale.length)})`, stale);
+    }
   });
   return { campusId, routes: routeIds.length, stops: stopIds.size, scheduleRows, routeIds };
 }
