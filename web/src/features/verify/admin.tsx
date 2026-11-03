@@ -381,7 +381,7 @@ function ReviewModal({ id, onClose, onPrev, onNext, hasPrev, hasNext, onDecided 
                 <ul className="mt-1 flex flex-col gap-1 text-small">
                   {item.history.map((h) => (
                     <li key={h.id} className="flex flex-wrap gap-x-2 text-ink-2">
-                      <span className="text-ink">{h.action}</span>
+                      <span className="text-ink">{t(`verify.timeline.${h.action}`) === `verify.timeline.${h.action}` ? h.action : t(`verify.timeline.${h.action}`, { type: typeLabel(t, item.type), to: String((h.after as { trustLevel?: number } | null)?.trustLevel ?? '') })}</span>
                       <span>{h.actor?.name ?? t('verify.timeline.by.system')}</span>
                       {h.reason && <span className="text-ink-3">· {h.reason}</span>}
                       <span className="text-ink-3">· {formatRelative(h.createdAt)}</span>

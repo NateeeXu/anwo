@@ -3,6 +3,7 @@
 //
 //   GEOCODE_OFFLINE=1 PORT=4103 DB_PATH=server/data/test-chat.db npm run dev -w server
 //   VITE_PORT=5103 VITE_API_TARGET=http://127.0.0.1:4103 npm run dev -w web
+//   GEOCODE_OFFLINE=1 DB_PATH=server/data/test-chat.db npm run seed -w server -- --modules core,chat --force   (fresh read states)
 //   WEB_PORT=5103 node docs/modules/chat.spec.mjs
 //
 // Screenshots → docs/screenshots/chat/. Exit code 1 on any pageerror / console.error or failed assertion.
@@ -98,7 +99,7 @@ await page.waitForSelector('[data-message-id]');
 await page.waitForTimeout(600);
 assert(await page.getByText('1735 Chicago Ave').first().isVisible(), 'context card is pinned at the top of the thread');
 assert((await page.locator('[data-message-id]').count()) >= 6, 'thread renders its messages');
-assert(await page.getByRole('button', { name: /查看|View/ }).first().isVisible(), 'context card has a 查看 action');
+assert(await page.getByRole('link', { name: /查看|View/ }).first().isVisible(), 'context card has a 查看 action');
 await shot(page, KEY, 'thread-listing-desktop');
 
 // group thread with system pills
@@ -112,7 +113,8 @@ await shot(page, KEY, 'thread-group-desktop');
 await page.goto('/chat?tab=unread');
 await page.waitForSelector('a[href^="/chat/chatseed-"]');
 const unreadRows = await page.locator('a[href^="/chat/chatseed-"]').count();
-assert(unreadRows >= 7, `未读 tab lists ${unreadRows} threads`);
+const initialUnread = inbox.items.filter((c) => c.unreadCount > 0).length;
+assert(unreadRows >= initialUnread - 2, `未读 tab lists ${unreadRows} threads (two were just opened and read)`);
 await page.getByRole('tab', { name: /归档|Archived/ }).click();
 await page.waitForTimeout(800);
 const archivedRows = await page.locator('a[href^="/chat/chatseed-"]').count();
@@ -124,17 +126,19 @@ assert(await page.locator('mark').first().isVisible(), 'message search highlight
 await shot(page, KEY, 'inbox-search-desktop');
 await page.getByLabel(/搜索对话或消息|Search conversations/).fill('');
 
-// ---------------------------------------------------------------- create flow: new thread with Kai (never chatted), scam banner, text + image
-const kaiId = (await apiGet(page, '/api/search?q=Kai&types=user&limit=5')).users?.find((u) => u.name.includes('Kai'))?.id
-  ?? (await (async () => {
-    // fallback: look the user up through a seeded group (Kai is in the CS 336 study group) via the admin API
-    const adminPage = await (await browser.newContext({ baseURL: page.url().replace(/\/chat.*$/, '') })).newPage();
-    await login(adminPage, 'admin@example.edu');
-    const r = await apiGet(adminPage, '/api/chat/admin/conversations?q=CS%20336');
-    await adminPage.context().close();
-    return r.items[0]?.members.find((m) => m.name.includes('Kai'))?.id;
-  })());
-assert(!!kaiId, 'found Kai Tanaka to start a new conversation with');
+// ---------------------------------------------------------------- create flow: new thread with someone alice never chatted with, scam banner, text + image
+const CANDIDATES = [
+  ['Kai', 'kai.tanaka@u.northwestern.edu'], ['Daniel', 'daniel.kim@u.northwestern.edu'], ['Sophia', 'sophia.wang@u.northwestern.edu'],
+  ['Boyang', 'boyang.he@u.northwestern.edu'], ['Jiaqi', 'jiaqi.huang@u.northwestern.edu'], ['Mengyao', 'mengyao.xu@u.northwestern.edu'],
+];
+const known = new Set([...inbox.items, ...(await apiGet(page, '/api/chat/conversations?archived=1&pageSize=50')).items].map((c) => c.peer?.id).filter(Boolean));
+let partner = null;
+for (const [name, email] of CANDIDATES) {
+  const hit = (await apiGet(page, `/api/search?q=${name}&types=user&limit=5`)).users?.find((u) => u.name.includes(name));
+  if (hit && !known.has(hit.id)) { partner = { id: hit.id, name, email }; break; }
+}
+assert(!!partner, `found a fresh partner to start a new conversation with (${partner?.name ?? 'none'})`);
+const kaiId = partner.id;
 const created = await (await page.request.post('/api/chat/conversations', { data: { userId: kaiId }, headers: H })).json();
 assert(created.ok && created.data.created === true, 'POST /api/chat/conversations creates a new direct thread');
 const newId = created.data.id;
@@ -146,18 +150,18 @@ assert(await page.getByRole('link', { name: /了解更多|Learn more/ }).isVisib
 await shot(page, KEY, 'thread-new-scam-banner');
 
 const composer = page.locator('textarea');
-await composer.fill('Hi Kai，听说你也在找 Noyes 附近的房子？');
+await composer.fill(`Hi ${partner.name}，听说你也在找 Noyes 附近的房子？`);
 await page.keyboard.press('Enter');
 await page.waitForSelector('[data-message-id]:not([data-message-id^="local-"])', { timeout: 8000 });
-assert(await page.getByText('Hi Kai，听说你也在找 Noyes 附近的房子？').isVisible(), 'text message is sent and rendered');
+assert(await page.locator('[data-message-id]').getByText(`Hi ${partner.name}，听说你也在找 Noyes 附近的房子？`).first().isVisible(), 'text message is sent and rendered');
 await page.setInputFiles('input[type=file]', { name: 'room.png', mimeType: 'image/png', buffer: PNG });
 await page.waitForSelector('[data-message-id] img[alt*="Alice"], [data-message-id] img[alt*="发送的图片"]', { timeout: 10000 });
 assert(true, 'image message uploads and renders');
 
-// realtime: Kai replies through the API in another session → alice sees it live, plus typing indicator
+// realtime: the partner replies through the API in another session → alice sees it live, plus typing indicator
 const kaiCtx = await browser.newContext({ baseURL: page.url().replace(/\/chat.*$/, '') });
 const kaiPage = await kaiCtx.newPage();
-await login(kaiPage, 'kai.tanaka@u.northwestern.edu');
+await login(kaiPage, partner.email);
 await kaiPage.request.post(`/api/chat/conversations/${newId}/typing`, { data: { typing: true }, headers: H });
 await page.waitForTimeout(600);
 assert(await page.getByText(/正在输入|is typing/).first().isVisible().catch(() => false), 'typing indicator shows for the other member');
@@ -173,7 +177,7 @@ assert(aliceSide.unreadCount === 0, 'open thread is marked read for alice automa
 await kaiCtx.close();
 
 // actions menu: archive → unarchive
-await page.getByRole('button', { name: /更多操作|More actions/ }).click();
+await page.locator('header').getByRole('button', { name: /更多操作|More actions/ }).click();
 await page.getByRole('menuitem', { name: /^归档$|^Archive$/ }).click();
 await page.waitForURL(/\/chat$/, { timeout: 5000 });
 await page.waitForTimeout(600);

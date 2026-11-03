@@ -132,21 +132,21 @@ async function run() {
   await page.getByRole('button', { name: /拼车/ }).first().waitFor({ timeout: 20000 });
   await page.getByRole('button', { name: /^拼车/ }).first().click();
   await page.getByRole('button', { name: '下一步' }).click();
-  await page.getByLabel('标题').fill('周日 Mitsuwa 拼车 · 测试发布');
+  await page.getByRole('textbox', { name: /^标题/ }).fill('周日 Mitsuwa 拼车 · 测试发布');
   const start = new Date(Date.now() + 3 * 86400000);
   start.setHours(14, 0, 0, 0);
   const local = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}T14:00`;
-  await page.getByLabel('开始时间').fill(local);
-  await page.getByLabel('集合地点').fill('Noyes 站');
-  await page.getByLabel('目的地').fill('Mitsuwa Marketplace');
-  await page.getByLabel('详情').fill('周日下午去 Mitsuwa 买食材，油费 AA。\n\nSunday grocery run to Mitsuwa, split gas.');
-  await page.getByLabel('每人费用').fill('6');
+  await page.getByLabel(/^开始时间/).fill(local);
+  await page.getByRole('textbox', { name: /^集合地点/ }).fill('Noyes 站');
+  await page.getByRole('textbox', { name: '目的地', exact: true }).fill('Mitsuwa Marketplace');
+  await page.getByRole('textbox', { name: /^详情/ }).fill('周日下午去 Mitsuwa 买食材，油费 AA。\n\nSunday grocery run to Mitsuwa, split gas.');
+  await page.getByRole('spinbutton', { name: /每人费用/ }).fill('6');
   await settle(page, 600);
   await shot(page, MODULE, 'form-step-details');
   await page.getByRole('button', { name: '下一步' }).click();
   await page.getByRole('switch', { name: /加入需要我审核/ }).click();
   await shot(page, MODULE, 'form-step-rules');
-  await page.getByRole('button', { name: '发布', exact: true }).click();
+  await page.locator('main').getByRole('button', { name: '发布', exact: true }).click();
   await page.waitForURL(/\/buddy\/[0-9a-f-]{36}$/, { timeout: 20000 });
   await page.waitForSelector('main h1');
   await settle(page);
@@ -159,10 +159,10 @@ async function run() {
 
   // edit
   await page.goto(`/buddy/${createdId}/edit`);
-  await page.getByLabel('标题').waitFor({ timeout: 20000 });
-  await page.getByLabel('标题').fill('周日 Mitsuwa 拼车 · 已编辑');
+  await page.getByRole('textbox', { name: /^标题/ }).waitFor({ timeout: 20000 });
+  await page.getByRole('textbox', { name: /^标题/ }).fill('周日 Mitsuwa 拼车 · 已编辑');
   await page.getByRole('button', { name: '下一步' }).click();
-  await page.getByRole('button', { name: '保存' }).click();
+  await page.locator('main').getByRole('button', { name: '保存', exact: true }).click();
   await page.waitForURL(new RegExp(`/buddy/${createdId}$`), { timeout: 20000 });
   await settle(page);
   assert((await apiGet(page, `/api/buddy/posts/${createdId}`)).title === '周日 Mitsuwa 拼车 · 已编辑', 'edit saved');

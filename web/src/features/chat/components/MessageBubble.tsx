@@ -158,9 +158,9 @@ export const MessageBubble = memo(function MessageBubble({ message: m, conv, meI
       {menuItems.length > 0 && !failed && (
         <div className={cn('mb-1 shrink-0 opacity-0 transition-opacity duration-token-fast group-hover/msg:opacity-100 focus-within:opacity-100', tapped && 'opacity-100')}>
           <DropdownMenu
-            label={t('chat.actions.menu')}
+            label={t('chat.actions.messageMenu')}
             align={mine ? 'end' : 'start'}
-            trigger={<Button variant="ghost" size="sm" iconOnly aria-label={t('chat.actions.menu')} className="size-7"><MoreHorizontal /></Button>}
+            trigger={<Button variant="ghost" size="sm" iconOnly aria-label={t('chat.actions.messageMenu')} className="size-7"><MoreHorizontal /></Button>}
             items={menuItems}
           />
         </div>

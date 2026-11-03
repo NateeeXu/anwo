@@ -84,9 +84,9 @@ await step('browse map', async () => {
 
 await step('item detail (anonymous)', async () => {
   await page.goto('/market/mkt-item-24');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('#main h1', { timeout: 20000 });
   await settle(page, 800);
-  const h1 = await page.locator('h1').first().textContent();
+  const h1 = await page.locator('#main h1').first().textContent();
   if (!/iPad/.test(h1 || '')) throw new Error(`unexpected h1: ${h1}`);
   if ((await page.getByText(/相似物品均价|Similar items average/).count()) < 1) throw new Error('price suggestion line missing');
   await shot(page, MODULE, 'detail-desktop');
@@ -94,7 +94,7 @@ await step('item detail (anonymous)', async () => {
 
 await step('bundle page', async () => {
   await page.goto('/market/bundles/mkt-bundle-xinyi');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('#main h1', { timeout: 20000 });
   await settle(page, 600);
   const n = await page.locator('article').count();
   if (n < 4) throw new Error(`bundle items rendered: ${n}`);
@@ -107,7 +107,7 @@ await step('login bob', async () => { bob = await login(page, 'bob@u.northwester
 
 await step('wishlist + buy via chat', async () => {
   await page.goto('/market/mkt-item-08');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('#main h1', { timeout: 20000 });
   await settle(page);
   const wish = page.getByRole('button', { name: /加入心愿单|Add to wishlist/ }).first();
   await wish.click();
@@ -146,12 +146,12 @@ await step('post item (create flow)', async () => {
   await page.getByLabel(/地点描述|Landmark/).fill('Davis St Metra 站');
   await settle(page, 500);
   await shot(page, MODULE, 'post-item-desktop');
-  await page.getByRole('button', { name: /^发布$|^Post$/ }).click();
+  await page.locator('form button[type=submit]').click();
   await page.waitForURL(/\/market\/[0-9a-f-]{36}$/, { timeout: 20000 });
   createdId = page.url().split('/').pop();
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('#main h1', { timeout: 20000 });
   await settle(page, 800);
-  const h1 = await page.locator('h1').first().textContent();
+  const h1 = await page.locator('#main h1').first().textContent();
   if (!/小熊|Bear/.test(h1 || '')) throw new Error(`created item not shown: ${h1}`);
   await shot(page, MODULE, 'post-item-result-desktop');
 });
@@ -207,7 +207,7 @@ await step('english browse', async () => {
 await step('dark detail', async () => {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/market/mkt-item-49');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('#main h1', { timeout: 20000 });
   await settle(page, 800);
   await shot(page, MODULE, 'detail-desktop-dark');
   await page.emulateMedia({ colorScheme: 'light' });
@@ -234,7 +234,7 @@ await step('mobile map', async () => {
 });
 await step('mobile detail', async () => {
   await m.page.goto('/market/mkt-item-11');
-  await m.page.waitForSelector('h1', { timeout: 20000 });
+  await m.page.waitForSelector('#main h1', { timeout: 20000 });
   await settle(m.page, 800);
   await shot(m.page, MODULE, 'detail-mobile', { fullPage: true });
 });

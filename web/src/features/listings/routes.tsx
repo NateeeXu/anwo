@@ -1,13 +1,23 @@
-// Module routes for "listings" — owned by the listings module agent; replace freely.
-// Contract: default-export a React Router RouteObject[] mounted as children of the app shell
-// (see docs/WEB.md). Paths are relative to "/" (no leading slash). Lazy-load heavy pages with
-// React.lazy — the router wraps every route element in Suspense with a skeleton fallback.
+// Module routes for "listings" — owned by the listings module agent. Mounted as children of the app shell (docs/WEB.md §2).
+import { lazy } from 'react';
 import type { RouteObject } from 'react-router';
-import { ModulePlaceholder } from '../../app/ModulePlaceholder';
+
+const Browse = lazy(() => import('./pages/Browse'));
+const Detail = lazy(() => import('./pages/Detail'));
+const Mine = lazy(() => import('./pages/Mine'));
+const Saved = lazy(() => import('./pages/Saved'));
+const PostWizard = lazy(() => import('./pages/PostWizard'));
+const EditListing = lazy(() => import('./pages/PostWizard').then((m) => ({ default: m.EditListing })));
+const PostSuccess = lazy(() => import('./pages/PostSuccess'));
 
 const routes: RouteObject[] = [
-  { path: 'listings/*', element: <ModulePlaceholder moduleKey="listings" titleKey="listings.title" tabs /> },
-  { path: 'post/listing', element: <ModulePlaceholder moduleKey="listings" titleKey="listings.post.listing.title" tabs /> },
+  { path: 'listings', element: <Browse /> },
+  { path: 'listings/mine', element: <Mine /> },
+  { path: 'listings/saved', element: <Saved /> },
+  { path: 'listings/:id', element: <Detail /> },
+  { path: 'listings/:id/edit', element: <EditListing />, handle: { hideTabs: true } },
+  { path: 'listings/:id/success', element: <PostSuccess />, handle: { hideTabs: true } },
+  { path: 'post/listing', element: <PostWizard />, handle: { hideTabs: true } },
 ];
 
 export default routes;
