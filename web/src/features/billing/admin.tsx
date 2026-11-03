@@ -63,7 +63,7 @@ export default function BillingAdminPanel() {
       </header>
 
       {q.isError && <EmptyState icon={CircleAlert} title={t('error.generic')} action={{ label: t('common.retry'), onClick: () => q.refetch() }} />}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-6">
         {SERIES.map((k) => (
           <button key={k} type="button" className="rounded-card text-left" onClick={() => setSelected(k)} aria-pressed={selected === k}>
             <StatTile label={t(`billing.admin.series.${k}`)} value={tileValue[k]} format="money" selected={selected === k} delta={half(k)} spark={(d?.series ?? []).map((p) => p[k])} className="h-full" />

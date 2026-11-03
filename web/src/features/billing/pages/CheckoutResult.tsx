@@ -18,7 +18,7 @@ export function CheckoutSuccessPage() {
 function Success() {
   const t = useT();
   const [params] = useSearchParams();
-  const { formatMoney, formatDate } = useLocale();
+  const { formatDate } = useLocale();
   const planName = usePlanName();
   const q = useOrder(params.get('order') ?? undefined);
   const [copied, setCopied] = useState(false);

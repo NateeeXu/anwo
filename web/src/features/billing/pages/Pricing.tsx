@@ -53,7 +53,7 @@ export default function PricingPage() {
     <div className="mx-auto w-full max-w-content px-4 lg:px-8">
       <Head title={t('billing.pricing.title')} description={t('billing.pricing.tagline')} />
       <header className="pt-2 pb-6 text-center lg:pt-6">
-        <h1 className="text-display text-ink">{t('billing.pricing.headline')}</h1>
+        <h1 className="text-h1 text-ink sm:text-display">{t('billing.pricing.headline')}</h1>
         <p className="mt-2 text-small text-ink-2">{t('billing.pricing.tagline')}</p>
         {status === 'authed' && wallet.data && wallet.data.balanceCents > 0 && (
           <div className="mt-3 inline-flex items-center gap-2">

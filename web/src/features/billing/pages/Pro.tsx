@@ -57,7 +57,7 @@ function ProLanding({ data }: { data: SubscriptionData }) {
       <Head title={t('billing.pro.title')} description={t('billing.pro.subtitle')} />
       <header className="pb-6 text-center">
         <Badge variant="pro" className="mb-2" />
-        <h1 className="text-display text-ink">{t('billing.pro.headline')}</h1>
+        <h1 className="text-h1 text-ink sm:text-display">{t('billing.pro.headline')}</h1>
         <p className="mt-2 text-small text-ink-2">{t('billing.pro.subtitle')}</p>
       </header>
       {!gateOk && (

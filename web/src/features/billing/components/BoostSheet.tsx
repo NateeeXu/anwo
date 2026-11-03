@@ -41,7 +41,7 @@ export function BoostSheet({ open, onClose, entityType, entityId, surface = 'own
   const validate = useValidatePromo();
   const create = useCreateOrder();
 
-  const plans = useMemo(() => (q.data?.plans ?? []).filter((p) => p.kind === 'boost' && p.tier), [q.data]);
+  const plans = useMemo(() => (q.data?.plans ?? []).filter((p) => p.kind === 'boost' && p.tier && !p.key.startsWith('boost.bundle.')), [q.data]);
   const addon = useMemo(() => q.data?.plans.find((p) => p.addonFor), [q.data]);
   const pack = useMemo(() => q.data?.plans.find((p) => p.key === 'pack.moving_out'), [q.data]);
   useEffect(() => {
@@ -171,7 +171,7 @@ export function BoostSheet({ open, onClose, entityType, entityId, surface = 'own
               <Switch label={<span className="flex items-center gap-2"><Wallet className="size-4 text-ink-2" aria-hidden />{t('billing.checkout.useWallet', { amount: formatMoney(wallet) })}</span>} checked={useWallet} onChange={setUseWallet} size="sm" />
             )}
             <div className="flex flex-col gap-1 border-t border-line pt-2">
-              {selected && <MoneyLine label={`${planName(selected)}${selected.durationDays ? ` · ${durationLabel(t, selected.durationDays)}` : ''}`} cents={selected.priceCents} />}
+              {selected && <MoneyLine label={planName(selected)} cents={selected.priceCents} />}
               {spotlight && addon && <MoneyLine label={planName(addon)} cents={addon.priceCents} />}
               {discount > 0 && <MoneyLine label={t('billing.checkout.discount')} cents={discount} negative />}
               {credit > 0 && <MoneyLine label={t('billing.checkout.walletCredit')} cents={credit} negative />}

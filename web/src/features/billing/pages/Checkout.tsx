@@ -13,7 +13,7 @@ import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { track } from '@/lib/track';
 import { useCancelOrder, useOrder, usePayOrder } from '../api';
-import { CardForm, EMPTY_CARD, MoneyLine, OrderStatusBadge, TestModeBand, cardValid, durationLabel, entityPath, usePlanName, type CardFormValue } from '../components/shared';
+import { CardForm, EMPTY_CARD, MoneyLine, OrderStatusBadge, TestModeBand, cardValid, entityPath, usePlanName, type CardFormValue } from '../components/shared';
 
 export default function CheckoutPage() {
   return <RequireAuth><Checkout /></RequireAuth>;
@@ -123,7 +123,6 @@ function Checkout() {
                       <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
                       <div>
                         <div>{t(`billing.payment.failure.${failure}`)}</div>
-                        {import.meta.env.DEV && <div className="mt-0.5 text-caption opacity-80">{t('billing.card.testHint')}</div>}
                       </div>
                     </div>
                   )}
@@ -154,7 +153,7 @@ function Checkout() {
                 </div>
               )}
               <div className="flex flex-col gap-1.5">
-                <MoneyLine label={order.kind === 'escrow_deposit' ? t('billing.secure.deposit') : `${planName(order.plan)}${order.plan?.durationDays ? ` · ${durationLabel(t, order.plan.durationDays)}` : ''}`} cents={order.subtotalCents} />
+                <MoneyLine label={order.kind === 'escrow_deposit' ? t('billing.secure.deposit') : planName(order.plan)} cents={order.subtotalCents} />
                 {order.addons.map((a) => <MoneyLine key={a.id} label={planName(a)} cents={a.priceCents} />)}
                 {order.discountCents > 0 && <MoneyLine label={`${t('billing.checkout.discount')}${order.promoCode ? ` · ${order.promoCode}` : ''}`} cents={order.discountCents} negative />}
                 {preview.credit > 0 && <MoneyLine label={t('billing.checkout.walletCredit')} cents={preview.credit} negative />}
