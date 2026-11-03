@@ -1,0 +1,28 @@
+{
+  "name": "campus-sublet",
+  "private": true,
+  "version": "0.1.0",
+  "description": "安窝 Anwo — nationwide, multi-campus life OS for international students (monorepo root)",
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev -w server\" \"npm run dev -w web\"",
+    "dev:server": "npm run dev -w server",
+    "dev:web": "npm run dev -w web",
+    "typecheck": "npm run typecheck -w shared && npm run typecheck -w server && npm run typecheck -w web",
+    "seed": "npm run seed -w server --",
+    "test": "npm test -w server",
+    "build": "npm run typecheck -w shared && npm run build -w web",
+    "start": "NODE_ENV=production npm run start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  }
+}

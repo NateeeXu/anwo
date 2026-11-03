@@ -1,0 +1,23 @@
+{
+  "name": "@anwo/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared types, zod schemas, enums, campus list and brand constants for 安窝 Anwo",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "gen:campuses": "node scripts/gen-campuses.mjs"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

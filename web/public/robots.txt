@@ -1,0 +1,13 @@
+# 安窝 Anwo — robots
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /chat
+Disallow: /settings
+Disallow: /notifications
+Disallow: /dev/
+Disallow: /verify
+Disallow: /post/
+Disallow: /login
+Disallow: /register

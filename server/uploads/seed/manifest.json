@@ -1,0 +1,1888 @@
+{
+ "generatedBy": "server/scripts/gen-placeholders.mjs",
+ "baseUrl": "/uploads/seed",
+ "groups": {
+  "avatars": [
+   {
+    "file": "a01.svg",
+    "url": "/uploads/seed/avatars/a01.svg",
+    "bytes": 548,
+    "label": "涵",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a02.svg",
+    "url": "/uploads/seed/avatars/a02.svg",
+    "bytes": 546,
+    "label": "AL",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a03.svg",
+    "url": "/uploads/seed/avatars/a03.svg",
+    "bytes": 548,
+    "label": "宇",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a04.svg",
+    "url": "/uploads/seed/avatars/a04.svg",
+    "bytes": 546,
+    "label": "BW",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a05.svg",
+    "url": "/uploads/seed/avatars/a05.svg",
+    "bytes": 548,
+    "label": "晨",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a06.svg",
+    "url": "/uploads/seed/avatars/a06.svg",
+    "bytes": 546,
+    "label": "CK",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a07.svg",
+    "url": "/uploads/seed/avatars/a07.svg",
+    "bytes": 548,
+    "label": "悦",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a08.svg",
+    "url": "/uploads/seed/avatars/a08.svg",
+    "bytes": 546,
+    "label": "DM",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a09.svg",
+    "url": "/uploads/seed/avatars/a09.svg",
+    "bytes": 548,
+    "label": "然",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a10.svg",
+    "url": "/uploads/seed/avatars/a10.svg",
+    "bytes": 546,
+    "label": "EP",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a11.svg",
+    "url": "/uploads/seed/avatars/a11.svg",
+    "bytes": 548,
+    "label": "萱",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a12.svg",
+    "url": "/uploads/seed/avatars/a12.svg",
+    "bytes": 546,
+    "label": "JR",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a13.svg",
+    "url": "/uploads/seed/avatars/a13.svg",
+    "bytes": 548,
+    "label": "轩",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a14.svg",
+    "url": "/uploads/seed/avatars/a14.svg",
+    "bytes": 546,
+    "label": "GS",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a15.svg",
+    "url": "/uploads/seed/avatars/a15.svg",
+    "bytes": 548,
+    "label": "怡",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a16.svg",
+    "url": "/uploads/seed/avatars/a16.svg",
+    "bytes": 546,
+    "label": "HT",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a17.svg",
+    "url": "/uploads/seed/avatars/a17.svg",
+    "bytes": 548,
+    "label": "博",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a18.svg",
+    "url": "/uploads/seed/avatars/a18.svg",
+    "bytes": 546,
+    "label": "JL",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a19.svg",
+    "url": "/uploads/seed/avatars/a19.svg",
+    "bytes": 548,
+    "label": "欣",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a20.svg",
+    "url": "/uploads/seed/avatars/a20.svg",
+    "bytes": 546,
+    "label": "KN",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a21.svg",
+    "url": "/uploads/seed/avatars/a21.svg",
+    "bytes": 548,
+    "label": "泽",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a22.svg",
+    "url": "/uploads/seed/avatars/a22.svg",
+    "bytes": 546,
+    "label": "LM",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a23.svg",
+    "url": "/uploads/seed/avatars/a23.svg",
+    "bytes": 548,
+    "label": "雨",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a24.svg",
+    "url": "/uploads/seed/avatars/a24.svg",
+    "bytes": 546,
+    "label": "MO",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a25.svg",
+    "url": "/uploads/seed/avatars/a25.svg",
+    "bytes": 548,
+    "label": "嘉",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a26.svg",
+    "url": "/uploads/seed/avatars/a26.svg",
+    "bytes": 546,
+    "label": "NQ",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a27.svg",
+    "url": "/uploads/seed/avatars/a27.svg",
+    "bytes": 548,
+    "label": "琪",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a28.svg",
+    "url": "/uploads/seed/avatars/a28.svg",
+    "bytes": 546,
+    "label": "PR",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a29.svg",
+    "url": "/uploads/seed/avatars/a29.svg",
+    "bytes": 548,
+    "label": "浩",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a30.svg",
+    "url": "/uploads/seed/avatars/a30.svg",
+    "bytes": 546,
+    "label": "RS",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a31.svg",
+    "url": "/uploads/seed/avatars/a31.svg",
+    "bytes": 548,
+    "label": "婷",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a32.svg",
+    "url": "/uploads/seed/avatars/a32.svg",
+    "bytes": 546,
+    "label": "SU",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a33.svg",
+    "url": "/uploads/seed/avatars/a33.svg",
+    "bytes": 548,
+    "label": "睿",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a34.svg",
+    "url": "/uploads/seed/avatars/a34.svg",
+    "bytes": 546,
+    "label": "TV",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a35.svg",
+    "url": "/uploads/seed/avatars/a35.svg",
+    "bytes": 548,
+    "label": "妍",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a36.svg",
+    "url": "/uploads/seed/avatars/a36.svg",
+    "bytes": 546,
+    "label": "WY",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a37.svg",
+    "url": "/uploads/seed/avatars/a37.svg",
+    "bytes": 548,
+    "label": "航",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a38.svg",
+    "url": "/uploads/seed/avatars/a38.svg",
+    "bytes": 546,
+    "label": "YZ",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a39.svg",
+    "url": "/uploads/seed/avatars/a39.svg",
+    "bytes": 548,
+    "label": "瑶",
+    "width": 240,
+    "height": 240
+   },
+   {
+    "file": "a40.svg",
+    "url": "/uploads/seed/avatars/a40.svg",
+    "bytes": 546,
+    "label": "ZC",
+    "width": 240,
+    "height": 240
+   }
+  ],
+  "rooms": [
+   {
+    "file": "r01.svg",
+    "url": "/uploads/seed/rooms/r01.svg",
+    "bytes": 5281,
+    "label": "Bedroom · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r02.svg",
+    "url": "/uploads/seed/rooms/r02.svg",
+    "bytes": 6614,
+    "label": "Study · Atlanta",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r03.svg",
+    "url": "/uploads/seed/rooms/r03.svg",
+    "bytes": 6509,
+    "label": "Living room · Los Angeles",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r04.svg",
+    "url": "/uploads/seed/rooms/r04.svg",
+    "bytes": 6296,
+    "label": "Kitchen · Pittsburgh",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r05.svg",
+    "url": "/uploads/seed/rooms/r05.svg",
+    "bytes": 5775,
+    "label": "Studio · Brooklyn",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r06.svg",
+    "url": "/uploads/seed/rooms/r06.svg",
+    "bytes": 5436,
+    "label": "Building · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r07.svg",
+    "url": "/uploads/seed/rooms/r07.svg",
+    "bytes": 5481,
+    "label": "Bedroom · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r08.svg",
+    "url": "/uploads/seed/rooms/r08.svg",
+    "bytes": 7223,
+    "label": "Study · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r09.svg",
+    "url": "/uploads/seed/rooms/r09.svg",
+    "bytes": 6211,
+    "label": "Living room · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r10.svg",
+    "url": "/uploads/seed/rooms/r10.svg",
+    "bytes": 6302,
+    "label": "Kitchen · Boston",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r11.svg",
+    "url": "/uploads/seed/rooms/r11.svg",
+    "bytes": 5604,
+    "label": "Studio · Austin",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r12.svg",
+    "url": "/uploads/seed/rooms/r12.svg",
+    "bytes": 5916,
+    "label": "Building · Los Angeles",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r13.svg",
+    "url": "/uploads/seed/rooms/r13.svg",
+    "bytes": 5568,
+    "label": "Bedroom · Berkeley",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r14.svg",
+    "url": "/uploads/seed/rooms/r14.svg",
+    "bytes": 6764,
+    "label": "Study · New York",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r15.svg",
+    "url": "/uploads/seed/rooms/r15.svg",
+    "bytes": 6151,
+    "label": "Living room · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r16.svg",
+    "url": "/uploads/seed/rooms/r16.svg",
+    "bytes": 6940,
+    "label": "Kitchen · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r17.svg",
+    "url": "/uploads/seed/rooms/r17.svg",
+    "bytes": 5536,
+    "label": "Studio · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r18.svg",
+    "url": "/uploads/seed/rooms/r18.svg",
+    "bytes": 5908,
+    "label": "Building · Atlanta",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r19.svg",
+    "url": "/uploads/seed/rooms/r19.svg",
+    "bytes": 4818,
+    "label": "Bedroom · Los Angeles",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r20.svg",
+    "url": "/uploads/seed/rooms/r20.svg",
+    "bytes": 7710,
+    "label": "Study · Berkeley",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r21.svg",
+    "url": "/uploads/seed/rooms/r21.svg",
+    "bytes": 6241,
+    "label": "Living room · Chicago",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r22.svg",
+    "url": "/uploads/seed/rooms/r22.svg",
+    "bytes": 6560,
+    "label": "Kitchen · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r23.svg",
+    "url": "/uploads/seed/rooms/r23.svg",
+    "bytes": 6081,
+    "label": "Studio · Chicago",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r24.svg",
+    "url": "/uploads/seed/rooms/r24.svg",
+    "bytes": 6380,
+    "label": "Building · Cambridge",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r25.svg",
+    "url": "/uploads/seed/rooms/r25.svg",
+    "bytes": 5744,
+    "label": "Bedroom · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r26.svg",
+    "url": "/uploads/seed/rooms/r26.svg",
+    "bytes": 6884,
+    "label": "Study · Brooklyn",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r27.svg",
+    "url": "/uploads/seed/rooms/r27.svg",
+    "bytes": 6237,
+    "label": "Living room · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r28.svg",
+    "url": "/uploads/seed/rooms/r28.svg",
+    "bytes": 6311,
+    "label": "Kitchen · Brooklyn",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r29.svg",
+    "url": "/uploads/seed/rooms/r29.svg",
+    "bytes": 6358,
+    "label": "Studio · Berkeley",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r30.svg",
+    "url": "/uploads/seed/rooms/r30.svg",
+    "bytes": 4396,
+    "label": "Building · Chicago",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r31.svg",
+    "url": "/uploads/seed/rooms/r31.svg",
+    "bytes": 5893,
+    "label": "Bedroom · Berkeley",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r32.svg",
+    "url": "/uploads/seed/rooms/r32.svg",
+    "bytes": 7608,
+    "label": "Study · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r33.svg",
+    "url": "/uploads/seed/rooms/r33.svg",
+    "bytes": 5690,
+    "label": "Living room · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r34.svg",
+    "url": "/uploads/seed/rooms/r34.svg",
+    "bytes": 6479,
+    "label": "Kitchen · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r35.svg",
+    "url": "/uploads/seed/rooms/r35.svg",
+    "bytes": 6008,
+    "label": "Studio · Los Angeles",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r36.svg",
+    "url": "/uploads/seed/rooms/r36.svg",
+    "bytes": 4400,
+    "label": "Building · Berkeley",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r37.svg",
+    "url": "/uploads/seed/rooms/r37.svg",
+    "bytes": 5486,
+    "label": "Bedroom · Urbana",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r38.svg",
+    "url": "/uploads/seed/rooms/r38.svg",
+    "bytes": 7789,
+    "label": "Study · Berkeley",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r39.svg",
+    "url": "/uploads/seed/rooms/r39.svg",
+    "bytes": 6279,
+    "label": "Living room · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r40.svg",
+    "url": "/uploads/seed/rooms/r40.svg",
+    "bytes": 6622,
+    "label": "Kitchen · Cambridge",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r41.svg",
+    "url": "/uploads/seed/rooms/r41.svg",
+    "bytes": 6012,
+    "label": "Studio · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r42.svg",
+    "url": "/uploads/seed/rooms/r42.svg",
+    "bytes": 4404,
+    "label": "Building · Los Angeles",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r43.svg",
+    "url": "/uploads/seed/rooms/r43.svg",
+    "bytes": 5880,
+    "label": "Bedroom · Pittsburgh",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r44.svg",
+    "url": "/uploads/seed/rooms/r44.svg",
+    "bytes": 6662,
+    "label": "Study · Urbana",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r45.svg",
+    "url": "/uploads/seed/rooms/r45.svg",
+    "bytes": 6090,
+    "label": "Living room · Ann Arbor",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r46.svg",
+    "url": "/uploads/seed/rooms/r46.svg",
+    "bytes": 6132,
+    "label": "Kitchen · New York",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r47.svg",
+    "url": "/uploads/seed/rooms/r47.svg",
+    "bytes": 6233,
+    "label": "Studio · Cambridge",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r48.svg",
+    "url": "/uploads/seed/rooms/r48.svg",
+    "bytes": 5440,
+    "label": "Building · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r49.svg",
+    "url": "/uploads/seed/rooms/r49.svg",
+    "bytes": 5393,
+    "label": "Bedroom · Seattle",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r50.svg",
+    "url": "/uploads/seed/rooms/r50.svg",
+    "bytes": 7257,
+    "label": "Study · Evanston",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r51.svg",
+    "url": "/uploads/seed/rooms/r51.svg",
+    "bytes": 5833,
+    "label": "Living room · New York",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r52.svg",
+    "url": "/uploads/seed/rooms/r52.svg",
+    "bytes": 6328,
+    "label": "Kitchen · Pittsburgh",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r53.svg",
+    "url": "/uploads/seed/rooms/r53.svg",
+    "bytes": 5885,
+    "label": "Studio · Brooklyn",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r54.svg",
+    "url": "/uploads/seed/rooms/r54.svg",
+    "bytes": 6374,
+    "label": "Building · Austin",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   },
+   {
+    "file": "r55.svg",
+    "url": "/uploads/seed/rooms/r55.svg",
+    "bytes": 5857,
+    "label": "Bedroom · Chicago",
+    "width": 1200,
+    "height": 900,
+    "type": "bedroom"
+   },
+   {
+    "file": "r56.svg",
+    "url": "/uploads/seed/rooms/r56.svg",
+    "bytes": 7460,
+    "label": "Study · Ann Arbor",
+    "width": 1200,
+    "height": 900,
+    "type": "study"
+   },
+   {
+    "file": "r57.svg",
+    "url": "/uploads/seed/rooms/r57.svg",
+    "bytes": 6677,
+    "label": "Living room · Atlanta",
+    "width": 1200,
+    "height": 900,
+    "type": "living"
+   },
+   {
+    "file": "r58.svg",
+    "url": "/uploads/seed/rooms/r58.svg",
+    "bytes": 6552,
+    "label": "Kitchen · Boston",
+    "width": 1200,
+    "height": 900,
+    "type": "kitchen"
+   },
+   {
+    "file": "r59.svg",
+    "url": "/uploads/seed/rooms/r59.svg",
+    "bytes": 6023,
+    "label": "Studio · Austin",
+    "width": 1200,
+    "height": 900,
+    "type": "studio"
+   },
+   {
+    "file": "r60.svg",
+    "url": "/uploads/seed/rooms/r60.svg",
+    "bytes": 6380,
+    "label": "Building · Brooklyn",
+    "width": 1200,
+    "height": 900,
+    "type": "building"
+   }
+  ],
+  "items": [
+   {
+    "file": "i01.svg",
+    "url": "/uploads/seed/items/i01.svg",
+    "bytes": 1741,
+    "label": "Desk chair",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i02.svg",
+    "url": "/uploads/seed/items/i02.svg",
+    "bytes": 1411,
+    "label": "Laptop",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i03.svg",
+    "url": "/uploads/seed/items/i03.svg",
+    "bytes": 2250,
+    "label": "Calculus textbook",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i04.svg",
+    "url": "/uploads/seed/items/i04.svg",
+    "bytes": 1521,
+    "label": "Rice cooker",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i05.svg",
+    "url": "/uploads/seed/items/i05.svg",
+    "bytes": 2260,
+    "label": "Road bike",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i06.svg",
+    "url": "/uploads/seed/items/i06.svg",
+    "bytes": 1555,
+    "label": "Study desk",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i07.svg",
+    "url": "/uploads/seed/items/i07.svg",
+    "bytes": 1529,
+    "label": "27\" monitor",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i08.svg",
+    "url": "/uploads/seed/items/i08.svg",
+    "bytes": 2064,
+    "label": "Organic chemistry",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i09.svg",
+    "url": "/uploads/seed/items/i09.svg",
+    "bytes": 1591,
+    "label": "Electric kettle",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i10.svg",
+    "url": "/uploads/seed/items/i10.svg",
+    "bytes": 2270,
+    "label": "Commuter bike",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i11.svg",
+    "url": "/uploads/seed/items/i11.svg",
+    "bytes": 3453,
+    "label": "Bookshelf",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i12.svg",
+    "url": "/uploads/seed/items/i12.svg",
+    "bytes": 1405,
+    "label": "Phone",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i13.svg",
+    "url": "/uploads/seed/items/i13.svg",
+    "bytes": 2060,
+    "label": "Intro economics",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i14.svg",
+    "url": "/uploads/seed/items/i14.svg",
+    "bytes": 1416,
+    "label": "Frying pan",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i15.svg",
+    "url": "/uploads/seed/items/i15.svg",
+    "bytes": 1663,
+    "label": "Electric scooter",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i16.svg",
+    "url": "/uploads/seed/items/i16.svg",
+    "bytes": 1537,
+    "label": "Loveseat",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i17.svg",
+    "url": "/uploads/seed/items/i17.svg",
+    "bytes": 1585,
+    "label": "Headphones",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i18.svg",
+    "url": "/uploads/seed/items/i18.svg",
+    "bytes": 2433,
+    "label": "Linear algebra",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i19.svg",
+    "url": "/uploads/seed/items/i19.svg",
+    "bytes": 1414,
+    "label": "Stock pot",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i20.svg",
+    "url": "/uploads/seed/items/i20.svg",
+    "bytes": 1709,
+    "label": "Bike helmet",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i21.svg",
+    "url": "/uploads/seed/items/i21.svg",
+    "bytes": 1339,
+    "label": "Floor lamp",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i22.svg",
+    "url": "/uploads/seed/items/i22.svg",
+    "bytes": 1446,
+    "label": "Printer",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i23.svg",
+    "url": "/uploads/seed/items/i23.svg",
+    "bytes": 2056,
+    "label": "Data structures",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i24.svg",
+    "url": "/uploads/seed/items/i24.svg",
+    "bytes": 1898,
+    "label": "Mug set",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i25.svg",
+    "url": "/uploads/seed/items/i25.svg",
+    "bytes": 1420,
+    "label": "U-lock",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i26.svg",
+    "url": "/uploads/seed/items/i26.svg",
+    "bytes": 1552,
+    "label": "Bed frame (full)",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i27.svg",
+    "url": "/uploads/seed/items/i27.svg",
+    "bytes": 1458,
+    "label": "Bluetooth speaker",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i28.svg",
+    "url": "/uploads/seed/items/i28.svg",
+    "bytes": 2042,
+    "label": "Statistics",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i29.svg",
+    "url": "/uploads/seed/items/i29.svg",
+    "bytes": 1454,
+    "label": "Blender",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i30.svg",
+    "url": "/uploads/seed/items/i30.svg",
+    "bytes": 2268,
+    "label": "Folding bike",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i31.svg",
+    "url": "/uploads/seed/items/i31.svg",
+    "bytes": 3316,
+    "label": "Dresser",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i32.svg",
+    "url": "/uploads/seed/items/i32.svg",
+    "bytes": 1511,
+    "label": "Tablet",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i33.svg",
+    "url": "/uploads/seed/items/i33.svg",
+    "bytes": 2437,
+    "label": "Physics vol. 1",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i34.svg",
+    "url": "/uploads/seed/items/i34.svg",
+    "bytes": 1454,
+    "label": "Toaster",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i35.svg",
+    "url": "/uploads/seed/items/i35.svg",
+    "bytes": 1649,
+    "label": "Longboard",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i36.svg",
+    "url": "/uploads/seed/items/i36.svg",
+    "bytes": 1561,
+    "label": "Dining table",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i37.svg",
+    "url": "/uploads/seed/items/i37.svg",
+    "bytes": 3697,
+    "label": "Mechanical keyboard",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i38.svg",
+    "url": "/uploads/seed/items/i38.svg",
+    "bytes": 2240,
+    "label": "Accounting",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i39.svg",
+    "url": "/uploads/seed/items/i39.svg",
+    "bytes": 1901,
+    "label": "Bowl set",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i40.svg",
+    "url": "/uploads/seed/items/i40.svg",
+    "bytes": 1428,
+    "label": "Bike lights",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i41.svg",
+    "url": "/uploads/seed/items/i41.svg",
+    "bytes": 1555,
+    "label": "Nightstand",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i42.svg",
+    "url": "/uploads/seed/items/i42.svg",
+    "bytes": 1657,
+    "label": "Desk fan",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i43.svg",
+    "url": "/uploads/seed/items/i43.svg",
+    "bytes": 2056,
+    "label": "Psychology 101",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i44.svg",
+    "url": "/uploads/seed/items/i44.svg",
+    "bytes": 1516,
+    "label": "Air fryer",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i45.svg",
+    "url": "/uploads/seed/items/i45.svg",
+    "bytes": 2270,
+    "label": "Mountain bike",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i46.svg",
+    "url": "/uploads/seed/items/i46.svg",
+    "bytes": 1740,
+    "label": "Bar stool",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i47.svg",
+    "url": "/uploads/seed/items/i47.svg",
+    "bytes": 1437,
+    "label": "Router",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i48.svg",
+    "url": "/uploads/seed/items/i48.svg",
+    "bytes": 2238,
+    "label": "Microbiology",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i49.svg",
+    "url": "/uploads/seed/items/i49.svg",
+    "bytes": 1514,
+    "label": "Hot pot",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i50.svg",
+    "url": "/uploads/seed/items/i50.svg",
+    "bytes": 2259,
+    "label": "City bike",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i51.svg",
+    "url": "/uploads/seed/items/i51.svg",
+    "bytes": 1536,
+    "label": "Bean bag",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i52.svg",
+    "url": "/uploads/seed/items/i52.svg",
+    "bytes": 1527,
+    "label": "Mini projector",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i53.svg",
+    "url": "/uploads/seed/items/i53.svg",
+    "bytes": 2056,
+    "label": "Macroeconomics",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i54.svg",
+    "url": "/uploads/seed/items/i54.svg",
+    "bytes": 1714,
+    "label": "Knife set",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i55.svg",
+    "url": "/uploads/seed/items/i55.svg",
+    "bytes": 1424,
+    "label": "Bike pump",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i56.svg",
+    "url": "/uploads/seed/items/i56.svg",
+    "bytes": 3393,
+    "label": "Clothes rack",
+    "category": "furniture",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i57.svg",
+    "url": "/uploads/seed/items/i57.svg",
+    "bytes": 1463,
+    "label": "Smart lamp",
+    "category": "electronics",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i58.svg",
+    "url": "/uploads/seed/items/i58.svg",
+    "bytes": 2431,
+    "label": "Writing handbook",
+    "category": "textbooks",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i59.svg",
+    "url": "/uploads/seed/items/i59.svg",
+    "bytes": 1463,
+    "label": "Water filter",
+    "category": "kitchen",
+    "width": 800,
+    "height": 800
+   },
+   {
+    "file": "i60.svg",
+    "url": "/uploads/seed/items/i60.svg",
+    "bytes": 2264,
+    "label": "Pannier bag",
+    "category": "bikes",
+    "width": 800,
+    "height": 800
+   }
+  ],
+  "buddy": [
+   {
+    "file": "b01.svg",
+    "url": "/uploads/seed/buddy/b01.svg",
+    "bytes": 3068,
+    "label": "Airport pickup · 接机",
+    "type": "airport_pickup",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b02.svg",
+    "url": "/uploads/seed/buddy/b02.svg",
+    "bytes": 2831,
+    "label": "Carpool · 拼车",
+    "type": "carpool",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b03.svg",
+    "url": "/uploads/seed/buddy/b03.svg",
+    "bytes": 7152,
+    "label": "Library · 自习",
+    "type": "study",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b04.svg",
+    "url": "/uploads/seed/buddy/b04.svg",
+    "bytes": 2273,
+    "label": "Gym · 健身",
+    "type": "gym",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b05.svg",
+    "url": "/uploads/seed/buddy/b05.svg",
+    "bytes": 2773,
+    "label": "Dinner · 聚餐",
+    "type": "dining",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b06.svg",
+    "url": "/uploads/seed/buddy/b06.svg",
+    "bytes": 4482,
+    "label": "Costco run · 囤货",
+    "type": "costco_run",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b07.svg",
+    "url": "/uploads/seed/buddy/b07.svg",
+    "bytes": 1870,
+    "label": "Hiking · 徒步",
+    "type": "travel",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b08.svg",
+    "url": "/uploads/seed/buddy/b08.svg",
+    "bytes": 3068,
+    "label": "Airport pickup · 接机",
+    "type": "airport_pickup",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b09.svg",
+    "url": "/uploads/seed/buddy/b09.svg",
+    "bytes": 2831,
+    "label": "Carpool · 拼车",
+    "type": "carpool",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b10.svg",
+    "url": "/uploads/seed/buddy/b10.svg",
+    "bytes": 6945,
+    "label": "Library · 自习",
+    "type": "study",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b11.svg",
+    "url": "/uploads/seed/buddy/b11.svg",
+    "bytes": 2273,
+    "label": "Gym · 健身",
+    "type": "gym",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b12.svg",
+    "url": "/uploads/seed/buddy/b12.svg",
+    "bytes": 2773,
+    "label": "Dinner · 聚餐",
+    "type": "dining",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b13.svg",
+    "url": "/uploads/seed/buddy/b13.svg",
+    "bytes": 4482,
+    "label": "Costco run · 囤货",
+    "type": "costco_run",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b14.svg",
+    "url": "/uploads/seed/buddy/b14.svg",
+    "bytes": 1870,
+    "label": "Hiking · 徒步",
+    "type": "travel",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b15.svg",
+    "url": "/uploads/seed/buddy/b15.svg",
+    "bytes": 3068,
+    "label": "Airport pickup · 接机",
+    "type": "airport_pickup",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b16.svg",
+    "url": "/uploads/seed/buddy/b16.svg",
+    "bytes": 2831,
+    "label": "Carpool · 拼车",
+    "type": "carpool",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b17.svg",
+    "url": "/uploads/seed/buddy/b17.svg",
+    "bytes": 7012,
+    "label": "Library · 自习",
+    "type": "study",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b18.svg",
+    "url": "/uploads/seed/buddy/b18.svg",
+    "bytes": 2273,
+    "label": "Gym · 健身",
+    "type": "gym",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b19.svg",
+    "url": "/uploads/seed/buddy/b19.svg",
+    "bytes": 2773,
+    "label": "Dinner · 聚餐",
+    "type": "dining",
+    "width": 1600,
+    "height": 900
+   },
+   {
+    "file": "b20.svg",
+    "url": "/uploads/seed/buddy/b20.svg",
+    "bytes": 4482,
+    "label": "Costco run · 囤货",
+    "type": "costco_run",
+    "width": 1600,
+    "height": 900
+   }
+  ],
+  "partners": [
+   {
+    "file": "p01.svg",
+    "url": "/uploads/seed/partners/p01.svg",
+    "bytes": 1302,
+    "label": "Northbank",
+    "category": "bank",
+    "tagline": "Student checking",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p02.svg",
+    "url": "/uploads/seed/partners/p02.svg",
+    "bytes": 1341,
+    "label": "Maple Trust",
+    "category": "bank",
+    "tagline": "No-fee accounts",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p03.svg",
+    "url": "/uploads/seed/partners/p03.svg",
+    "bytes": 1305,
+    "label": "Lumen Mobile",
+    "category": "sim",
+    "tagline": "Prepaid SIM & eSIM",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p04.svg",
+    "url": "/uploads/seed/partners/p04.svg",
+    "bytes": 1311,
+    "label": "Hopper SIM",
+    "category": "sim",
+    "tagline": "Campus data plans",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p05.svg",
+    "url": "/uploads/seed/partners/p05.svg",
+    "bytes": 1205,
+    "label": "Nestsure",
+    "category": "insurance",
+    "tagline": "Renters insurance",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p06.svg",
+    "url": "/uploads/seed/partners/p06.svg",
+    "bytes": 1357,
+    "label": "Covenant Renters",
+    "category": "insurance",
+    "tagline": "Deposit protection",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p07.svg",
+    "url": "/uploads/seed/partners/p07.svg",
+    "bytes": 1296,
+    "label": "Hauler Co.",
+    "category": "movers",
+    "tagline": "Local movers",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p08.svg",
+    "url": "/uploads/seed/partners/p08.svg",
+    "bytes": 1355,
+    "label": "Two Boxes Moving",
+    "category": "movers",
+    "tagline": "Dorm-to-apartment",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p09.svg",
+    "url": "/uploads/seed/partners/p09.svg",
+    "bytes": 1331,
+    "label": "Boxroom",
+    "category": "storage",
+    "tagline": "Summer storage",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p10.svg",
+    "url": "/uploads/seed/partners/p10.svg",
+    "bytes": 1313,
+    "label": "Attic Self Storage",
+    "category": "storage",
+    "tagline": "Month-to-month units",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p11.svg",
+    "url": "/uploads/seed/partners/p11.svg",
+    "bytes": 1220,
+    "label": "Sofa Loop",
+    "category": "furniture",
+    "tagline": "Furniture rental",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p12.svg",
+    "url": "/uploads/seed/partners/p12.svg",
+    "bytes": 1319,
+    "label": "Furnish Monthly",
+    "category": "furniture",
+    "tagline": "Rent-to-own sets",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p13.svg",
+    "url": "/uploads/seed/partners/p13.svg",
+    "bytes": 1283,
+    "label": "Gate Ride",
+    "category": "airport_pickup",
+    "tagline": "Airport pickup",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p14.svg",
+    "url": "/uploads/seed/partners/p14.svg",
+    "bytes": 1295,
+    "label": "Terminal Taxi",
+    "category": "airport_pickup",
+    "tagline": "Fixed-fare rides",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p15.svg",
+    "url": "/uploads/seed/partners/p15.svg",
+    "bytes": 1335,
+    "label": "Swiftwire",
+    "category": "money_transfer",
+    "tagline": "Money transfer",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p16.svg",
+    "url": "/uploads/seed/partners/p16.svg",
+    "bytes": 1314,
+    "label": "Ping Remit",
+    "category": "money_transfer",
+    "tagline": "Cross-border payments",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p17.svg",
+    "url": "/uploads/seed/partners/p17.svg",
+    "bytes": 1263,
+    "label": "Campus Card",
+    "category": "credit_card",
+    "tagline": "First credit card",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p18.svg",
+    "url": "/uploads/seed/partners/p18.svg",
+    "bytes": 1341,
+    "label": "Fledge Credit",
+    "category": "credit_card",
+    "tagline": "No-SSN credit",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p19.svg",
+    "url": "/uploads/seed/partners/p19.svg",
+    "bytes": 1309,
+    "label": "TuitionPay",
+    "category": "tuition",
+    "tagline": "Tuition payments",
+    "width": 600,
+    "height": 300
+   },
+   {
+    "file": "p20.svg",
+    "url": "/uploads/seed/partners/p20.svg",
+    "bytes": 1304,
+    "label": "Semester Flow",
+    "category": "tuition",
+    "tagline": "Payment plans",
+    "width": 600,
+    "height": 300
+   }
+  ],
+  "campus": [
+   {
+    "file": "c01.svg",
+    "url": "/uploads/seed/campus/c01.svg",
+    "bytes": 10240,
+    "label": "Northwestern · Evanston, IL",
+    "campusId": "northwestern",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c02.svg",
+    "url": "/uploads/seed/campus/c02.svg",
+    "bytes": 8431,
+    "label": "UIUC · Urbana, IL",
+    "campusId": "uiuc",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c03.svg",
+    "url": "/uploads/seed/campus/c03.svg",
+    "bytes": 8882,
+    "label": "NYU · New York, NY",
+    "campusId": "nyu",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c04.svg",
+    "url": "/uploads/seed/campus/c04.svg",
+    "bytes": 9120,
+    "label": "USC · Los Angeles, CA",
+    "campusId": "usc",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c05.svg",
+    "url": "/uploads/seed/campus/c05.svg",
+    "bytes": 8308,
+    "label": "Columbia · New York, NY",
+    "campusId": "columbia",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c06.svg",
+    "url": "/uploads/seed/campus/c06.svg",
+    "bytes": 9843,
+    "label": "BU · Boston, MA",
+    "campusId": "bu",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c07.svg",
+    "url": "/uploads/seed/campus/c07.svg",
+    "bytes": 8725,
+    "label": "Northeastern · Boston, MA",
+    "campusId": "northeastern",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c08.svg",
+    "url": "/uploads/seed/campus/c08.svg",
+    "bytes": 10388,
+    "label": "ASU · Tempe, AZ",
+    "campusId": "asu",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c09.svg",
+    "url": "/uploads/seed/campus/c09.svg",
+    "bytes": 8320,
+    "label": "Purdue · West Lafayette, IN",
+    "campusId": "purdue",
+    "width": 1200,
+    "height": 400
+   },
+   {
+    "file": "c10.svg",
+    "url": "/uploads/seed/campus/c10.svg",
+    "bytes": 9778,
+    "label": "UC Berkeley · Berkeley, CA",
+    "campusId": "uc-berkeley",
+    "width": 1200,
+    "height": 400
+   }
+  ]
+ }
+}

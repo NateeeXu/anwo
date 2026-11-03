@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FBF8F3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="安心落脚，从校园开始。Settle in safely, starting at campus." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <title>安窝 Anwo</title>
+    <script>
+      // Resolve theme before first paint so CSS variables and the dark: variant agree (DESIGN.md §9).
+      (function () {
+        try {
+          var pref = localStorage.getItem('theme');
+          var dark = pref === 'dark' || (pref !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+          var m = document.cookie.match(/(?:^|;\s*)lang=(zh-CN|en)/);
+          if (m) document.documentElement.setAttribute('lang', m[1]);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

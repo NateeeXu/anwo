@@ -1,0 +1,334 @@
+/* =====================================================================
+   安窝 Anwo — MapView styles (DESIGN.md §4.4 price pins, §3.8 z-index,
+   §9 dark-mode rule 5). Imported once by MapView.tsx; pages never import it.
+   Everything references semantic CSS variables from theme.css so pins,
+   polylines and controls follow light/dark automatically.
+   ===================================================================== */
+
+.anwo-map {
+  position: relative;
+  width: 100%;
+  background: var(--sunken);
+  border-radius: inherit;
+  overflow: hidden;
+  isolation: isolate;
+}
+.anwo-map .leaflet-container {
+  z-index: 0;                         /* Leaflet panes stay below z-raised (DESIGN §3.8) */
+  width: 100%;
+  height: 100%;
+  background: var(--sunken);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  outline: none;
+}
+.anwo-map .leaflet-container:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.anwo-map[data-interactive="false"] .leaflet-container { cursor: default; }
+.anwo-map[data-interactive="false"] .leaflet-marker-icon { cursor: default; }
+
+/* Overlay slot (floating cards, "search this area" button) sits above the map at z-raised */
+.anwo-map__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+.anwo-map__overlay > * { pointer-events: auto; }
+
+/* ---------- controls: zoom + locate share one look (surface plate, hairline, radius ctl) ---------- */
+.anwo-map .leaflet-bar {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-ctl);
+  box-shadow: var(--sh-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+.anwo-map .leaflet-bar a,
+.anwo-map .anwo-locate__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  font: 600 18px/1 var(--font-sans);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--e-out), color var(--duration-fast) var(--e-out);
+}
+.anwo-map .leaflet-bar a:last-child, .anwo-map .anwo-locate__btn { border-bottom: 0; }
+.anwo-map .leaflet-bar a:hover, .anwo-map .anwo-locate__btn:hover { background: var(--sunken); color: var(--ink); }
+.anwo-map .leaflet-bar a:focus-visible, .anwo-map .anwo-locate__btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -3px; border-radius: var(--radius-xs); }
+.anwo-map .leaflet-bar a.leaflet-disabled { color: var(--ink-4); background: var(--surface); cursor: not-allowed; }
+.anwo-map .anwo-locate__btn svg { width: 18px; height: 18px; stroke: currentColor; }
+.anwo-map .anwo-locate[data-state="locating"] .anwo-locate__btn svg { animation: anwo-spin 1.2s linear infinite; }
+.anwo-map .anwo-locate[data-state="found"] .anwo-locate__btn { color: var(--accent-text); }
+.anwo-map .anwo-locate[data-state="error"] .anwo-locate__btn { color: var(--danger); }
+@keyframes anwo-spin { to { transform: rotate(360deg); } }
+
+/* ---------- attribution: small, quiet, still readable (OSM requires it) ---------- */
+.anwo-map .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--ink-3);
+  font: 500 11px/16px var(--font-sans);
+  padding: 2px 6px;
+  border-top-left-radius: var(--radius-sm);
+  margin: 0;
+}
+.anwo-map .leaflet-control-attribution a { color: var(--ink-2); text-decoration: none; }
+.anwo-map .leaflet-control-attribution a:hover { text-decoration: underline; }
+.anwo-map .leaflet-control { margin: 12px; }
+.anwo-map .leaflet-bottom .leaflet-control-attribution { margin: 0; }
+
+/* ---------- marker host: anchor at the geographic point, pin positions itself ---------- */
+.anwo-marker { background: none; border: 0; overflow: visible; }
+.anwo-marker:focus-visible { outline: none; }
+.anwo-marker:focus-visible .anwo-pin__pill,
+.anwo-marker:focus-visible .anwo-cluster,
+.anwo-marker:focus-visible .anwo-stop__dot,
+.anwo-marker:focus-visible .anwo-poi__dot,
+.anwo-marker:focus-visible .anwo-campus { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ---------- price pin (DESIGN §4.4) ---------- */
+.anwo-pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -100%);
+  transform-origin: 50% 100%;
+  transition: transform var(--duration-base) var(--e-emphasis);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.anwo-pin__pill {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  box-shadow: var(--sh-pin);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--duration-fast) var(--e-out), color var(--duration-fast) var(--e-out), border-color var(--duration-fast) var(--e-out);
+}
+.anwo-pin__tail {
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  background: var(--surface);
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: rotate(45deg);
+  transition: background-color var(--duration-fast) var(--e-out), border-color var(--duration-fast) var(--e-out);
+}
+.anwo-pin__glyph { display: inline-flex; width: 12px; height: 12px; margin-right: 2px; }
+.anwo-pin__glyph svg { width: 12px; height: 12px; stroke: currentColor; }
+
+/* kinds */
+.anwo-pin[data-kind="item"] .anwo-pin__pill, .anwo-pin[data-kind="item"] .anwo-pin__tail { background: var(--sunken); }
+.anwo-pin[data-kind="buddy"] .anwo-pin__pill { letter-spacing: 0.01em; }
+
+/* visited / muted */
+.anwo-pin[data-muted="true"] .anwo-pin__pill { color: var(--ink-3); border-color: var(--line-strong); }
+.anwo-pin[data-muted="true"] .anwo-pin__tail { border-color: var(--line-strong); }
+
+/* hover (pointer or linked list card) */
+.anwo-pin:hover .anwo-pin__pill, .anwo-pin[data-hovered="true"] .anwo-pin__pill { background: var(--inverse); color: var(--ink-inverse); border-color: var(--inverse); }
+.anwo-pin:hover .anwo-pin__tail, .anwo-pin[data-hovered="true"] .anwo-pin__tail { background: var(--inverse); border-color: var(--inverse); }
+
+/* selected: accent fill + pop (1.08) */
+.anwo-pin[data-selected="true"] { transform: translate(-50%, -100%) scale(1.08); animation: anwo-pin-pop var(--duration-base) var(--e-emphasis) both; }
+.anwo-pin[data-selected="true"] .anwo-pin__pill { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.anwo-pin[data-selected="true"] .anwo-pin__tail { background: var(--accent); border-color: var(--accent); }
+@keyframes anwo-pin-pop { from { transform: translate(-50%, -100%) scale(0.9); } to { transform: translate(-50%, -100%) scale(1.08); } }
+
+/* saved: 8px accent dot at the top-right corner */
+.anwo-pin[data-saved="true"] .anwo-pin__pill::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1.5px var(--surface);
+}
+
+/* React `<PricePin>` / `<ClusterPin>` outside Leaflet (legends, docs): in-flow, no anchor translate */
+.anwo-pin.anwo-pin--static { position: relative; transform: none; }
+.anwo-pin.anwo-pin--static[data-selected="true"] { transform: scale(1.08); animation: none; }
+.anwo-cluster.anwo-cluster--static { position: relative; transform: none; display: inline-flex; }
+.anwo-cluster.anwo-cluster--static:hover { transform: scale(1.06); }
+
+/* ---------- cluster: 36px ink circle with count, 2px surface rim ---------- */
+.anwo-cluster {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--inverse);
+  color: var(--ink-inverse);
+  border: 2px solid var(--surface);
+  box-shadow: var(--sh-pin);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--e-out);
+}
+.anwo-cluster:hover { transform: translate(-50%, -50%) scale(1.06); }
+.anwo-cluster[data-size="lg"] { width: 44px; height: 44px; }
+
+/* ---------- shuttle stop: 10px circle, surface fill, 2px ink border (accent on selected route) ---------- */
+.anwo-stop {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.anwo-stop__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  box-sizing: border-box;
+  transition: transform var(--duration-fast) var(--e-out), border-color var(--duration-fast) var(--e-out);
+}
+.anwo-stop:hover .anwo-stop__dot, .anwo-stop[data-hovered="true"] .anwo-stop__dot { transform: scale(1.3); }
+.anwo-stop[data-selected="true"] .anwo-stop__dot { border-color: var(--accent); background: var(--accent-soft); transform: scale(1.4); }
+.anwo-stop[data-muted="true"] .anwo-stop__dot { border-color: var(--line-strong); }
+
+/* ---------- POI: 12px dot with ink-2 border; label on hover ---------- */
+.anwo-poi {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.anwo-poi__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--ink-2);
+  box-sizing: border-box;
+  transition: transform var(--duration-fast) var(--e-out);
+}
+.anwo-poi__label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 2px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--inverse);
+  color: var(--ink-inverse);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--e-out);
+}
+.anwo-poi:hover .anwo-poi__label, .anwo-poi[data-selected="true"] .anwo-poi__label, .anwo-poi[data-hovered="true"] .anwo-poi__label { opacity: 1; }
+.anwo-poi[data-selected="true"] .anwo-poi__dot { border-color: var(--accent); transform: scale(1.3); }
+
+/* ---------- campus: mark (28px) on a 36px surface plate ---------- */
+.anwo-campus {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-ctl);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--sh-pin);
+  cursor: default;
+}
+.anwo-campus svg { width: 28px; height: 28px; }
+.anwo-campus__label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---------- user location (locate control) ---------- */
+.anwo-me {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+  box-shadow: var(--sh-pin);
+}
+
+/* ---------- vector layers (polylines/circles) use classes so colors follow tokens ---------- */
+.anwo-route--ink { stroke: var(--ink); }
+.anwo-route--accent { stroke: var(--accent); }
+.anwo-route--muted { stroke: var(--line-strong); }
+.anwo-area--area { stroke: var(--accent); fill: var(--accent); }
+.anwo-area--pickup { stroke: var(--ink-2); fill: var(--sunken); }
+.anwo-area--radius { stroke: var(--line-strong); fill: none; }
+.anwo-area--accuracy { stroke: var(--accent); fill: var(--accent); }
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .anwo-pin, .anwo-cluster, .anwo-stop__dot, .anwo-poi__dot { transition: none; animation: none; }
+  .anwo-pin[data-selected="true"] { animation: none; }
+}

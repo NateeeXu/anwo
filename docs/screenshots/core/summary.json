@@ -1,0 +1,357 @@
+{
+  "webPort": 5173,
+  "at": "2026-11-03T17:19:52.584Z",
+  "results": [
+    {
+      "name": "home-desktop",
+      "route": "/",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 2221,
+      "errors": [],
+      "note": "你在哪所学校？ · 安窝 Anwo"
+    },
+    {
+      "name": "welcome-desktop",
+      "route": "/welcome",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1534,
+      "errors": [],
+      "note": "你在哪所学校？ · 安窝 Anwo"
+    },
+    {
+      "name": "login-desktop",
+      "route": "/login",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1442,
+      "errors": [],
+      "note": "登录 · 安窝 Anwo"
+    },
+    {
+      "name": "home-authed-desktop",
+      "route": "/",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1607,
+      "errors": [],
+      "note": "Northwestern 的本周 · 安窝 Anwo"
+    },
+    {
+      "name": "settings-desktop",
+      "route": "/settings",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1549,
+      "errors": [],
+      "note": "设置 · 安窝 Anwo"
+    },
+    {
+      "name": "profile-desktop",
+      "route": "/u/55858834-f4a8-4e17-ad5f-25f841921a91",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1837,
+      "errors": [],
+      "note": "张晓雨 Alice · 安窝 Anwo"
+    },
+    {
+      "name": "notifications-desktop",
+      "route": "/notifications",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1816,
+      "errors": [],
+      "note": "通知 · 安窝 Anwo"
+    },
+    {
+      "name": "dev-mailbox-desktop",
+      "route": "/dev/mailbox",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1750,
+      "errors": [],
+      "note": "开发邮箱 · 安窝 Anwo"
+    },
+    {
+      "name": "search-desktop",
+      "route": "/search?q=a",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1782,
+      "errors": [],
+      "note": "「a」的搜索结果 · 安窝 Anwo"
+    },
+    {
+      "name": "listings-desktop",
+      "route": "/listings",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1445,
+      "errors": [],
+      "note": "转租房源 · 安窝 Anwo"
+    },
+    {
+      "name": "wanted-desktop",
+      "route": "/wanted",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1472,
+      "errors": [],
+      "note": "求租 · 安窝 Anwo"
+    },
+    {
+      "name": "chat-desktop",
+      "route": "/chat",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1445,
+      "errors": [],
+      "note": "消息 · 安窝 Anwo"
+    },
+    {
+      "name": "verify-desktop",
+      "route": "/verify",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1454,
+      "errors": [],
+      "note": "身份验证 · 安窝 Anwo"
+    },
+    {
+      "name": "map-desktop",
+      "route": "/map",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1480,
+      "errors": [],
+      "note": "地图 · 安窝 Anwo"
+    },
+    {
+      "name": "shuttle-desktop",
+      "route": "/shuttle",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1452,
+      "errors": [],
+      "note": "校车 · 安窝 Anwo"
+    },
+    {
+      "name": "market-desktop",
+      "route": "/market",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1446,
+      "errors": [],
+      "note": "二手市场 · 安窝 Anwo"
+    },
+    {
+      "name": "buddy-desktop",
+      "route": "/buddy",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1466,
+      "errors": [],
+      "note": "找搭子 · 安窝 Anwo"
+    },
+    {
+      "name": "pricing-desktop",
+      "route": "/pricing",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1453,
+      "errors": [],
+      "note": "定价 · 安窝 Anwo"
+    },
+    {
+      "name": "admin-desktop",
+      "route": "/admin",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1447,
+      "errors": [],
+      "note": "安窝 Anwo"
+    },
+    {
+      "name": "home-dark-desktop",
+      "route": "/",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1532,
+      "errors": [],
+      "note": "Northwestern 的本周 · 安窝 Anwo"
+    },
+    {
+      "name": "home-en-desktop",
+      "route": "/",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1728,
+      "errors": [],
+      "note": "This week at Northwestern · 安窝 Anwo"
+    },
+    {
+      "name": "listings-en-desktop",
+      "route": "/listings",
+      "viewport": "desktop",
+      "ok": true,
+      "ms": 1452,
+      "errors": [],
+      "note": "Sublets · 安窝 Anwo"
+    },
+    {
+      "name": "home-mobile",
+      "route": "/",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1531,
+      "errors": [],
+      "note": "Northwestern 的本周 · 安窝 Anwo"
+    },
+    {
+      "name": "welcome-mobile",
+      "route": "/welcome",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1432,
+      "errors": [],
+      "note": "你在哪所学校？ · 安窝 Anwo"
+    },
+    {
+      "name": "settings-mobile",
+      "route": "/settings",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1485,
+      "errors": [],
+      "note": "设置 · 安窝 Anwo"
+    },
+    {
+      "name": "profile-mobile",
+      "route": "/u/55858834-f4a8-4e17-ad5f-25f841921a91",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1723,
+      "errors": [],
+      "note": "张晓雨 Alice · 安窝 Anwo"
+    },
+    {
+      "name": "notifications-mobile",
+      "route": "/notifications",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1751,
+      "errors": [],
+      "note": "通知 · 安窝 Anwo"
+    },
+    {
+      "name": "dev-mailbox-mobile",
+      "route": "/dev/mailbox",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1708,
+      "errors": [],
+      "note": "开发邮箱 · 安窝 Anwo"
+    },
+    {
+      "name": "search-mobile",
+      "route": "/search?q=a",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1537,
+      "errors": [],
+      "note": "「a」的搜索结果 · 安窝 Anwo"
+    },
+    {
+      "name": "listings-mobile",
+      "route": "/listings",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1460,
+      "errors": [],
+      "note": "转租房源 · 安窝 Anwo"
+    },
+    {
+      "name": "wanted-mobile",
+      "route": "/wanted",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1452,
+      "errors": [],
+      "note": "求租 · 安窝 Anwo"
+    },
+    {
+      "name": "chat-mobile",
+      "route": "/chat",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1484,
+      "errors": [],
+      "note": "消息 · 安窝 Anwo"
+    },
+    {
+      "name": "verify-mobile",
+      "route": "/verify",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1430,
+      "errors": [],
+      "note": "身份验证 · 安窝 Anwo"
+    },
+    {
+      "name": "map-mobile",
+      "route": "/map",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1452,
+      "errors": [],
+      "note": "地图 · 安窝 Anwo"
+    },
+    {
+      "name": "shuttle-mobile",
+      "route": "/shuttle",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1453,
+      "errors": [],
+      "note": "校车 · 安窝 Anwo"
+    },
+    {
+      "name": "market-mobile",
+      "route": "/market",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1462,
+      "errors": [],
+      "note": "二手市场 · 安窝 Anwo"
+    },
+    {
+      "name": "buddy-mobile",
+      "route": "/buddy",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1435,
+      "errors": [],
+      "note": "找搭子 · 安窝 Anwo"
+    },
+    {
+      "name": "pricing-mobile",
+      "route": "/pricing",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1458,
+      "errors": [],
+      "note": "定价 · 安窝 Anwo"
+    },
+    {
+      "name": "admin-mobile",
+      "route": "/admin",
+      "viewport": "mobile",
+      "ok": true,
+      "ms": 1481,
+      "errors": [],
+      "note": "安窝 Anwo"
+    }
+  ]
+}

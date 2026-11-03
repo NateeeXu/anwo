@@ -655,3 +655,24 @@ Vite dev proxies `/api`, `/uploads`, `/ws` → `VITE_API_TARGET` (default `http:
 
 ### Appendix B — Request helper contract (web)
 `web/src/lib/api.ts` exports `api<T>(path, { method, body, query, signal })` → unwraps envelope, throws `ApiError { code, message, fields, data, status }`; sets `X-Requested-With`, `credentials: 'include'`, JSON body, and `Accept-Language` from the `lang` cookie. React Query keys: `[module, resource, params]`.
+
+### Appendix C — Cross-module services (scaffold-owned, read-only for module agents)
+
+The helpers below live in `server/src/lib/**` (full signatures and examples in `docs/SERVER.md` §3). Module agents import them; they never edit them (request changes under "Integration requests" in `docs/modules/<key>.md`).
+
+| Need | Import | Notes |
+|---|---|---|
+| Open / reuse a conversation, post a context card / system message | `openConversation`, `postMessage`, `postContextCard`, `postSystemMessage`, `contextCardFor`, `markConversationRead` from `lib/conversations.ts` | Shared primitives on the chat tables; they publish the WS_EVENTS §5.2 frames. The chat module's `modules/chat/service.ts` wraps them with block / verified-only / quota checks (the signatures other modules call). |
+| Sponsored slots in a list | `pickSponsored`, `mergeSponsored`, `sponsoredSlotCount`, `recordImpressions`, `recordClick`, `activeBoostFor` from `lib/sponsored.ts` | DATA_MODEL §8 slot rules (2 per 10, positions 1 and 6; home block of 8 → 1). Re-exported by `modules/billing/service.ts`. |
+| Nearest shuttle stop / commute | `nearestStop(lat, lng, campusId)`, `commuteEstimate(campusId, lat, lng)` from `lib/shuttle.ts` | Returns `null` when the campus has no stop within 3 km. Re-exported by `modules/shuttle/service.ts`. |
+| Geocoding & campus scoping | `geocode`, `suggestCampus`, `scopeFromQuery`, `whereScope`, `scopeInfo`, `haversineM`, `haversineSql`, `bboxAround`, `fuzz` from `lib/geo.ts` | `scopeFromQuery` implements §1.4 / DATA_MODEL §9.1 precedence (bbox > lat/lng > city/state > campusId from query → user → cookie); `whereScope` builds the SQL every list endpoint appends; `geocode` = cache → Nominatim → campus-centroid fallback (`approx: true`). |
+| Bell notifications | `notify(userId, kind, { title, body, link, entityType, entityId, data })` from `lib/notify.ts` | Inserts the row and publishes `notification` to the user; titles localized to the recipient's locale. |
+| Analytics events | `logEvent(req, type, { entityType, entityId, props })`, `recentlyLogged(...)` from `lib/events.ts` | BRIEF §6.4 instrumentation; `view_count` dedupe helper. |
+| Audit log | `audit(req, { action, entityType, entityId, before, after, reason })` from `lib/audit.ts` | Every admin write; positional form for jobs. |
+| Trust | `recomputeTrust(userId)`, `setTrustOverride(...)`, `badgesFor(user)` from `lib/trust.ts` | The only writer of `users.trust_level`. |
+| Reports | `createReport(req, { entityType, entityId, reason, details, campusId })` from `lib/reports.ts` | Every `/report` endpoint. |
+| Cards | `listingCards`, `wantedCards`, `itemCards`, `buddyCards`, `toUserPublic`, `toCampusLite` from `lib/cards.ts` | One mapper per card so list endpoints and global search never diverge. |
+| Edu verification | `requestEduCode`, `confirmEduCode` from `lib/eduVerify.ts`; `sendSmsCode`, `verifySmsCode` from `lib/mailbox.ts` | `/api/verify/edu/*` are aliases of the auth endpoints. |
+| Feature flags | `isEnabled(key, campusId)`, `requireFlag(key)` (`lib/flags.ts`, `lib/auth.ts`) | Missing row = enabled. |
+| Realtime | `publish`, `publishTopic`, `publishRole`, `registerHandler`, `registerTopicGuard` from `realtime/hub.ts` | WS_EVENTS §9. |
+| Hooks | `hooks.on('user.trustChanged' \| 'user.registered' \| …)` from `lib/hooks.ts` | e.g. billing qualifies referrals when trust reaches 1. |
