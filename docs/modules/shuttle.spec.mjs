@@ -269,7 +269,7 @@ async function main() {
       watch(page, 'en');
       await page.goto(`/shuttle/${ROUTE_LOOP}`);
       // the PageHeader h1 is hidden below md (the mobile top bar carries the title) — wait on content instead
-      await page.getByText(/Every 20 min/).first().waitFor();
+      await page.locator('dd', { hasText: /Every 20 min/ }).first().waitFor();
       await page.locator('table').waitFor();
       await shot(page, 'route-detail-en-mobile', { fullPage: true });
       await ctx.close();

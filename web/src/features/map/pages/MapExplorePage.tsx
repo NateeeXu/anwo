@@ -11,7 +11,7 @@ import type { CampusStat, GeocodeHit, MapLayer } from '@shared/schemas/map';
 import { MAX_BBOX_DEG, RADIUS_PRESETS_M } from '@shared/schemas/map';
 import { Head } from '@/app/Head';
 import { usePostSheet } from '@/app/shell/shellStore';
-import { Button, Chip, EmptyState, SegmentedControl, Skeleton, Tooltip } from '@/components';
+import { Button, EmptyState, SegmentedControl, Skeleton, Tooltip } from '@/components';
 import { DrawSearchControl, MapView, clusterCellForZoom, meIcon, type MapCircle, type MapMarker, type MapPolyline } from '@/components/map';
 import { ApiError } from '@/lib/api';
 import { useCampus } from '@/lib/campus';
@@ -180,20 +180,14 @@ export default function MapExplorePage() {
     return null;
   }, [selectedKey, results, searchHit, me]);
 
-  const select = useCallback((key: string | null, opts: { fly?: boolean } = {}) => {
+  const select = useCallback((key: string | null) => {
     setSelectedKey(key);
     write({ selected: key });
     if (!key) return;
-    const type = key.split(':')[0];
-    track('map.pin_click', { type, entityType: type === 'listing' ? 'listing' : type === 'item' ? 'market_item' : type === 'buddy' ? 'buddy_post' : undefined, entityId: key.slice(type!.length + 1) });
+    const type = key.split(':')[0]!;
+    const entityType = type === 'listing' ? 'listing' : type === 'item' ? 'market_item' : type === 'buddy' ? 'buddy_post' : undefined;
+    track('map.pin_click', { type, entityType, entityId: entityType ? key.slice(type.length + 1) : undefined });
     if (!isDesktop) setDrawerOpen(false);
-    if (opts.fly) {
-      // fly after the selection resolves (next frame), keeping the current zoom unless far out
-      window.requestAnimationFrame(() => {
-        const el = document.querySelector(`[data-pin="${CSS.escape(key)}"]`);
-        void el;
-      });
-    }
   }, [isDesktop, write]);
 
   useEffect(() => {
@@ -571,7 +565,6 @@ export default function MapExplorePage() {
             </div>
             {isDesktop && scopeToggle}
             {!nationwide && <LayerChips layers={layers} counts={counts} onToggle={toggleLayer} scroll={!isDesktop} className={isDesktop ? '' : '-mx-0.5 px-0.5'} />}
-            {radius && !drawMode && null}
           </div>
           {!isDesktop && drawBar && <div className="pointer-events-auto">{drawBar}</div>}
         </div>
@@ -650,9 +643,6 @@ export default function MapExplorePage() {
           </section>
         )}
 
-        {radius && !drawMode && (
-          <div className="absolute left-3 top-3"><Chip onRemove={clearDraw}>{t('map.draw.chip', { radius: formatDistance(radius.radiusM) })}</Chip></div>
-        )}
       </div>
 
       <SuggestPlaceModal
