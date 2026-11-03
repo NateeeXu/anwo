@@ -24,7 +24,7 @@ void ROOT; void path;
 const errors = [];
 const consoleErrors = [];
 // network noise in the sandbox: OSM tiles are unreachable, favicon probes
-const NOISE = /favicon|net::ERR|Failed to load resource|tile\.openstreetmap/;
+const NOISE = /favicon|net::ERR|Failed to load resource|tile\.openstreetmap|WebSocket connection to/;
 function watch(page, label) {
   page.on('pageerror', (e) => { errors.push(`[${label}] ${e.message}`); console.error('[pageerror]', label, e.message); });
   page.on('console', (m) => { if (m.type() === 'error' && !NOISE.test(m.text())) { consoleErrors.push(`[${label}] ${m.text()}`); console.error('[console.error]', label, m.text()); } });
@@ -139,7 +139,7 @@ async function main() {
     await panel.waitFor();
     await panel.getByText('到校通勤').waitFor();
     await panel.getByText(/分钟/).first().waitFor();
-    assert(/sel=poi/.test(page.url()), 'selection in URL');
+    await page.waitForURL(/sel=poi/); // selection is part of the shareable URL
     await shot(page, 'poi-commute-desktop');
 
     // 「以此为圆心」 → draw-radius search around the library, then switch to the 500 m preset
@@ -147,7 +147,7 @@ async function main() {
     const drawBar = page.getByTestId('draw-bar');
     await drawBar.waitFor();
     await page.waitForURL(/[?&]r=/);
-    await drawBar.getByRole('radio', { name: /500/ }).click();
+    await drawBar.getByRole('radio').first().click(); // smallest preset (500 m, shown in the viewer's unit)
     await page.waitForTimeout(600);
     assert(/,500(&|$)/.test(page.url()), `radius 500 in URL (${page.url()})`);
     const inside = await drawBar.innerText();

@@ -143,7 +143,7 @@ export const useEscrowAction = () => useMutation({
   onSuccess: invalidateBilling,
 });
 export const useFundEscrow = () => useMutation({ mutationFn: ({ id, body }: { id: string; body: { card: CardInput; rail?: EscrowRail } | { paymentMethodId: string; rail?: EscrowRail } }) => api<{ escrow: EscrowDto; order: OrderDto }>(`/api/billing/escrows/${id}/fund`, { body }), onSuccess: invalidateBilling });
-export const useKitDone = () => useMutation({ mutationFn: (body: { slug: string; done: boolean }) => api<{ done: string[] }>('/api/billing/kit/done', { body }), onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['billing', 'partners'] }) });
+export const useKitDone = () => useMutation({ mutationFn: (body: { slug: string; done: boolean }) => api<{ done: string[] }>('/api/billing/kit/done', { body }), onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ['billing', 'partners'] }); void queryClient.invalidateQueries({ queryKey: ['billing', 'partner'] }); } });
 export const useSponsorLead = () => useMutation({ mutationFn: (body: { businessName: string; contact: string; campusId?: string; interest: 'sponsor' | 'building'; note?: string }) => api<{ id: string }>('/api/billing/sponsor-leads', { body }) });
 export const useReportPartner = () => useMutation({ mutationFn: ({ slug, reason, details }: { slug: string; reason: string; details?: string }) => api(`/api/billing/partners/${slug}/report`, { body: { reason, details } }) });
 export const useAdminRefund = () => useMutation({ mutationFn: ({ id, amountCents, reason }: { id: string; amountCents?: number; reason: string }) => api<OrderDto>(`/api/billing/admin/orders/${id}/refund`, { body: { amountCents, reason } }), onSuccess: invalidateBilling });

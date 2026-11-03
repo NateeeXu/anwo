@@ -223,7 +223,7 @@ export function cardValid(c: CardFormValue): boolean {
 
 export function entityPath(entityType: string | null, entityId: string | null): string {
   if (!entityType || !entityId) return '/';
-  return entityType === 'listing' ? `/listings/${entityId}` : entityType === 'market_item' ? `/market/${entityId}` : entityType === 'buddy_post' ? `/buddy/${entityId}` : entityType === 'escrow' ? `/billing/escrows/${entityId}` : '/';
+  return entityType === 'listing' ? `/listings/${entityId}` : entityType === 'market_item' ? `/market/${entityId}` : entityType === 'buddy_post' ? `/buddy/${entityId}` : entityType === 'escrow' ? `/escrow/${entityId}` : '/';
 }
 
 export function planFor(plans: PlanDto[] | undefined, key: string): PlanDto | undefined {

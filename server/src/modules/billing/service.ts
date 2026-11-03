@@ -886,7 +886,7 @@ export function transitionEscrow(e: EscrowRow, to: Escrow['status'], opts: Trans
       try { postSystemMessage(e.conversation_id, 'escrow_state', { escrowId: e.id, status: to, amountCents: e.amount_cents }); } catch (err) { logger.warn({ err }, 'escrow system message failed'); }
     }
     for (const uidTo of [e.payer_id, e.payee_id]) {
-      notify(uidTo, 'escrow.state', { title: { zh: `安心付：${label.zh}`, en: `Secure Payment ${label.en}` }, body: { zh: `押金 $${(e.amount_cents / 100).toFixed(0)}（测试模式）`, en: `Deposit $${(e.amount_cents / 100).toFixed(0)} (test mode)` }, link: `/billing/escrows/${e.id}`, entityType: 'escrow', entityId: e.id, data: { status: to } });
+      notify(uidTo, 'escrow.state', { title: { zh: `安心付：${label.zh}`, en: `Secure Payment ${label.en}` }, body: { zh: `押金 $${(e.amount_cents / 100).toFixed(0)}（测试模式）`, en: `Deposit $${(e.amount_cents / 100).toFixed(0)} (test mode)` }, link: `/escrow/${e.id}`, entityType: 'escrow', entityId: e.id, data: { status: to } });
     }
     const evName: Record<string, string> = { accepted: 'escrow.accept', funded: 'escrow.fund', released: 'escrow.release', refunded: 'escrow.refund', disputed: 'escrow.dispute', resolved: 'escrow.resolve', cancelled: 'escrow.cancel', expired: 'escrow.expire', in_inspection: 'escrow.inspection' };
     logEvent(req, evName[to] ?? `escrow.${to}`, { entityType: 'escrow', entityId: e.id, userId: opts.actorId ?? undefined, campusId: e.campus_id, props: { amountCents: e.amount_cents, feeCents: e.fee_cents, feePayer: e.fee_payer, rail: e.rail, state: to, resolution: opts.resolution?.kind ?? null, hoursHeld: e.funded_at ? Math.round((nowMs() - Date.parse(e.funded_at)) / HOUR) : null } });
@@ -960,7 +960,7 @@ export function createEscrow(user: AuthUser, input: { listingId: string; counter
       postSystemMessage(conversationId, 'escrow_state', { escrowId: id, status: 'proposed', amountCents: input.amountCents });
     } catch (err) { logger.warn({ err }, 'escrow context card failed'); }
   }
-  notify(input.counterpartyId, 'escrow.state', { title: { zh: '收到一笔安心付提议', en: 'You received a Secure Payment proposal' }, body: { zh: `「${listing.title}」押金 $${(input.amountCents / 100).toFixed(0)}，入住 ${input.moveInDate}。`, en: `"${listing.title}" deposit $${(input.amountCents / 100).toFixed(0)}, move-in ${input.moveInDate}.` }, link: `/billing/escrows/${id}`, entityType: 'escrow', entityId: id });
+  notify(input.counterpartyId, 'escrow.state', { title: { zh: '收到一笔安心付提议', en: 'You received a Secure Payment proposal' }, body: { zh: `「${listing.title}」押金 $${(input.amountCents / 100).toFixed(0)}，入住 ${input.moveInDate}。`, en: `"${listing.title}" deposit $${(input.amountCents / 100).toFixed(0)}, move-in ${input.moveInDate}.` }, link: `/escrow/${id}`, entityType: 'escrow', entityId: id });
   logEvent(req, 'escrow.propose', { entityType: 'escrow', entityId: id, campusId: listing.campus_id, props: { amountCents: input.amountCents, feeCents: quote.feeCents, feePayer: input.feePayer, rail: input.rail, state: 'proposed' } });
   return requireEscrow(id);
 }
@@ -1078,19 +1078,21 @@ export function revenueSummary(filter: { from: string; to: string; campusId?: st
   for (const r of rev) {
     const p = pt(r.date);
     p.revenueCents += r.revenue;
-    p.refundsCents += r.refunded;
     p.orders += r.n;
     if (r.order_kind === 'boost') p.boostCents += r.revenue;
     else if (r.order_kind === 'subscription' || r.order_kind === 'subscription_renewal') p.proCents += r.revenue;
     else if (r.order_kind === 'escrow_deposit') p.escrowFeeCents += r.revenue;
     byKind[r.order_kind] = (byKind[r.order_kind] ?? 0) + r.revenue;
-    refunds += r.refunded;
     orders += r.n;
   }
   let affiliateEst = 0;
   for (const c of clicks) { const p = pt(c.date); p.affiliateCents += c.est; affiliateEst += c.est; }
   let gmvTotal = 0;
   for (const g of gmv) { pt(g.date).gmvCents += g.gmv; gmvTotal += g.gmv; }
+  // v_revenue only carries succeeded/partially refunded payments; full refunds live on payments.refunded_cents
+  const refundRows = q.all<{ date: string; r: number }>(`SELECT ${bucket.replace(/\bat\b/g, 'p.updated_at')} AS date, SUM(p.refunded_cents) AS r FROM payments p JOIN orders o ON o.id = p.order_id WHERE p.refunded_cents > 0 AND p.updated_at >= ? AND p.updated_at <= ?${filter.campusId ? ' AND o.campus_id = ?' : ''} GROUP BY date`, [fromIso, toIso, ...cp]);
+  refunds = 0;
+  for (const r of refundRows) { pt(r.date).refundsCents = r.r; refunds += r.r; }
   const recognized = q.get<{ s: number | null }>(`SELECT SUM(payout_cents) AS s FROM partner_conversions WHERE status IN ('approved','paid') AND occurred_at >= ? AND occurred_at <= ?`, [fromIso, toIso])?.s ?? 0;
   const walletContra = q.get<{ s: number | null }>(`SELECT SUM(-delta_cents) AS s FROM wallet_ledger WHERE kind = 'order_payment' AND created_at >= ? AND created_at <= ?`, [fromIso, toIso])?.s ?? 0;
   const payingUsers = q.count(`SELECT COUNT(DISTINCT user_id) FROM v_revenue WHERE at >= ? AND at <= ?${campusSql}`, [fromIso, toIso, ...cp]);

@@ -126,6 +126,8 @@ function sortForDom(markers: MapMarker[]): MapMarker[] {
 
 type Bucket = ClusterBucket;
 
+const isEnter = (e: KeyboardEvent) => e.key === 'Enter' || e.keyCode === 13;
+
 // ---------------------------------------------------------------- inner components (need useMap)
 function ViewController({
   center, zoom, bounds, fitBounds, fitKey, onBoundsChange, onMapReady,
@@ -230,6 +232,12 @@ function MarkerLayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sorted, clusterThreshold, clusterCellPx, clusterKinds?.join(','), map, zoomTick]);
 
+  const zoomToCluster = (members: MapMarker[]) => {
+    const bb = bboxOf(members, 0.1);
+    if (bb) map.fitBounds(bboxToLeaflet(bb), { padding: [40, 40], maxZoom: 17, animate: !prefersReducedMotion() });
+    onClusterClick?.(members);
+  };
+
   return (
     <>
       {buckets.map((b) => {
@@ -245,11 +253,8 @@ function MarkerLayer({
               zIndexOffset={600}
               title={`${c.count}`}
               eventHandlers={{
-                click: () => {
-                  const bb = bboxOf(c.members, 0.1);
-                  if (bb) map.fitBounds(bboxToLeaflet(bb), { padding: [40, 40], maxZoom: 17, animate: !prefersReducedMotion() });
-                  onClusterClick?.(c.members);
-                },
+                click: () => zoomToCluster(c.members),
+                keypress: (e: L.LeafletKeyboardEvent) => { if (isEnter(e.originalEvent)) zoomToCluster(c.members); },
               }}
             />
           );
@@ -270,6 +275,8 @@ function MarkerLayer({
             {...(m.title ? { title: m.title } : {})}
             eventHandlers={{
               click: () => onMarkerClick?.(m.id),
+              // Leaflet only maps Enter to popups; DESIGN §4.4 promises Enter selects a focused pin (map module fix)
+              keypress: (e: L.LeafletKeyboardEvent) => { if (isEnter(e.originalEvent)) onMarkerClick?.(m.id); },
               mouseover: () => onMarkerHover?.(m.id),
               mouseout: () => onMarkerHover?.(null),
             }}

@@ -111,7 +111,7 @@ export function BoostSheet({ open, onClose, entityType, entityId, surface = 'own
       ) : undefined}
     >
       <TestModeBand compact className="mb-4" />
-      {status === 'anon' && <EmptyState icon={Lock} title={t('billing.boost.loginTitle')} description={t('billing.boost.loginDescription')} action={<Button asChild variant="primary"><Link to={`/login?next=${encodeURIComponent(`/pricing?boost=${entityType}:${entityId}`)}`}>{t('nav.login')}</Link></Button>} size="sm" />)
+      {status === 'anon' && <EmptyState icon={Lock} title={t('billing.boost.loginTitle')} description={t('billing.boost.loginDescription')} action={<Button asChild variant="primary"><Link to={`/login?next=${encodeURIComponent(`/pricing?boost=${entityType}:${entityId}`)}`}>{t('nav.login')}</Link></Button>} size="sm" />}
       {q.isLoading && <div className="flex flex-col gap-3"><Skeleton variant="rect" height={72} /><Skeleton variant="rect" height={72} /><Skeleton variant="rect" height={72} /></div>}
       {q.isError && <EmptyState icon={CircleAlert} title={t('error.generic')} action={{ label: t('common.retry'), onClick: () => q.refetch() }} size="sm" />}
       {q.data && !q.data.eligible && (

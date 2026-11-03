@@ -46,7 +46,7 @@ function Checkout() {
   const preview = useMemo(() => {
     if (!order) return null;
     const afterDiscount = Math.max(0, order.subtotalCents - order.discountCents);
-    const credit = walletAllowed && useWallet ? Math.min(order.walletBalanceCents + order.creditCents, afterDiscount) : 0;
+    const credit = walletAllowed && useWallet ? Math.min(order.walletBalanceCents, afterDiscount) : 0;
     return { credit, total: Math.max(0, afterDiscount - credit) + order.feeCents };
   }, [order, useWallet, walletAllowed]);
 
@@ -88,7 +88,7 @@ function Checkout() {
               <>
                 {walletAllowed && (order.walletBalanceCents > 0 || order.creditCents > 0) && (
                   <Card padding="md">
-                    <Switch label={<span className="flex items-center gap-2"><Wallet className="size-4 text-ink-2" aria-hidden />{t('billing.checkout.useWallet', { amount: formatMoney(order.walletBalanceCents + order.creditCents) })}</span>} description={t('billing.checkout.walletHint')} checked={useWallet} onChange={setUseWallet} />
+                    <Switch label={<span className="flex items-center gap-2"><Wallet className="size-4 text-ink-2" aria-hidden />{t('billing.checkout.useWallet', { amount: formatMoney(order.walletBalanceCents) })}</span>} description={t('billing.checkout.walletHint')} checked={useWallet} onChange={setUseWallet} />
                   </Card>
                 )}
                 <Card padding="lg" className="flex flex-col gap-4">

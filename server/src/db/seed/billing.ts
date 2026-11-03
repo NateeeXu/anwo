@@ -10,7 +10,7 @@ import { DAY, HOUR, nowIso, nowMs } from '../../lib/time';
 import { sha256 } from '../../lib/ids';
 import { seedUserId } from './core';
 
-export const version = 3;
+export const version = 4;
 
 const PLAN_ID = (n: number) => `b1110000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 function bid(key: string): string {
@@ -116,7 +116,8 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
   q.tx(() => {
     // ---- wipe our rows
     const affected = q.all<{ user_id: string }>("SELECT DISTINCT user_id FROM wallet_ledger WHERE id LIKE 'bil-%'").map((r) => r.user_id);
-    for (const tbl of ['escrow_events', 'escrows', 'boosts', 'subscriptions', 'payments', 'orders', 'promo_redemptions', 'wallet_ledger', 'referrals', 'partner_conversions', 'partner_clicks', 'sponsor_leads']) q.run(`DELETE FROM ${tbl} WHERE id LIKE 'bil-%'`);
+    q.run("DELETE FROM promo_redemptions WHERE id LIKE 'bil-%' OR promo_code_id LIKE 'bil-%' OR order_id LIKE 'bil-%'");
+    for (const tbl of ['escrow_events', 'escrows', 'boosts', 'subscriptions', 'payments', 'orders', 'wallet_ledger', 'referrals', 'partner_conversions', 'partner_clicks', 'sponsor_leads', 'listing_leads']) q.run(`DELETE FROM ${tbl} WHERE id LIKE 'bil-%'`);
     q.run("DELETE FROM events WHERE session_id = 'seed-billing'");
     q.run("DELETE FROM kit_checklist WHERE user_id = ?", [userByEmail('alice@u.northwestern.edu')]);
     q.run("DELETE FROM partners WHERE id LIKE 'bil-%'");
@@ -395,6 +396,22 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
     }
     // alice's checklist progress
     for (const slug of ['chase-college-checking', 'mint-mobile', 'amazon-prime-student']) q.run('INSERT OR REPLACE INTO kit_checklist (user_id, slug, done_at) VALUES (?, ?, ?)', [alice, slug, iso(12 * DAY)]);
+
+    // ---- Pro lead inbox + analytics for the landlord (listing_leads rows we own carry the bil- prefix)
+    const leadUsers = q.all<{ id: string }>("SELECT id FROM users WHERE campus_id = 'northwestern' AND role = 'student' AND id <> ? ORDER BY email LIMIT 14", [landlord]).map((r) => r.id);
+    const leadSources = ['message', 'message', 'wanted_offer', 'message', 'escrow', 'phone_reveal'];
+    const leadStatuses = ['new', 'new', 'replied', 'qualified', 'new', 'replied', 'closed', 'new', 'spam', 'qualified'];
+    landlordListings.forEach((lst, li) => {
+      leadUsers.forEach((u, ui) => {
+        if ((ui + li) % 3 === 2) return;
+        const conv = q.get<{ id: string }>("SELECT c.id FROM conversations c JOIN conversation_members m ON m.conversation_id = c.id WHERE c.context_type = 'listing' AND c.context_id = ? AND m.user_id = ? LIMIT 1", [lst.id, u])?.id ?? null;
+        q.run('INSERT OR IGNORE INTO listing_leads (id, listing_id, owner_id, user_id, conversation_id, source, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [bid(`lead:${lst.id}:${u}`), lst.id, landlord, u, conv, leadSources[(ui + li) % leadSources.length]!, leadStatuses[(ui * 3 + li) % leadStatuses.length]!, iso(((ui * 5 + li * 7) % 28) * DAY + (ui % 9) * HOUR)]);
+      });
+      for (let d = 0; d < 30; d++) {
+        const n = 2 + ((d * 7 + li * 3) % 6) + (d < 7 ? 2 : 0);
+        for (let k = 0; k < n; k++) q.run('INSERT INTO events (id, user_id, session_id, campus_id, type, entity_type, entity_id, props_json, path, created_at) VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?)', [bid(`ev:view:${lst.id}:${d}:${k}`), 'seed-billing', 'northwestern', 'listing.view', 'listing', lst.id, JSON.stringify({ seed: true }), `/listings/${lst.id}`, iso(d * DAY + (k * 2 + 8) * HOUR)]);
+      }
+    });
 
     // ---- sponsor leads
     q.run("INSERT INTO sponsor_leads (id, business_name, contact, campus_id, interest, note, status, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?)", [bid('lead:1'), 'Joy Yee Noodle Evanston', 'owner@joyyee-evanston.example', 'northwestern', 'sponsor', 'Interested in the Newcomer Kit food section for fall arrivals.', 'contacted', iso(9 * DAY)]);

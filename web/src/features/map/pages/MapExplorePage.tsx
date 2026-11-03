@@ -610,7 +610,7 @@ export default function MapExplorePage() {
 
         {/* selection panel */}
         {selection && !nationwide && (
-          <div className={cn('pointer-events-none absolute z-[12]', isDesktop ? 'bottom-6 left-1/2 w-[380px] -translate-x-1/2' : 'inset-x-3 bottom-[72px]')}>
+          <div className={cn('pointer-events-none absolute z-[12]', isDesktop ? 'right-[72px] top-4 w-[380px]' : 'inset-x-3 bottom-[72px]')}>
             <SelectionPanel
               selection={selection}
               campusId={campus?.id ?? null}

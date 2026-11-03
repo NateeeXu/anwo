@@ -578,7 +578,7 @@ router.post('/escrows/:id/dispute', requireAuth, writes, (req, res) => {
   const user = me(req);
   if (e.payer_id !== user.id && user.role !== 'admin') throw new ApiError('FORBIDDEN', 'Only the payer opens a dispute');
   const next = transitionEscrow(e, 'disputed', { actorId: user.id, note: body.reason, req, data: { reasonCode: body.reasonCode, evidenceUploadIds: body.evidenceUploadIds ?? [] } });
-  for (const admin of q.all<{ id: string }>("SELECT id FROM users WHERE role = 'admin' AND deleted_at IS NULL")) notify(admin.id, 'admin.queue', { title: { zh: '新的安心付争议', en: 'New Secure Payment dispute' }, body: { zh: '72 小时内需要首次回应。', en: 'First response due within 72 hours.' }, link: `/billing/escrows/${id}`, entityType: 'escrow', entityId: id });
+  for (const admin of q.all<{ id: string }>("SELECT id FROM users WHERE role = 'admin' AND deleted_at IS NULL")) notify(admin.id, 'admin.queue', { title: { zh: '新的安心付争议', en: 'New Secure Payment dispute' }, body: { zh: '72 小时内需要首次回应。', en: 'First response due within 72 hours.' }, link: `/escrow/${id}`, entityType: 'escrow', entityId: id });
   ok(res, toEscrowDto(next, user));
 });
 router.post('/escrows/:id/cancel', requireAuth, writes, (req, res) => {

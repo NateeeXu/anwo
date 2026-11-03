@@ -140,7 +140,7 @@ export default function PricingPage() {
             <FeatureList features={data.escrow?.features ?? ['billing.features.heldUntilMoveIn', 'billing.features.inspectionWindow', 'billing.features.disputes']} />
             <p className="rounded-sm bg-sunken px-3 py-2 text-caption text-ink-2">{t('billing.pricing.secure.partnerNote')}</p>
             <div className="mt-auto">
-              <Button asChild variant="secondary" fullWidth><Link to="/billing/escrows">{t('billing.pricing.secure.cta')}</Link></Button>
+              <Button asChild variant="secondary" fullWidth><Link to="/escrow">{t('billing.pricing.secure.cta')}</Link></Button>
             </div>
           </Card>
         </div>
