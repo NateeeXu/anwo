@@ -133,7 +133,7 @@ export default function ShuttlePage() {
   const sidebar = selectedStop ? (
     <div className="flex flex-col gap-3">
       <Button variant="ghost" size="sm" iconLeft={<ArrowLeft />} onClick={() => openStop(null)} className="self-start">{selectedRoute ? selectedRoute.name : t('shuttle.backToList')}</Button>
-      <StopDetail stop={selectedStop} onSelectRoute={(id) => openRoute(id)} />
+      <StopDetail stop={selectedStop} showAlerts={false} onSelectRoute={(id) => openRoute(id)} />
     </div>
   ) : selectedRoute ? (
     <RoutePanel route={selectedRoute} stops={data.stops} onBack={() => openRoute(null)} onStop={openStop} />
@@ -200,7 +200,7 @@ export default function ShuttlePage() {
           {mapOpen ? <div className="h-[240px] overflow-hidden rounded-card">{map}</div> : null}
           <div>{selectedStop ? (selectedRoute ? <RoutePanel route={selectedRoute} stops={data.stops} onBack={() => openRoute(null)} onStop={openStop} /> : sidebarListFor(tab, data, setParam, openRoute, openStop, t)) : sidebar}</div>
           <Sheet open={Boolean(selectedStop)} onClose={() => openStop(null)} title={selectedStop ? stopName(selectedStop, locale) : ''} snap="half" handle>
-            {selectedStop ? <StopDetail stop={selectedStop} showHeader={false} onSelectRoute={(id) => openRoute(id)} /> : null}
+            {selectedStop ? <StopDetail stop={selectedStop} showHeader={false} showAlerts={false} /> : null}
           </Sheet>
         </div>
       ) : (
@@ -281,11 +281,11 @@ function RouteRow({ route, onSelect, selected }: { route: RouteListItem; onSelec
   const summary = serviceSummary(t, route, locale);
   const days = serviceDaysLabel(t, route.serviceDays);
   return (
-    <Card as="div" interactive padding="none" className={cn('relative', selected && 'border-accent')}>
-      <button type="button" onClick={() => onSelect(route.id)} className="flex w-full items-center gap-3 rounded-card px-3 py-3 text-left focus-visible:outline-none" aria-current={selected ? 'true' : undefined}>
-        <RouteSwatch color={route.color} shortName={route.shortName} size="lg" className="w-[72px] flex-col items-start gap-0.5" />
+    <Card as="div" interactive padding="none" className={cn('flex items-stretch', selected && 'border-accent')}>
+      <button type="button" onClick={() => onSelect(route.id)} className="flex min-w-0 flex-1 items-center gap-3 rounded-l-card px-3 py-3 text-left focus-visible:outline-none" aria-current={selected ? 'true' : undefined}>
+        <RouteSwatch color={route.color} shortName={route.shortName} size="lg" className="w-[64px] flex-col items-start gap-0.5" />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-body font-semibold text-ink">{route.name}</span>
+          <span className="block text-body font-semibold leading-snug text-ink">{route.name}</span>
           <span className="block truncate text-small text-ink-2 tnum">{summary || days}</span>
           <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-caption text-ink-3">
             <span>{days}</span>
@@ -294,9 +294,11 @@ function RouteRow({ route, onSelect, selected }: { route: RouteListItem; onSelec
             {route.runsToday === false ? <Badge variant="neutral" size="sm">{t('shuttle.notToday')}</Badge> : null}
           </span>
         </span>
-        <ChevronRight className="size-4 shrink-0 text-ink-3" aria-hidden="true" />
       </button>
-      <FavoriteButton entityType="route" id={route.id} favorited={Boolean(route.favorited)} className="absolute right-9 top-2" />
+      <span className="flex shrink-0 flex-col items-center justify-between py-2 pr-2">
+        <FavoriteButton entityType="route" id={route.id} favorited={Boolean(route.favorited)} />
+        <ChevronRight className="mb-2 size-4 text-ink-3" aria-hidden="true" />
+      </span>
     </Card>
   );
 }

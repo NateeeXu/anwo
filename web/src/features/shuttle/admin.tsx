@@ -80,15 +80,15 @@ function AlertsTab({ campusId }: { campusId: string }) {
     {
       key: 'title', header: t('shuttle.admin.col.title'),
       render: (a) => (
-        <div className="min-w-0">
+        <div className="min-w-[240px]">
           <p className="text-body text-ink">{alertTitle(a, locale)}</p>
           {locale === 'zh-CN' && a.titleZh ? <p className="truncate text-caption text-ink-3" lang="en">{a.title}</p> : a.titleZh && locale === 'en' ? <p className="truncate text-caption text-ink-3" lang="zh-CN">{a.titleZh}</p> : null}
         </div>
       ),
     },
     { key: 'route', header: t('shuttle.admin.col.route'), width: 200, hideOnMobile: true, render: (a) => a.route ? <span className="flex items-center gap-2"><RouteSwatch color={a.route.color} size="sm" /><span className="truncate text-small">{a.route.name}</span></span> : <span className="text-small text-ink-3">{t('shuttle.admin.form.campusWide')}</span> },
-    { key: 'window', header: t('shuttle.admin.col.window'), width: 220, hideOnMobile: true, render: (a) => <span className="text-small text-ink-2 tnum">{formatDate(a.startsAt, 'datetime')} → {a.endsAt ? formatDate(a.endsAt, 'datetime') : '∞'}</span> },
-    { key: 'status', header: t('shuttle.admin.col.status'), width: 110, render: (a) => { const s = statusOf(a); return <Badge variant={s.variant} size="sm">{s.label}</Badge>; } },
+    { key: 'window', header: t('shuttle.admin.col.window'), width: 200, hideOnMobile: true, render: (a) => <span className="block text-small text-ink-2 tnum"><span className="block whitespace-nowrap">{formatDate(a.startsAt, 'datetime')}</span><span className="block whitespace-nowrap">→ {a.endsAt ? formatDate(a.endsAt, 'datetime') : '∞'}</span></span> },
+    { key: 'status', header: t('shuttle.admin.col.status'), width: 110, render: (a) => { const s = statusOf(a); return <span className="whitespace-nowrap"><Badge variant={s.variant} size="sm">{s.label}</Badge></span>; } },
   ];
   const rowActions = (a: AdminAlert) => (
     <DropdownMenu

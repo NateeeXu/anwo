@@ -50,10 +50,13 @@ async function shot(page, name, opts = {}) {
   await page.screenshot({ path: file, ...opts });
   console.log('[shot]', path.relative(ROOT, file));
 }
-async function login(page, email) {
+async function login(page, email, campusId = 'northwestern') {
   const r = await page.request.post(`${BASE}/api/dev/login-as`, { data: { email }, headers: H });
   if (!r.ok()) throw new Error(`login-as ${email} failed: ${r.status()}`);
-  return (await r.json()).data;
+  const me = (await r.json()).data;
+  // the shell prefers the profile campus over the cookie once logged in; the admin seed account has none
+  if (campusId && me.campusId !== campusId) await page.request.patch(`${BASE}/api/users/me`, { data: { campusId }, headers: H }).catch(() => {});
+  return me;
 }
 const assert = (cond, msg) => { if (!cond) throw new Error(`assertion failed: ${msg}`); };
 
@@ -102,7 +105,7 @@ async function main() {
       await shot(page, 'route-panel-desktop');
 
       // stop detail from the route panel
-      await page.getByRole('button', { name: /Noyes/ }).first().click();
+      await page.locator('li button', { hasText: /Noyes/ }).first().click();
       await page.waitForURL(/stop=/);
       await page.getByRole('heading', { level: 3, name: /下一班/ }).waitFor();
       await page.locator('li:has-text("分钟")').first().waitFor({ timeout: 15000 });
@@ -154,7 +157,7 @@ async function main() {
       await page.getByText('Campus Loop', { exact: true }).first().waitFor();
       await shot(page, 'browse-mobile');
       await page.getByRole('tab', { name: /站点/ }).click();
-      await page.getByRole('button', { name: /Davis/ }).first().click();
+      await page.locator('li button', { hasText: /Davis/ }).first().click();
       await page.waitForURL(/stop=/);
       await page.getByRole('dialog').waitFor();
       await page.locator('[role="dialog"] li:has-text("分钟")').first().waitFor({ timeout: 15000 });

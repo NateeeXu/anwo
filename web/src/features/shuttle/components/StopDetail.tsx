@@ -12,7 +12,7 @@ import { DeparturesList, useSecondsSince } from './Departures';
 import { FavoriteButton } from './FavoriteButton';
 import { RouteSwatch } from './RouteSwatch';
 
-export function StopDetail({ stop, favorited, onSelectRoute, showHeader = true }: { stop: StopItem; favorited?: boolean; onSelectRoute?: (routeId: string) => void; showHeader?: boolean }) {
+export function StopDetail({ stop, favorited, onSelectRoute, showHeader = true, showAlerts = true }: { stop: StopItem; favorited?: boolean; onSelectRoute?: (routeId: string) => void; showHeader?: boolean; /** false when the page already renders the campus alerts banner */ showAlerts?: boolean }) {
   const t = useT();
   const { locale } = useLocale();
   const next = useNextDepartures(stop.id);
@@ -32,7 +32,7 @@ export function StopDetail({ stop, favorited, onSelectRoute, showHeader = true }
         </div>
       ) : null}
 
-      {data?.alerts?.length ? <AlertsBanner alerts={data.alerts} routes={data.stop.routes} /> : null}
+      {showAlerts && data?.alerts?.length ? <AlertsBanner alerts={data.alerts} routes={data.stop.routes} /> : null}
 
       <section aria-labelledby={`next-${stop.id}`}>
         <div className="mb-1 flex items-baseline justify-between gap-2">
