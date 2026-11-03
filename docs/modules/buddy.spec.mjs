@@ -199,7 +199,7 @@ async function run() {
 
   // ---------------------------------------------------------------- 5. dark + english + mobile
   await page.emulateMedia({ colorScheme: 'dark' });
-  await page.addInitScript(() => { try { localStorage.setItem('theme', 'dark'); } catch {} });
+  await page.evaluate(() => { try { localStorage.setItem('theme', 'dark'); } catch {} });
   await page.goto('/buddy');
   await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark'));
   await page.waitForSelector('article', { timeout: 20000 });

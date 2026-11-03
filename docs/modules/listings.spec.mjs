@@ -48,6 +48,8 @@ if (!health || !health.ok()) {
 }
 
 await login(page, 'alice@u.northwestern.edu');
+// the browse page is campus-scoped; a device without a campus cookie is sent to /welcome
+await context.addCookies([{ name: 'campus', value: 'northwestern', url: `http://127.0.0.1:${WEB_PORT}` }]);
 
 let firstId = null;
 await step('browse desktop', async () => {

@@ -150,6 +150,16 @@ export default function Browse() {
   };
 
   const pristine = isPristine(filters);
+  const viewToggle = (
+    <SegmentedControl
+      size="sm"
+      label={t('listings.browse.view')}
+      className="md:hidden"
+      value={view}
+      onChange={(v) => { setView(v); const next = new URLSearchParams(sp); if (v === 'map') next.set('view', 'map'); else next.delete('view'); setSp(next, { replace: true }); }}
+      options={[{ value: 'map', label: t('listings.browse.viewMap'), icon: <MapIcon className="size-4" /> }, { value: 'list', label: t('listings.browse.viewList'), icon: <LayoutGrid className="size-4" /> }]}
+    />
+  );
   const title = t('listings.title');
   const subtitle = list.data ? (nationwide ? t('listings.browse.subtitleNationwide', { count: formatNumber(total) }) : t('listings.browse.subtitle', { count: formatNumber(total) })) : undefined;
 
@@ -224,11 +234,12 @@ export default function Browse() {
           <div className="flex items-center gap-2">
             {status === 'authed' && (
               <>
-                <Button asChild variant="ghost" size="sm" iconLeft={<Heart className="size-4" />}><Link to="/listings/saved">{t('listings.browse.saved')}</Link></Button>
-                <Button asChild variant="secondary" size="sm"><Link to="/listings/mine">{t('listings.browse.mine')}</Link></Button>
+                <Button asChild variant="ghost" size="sm" iconLeft={<Heart className="size-4" />} className="max-md:hidden"><Link to="/listings/saved">{t('listings.browse.saved')}</Link></Button>
+                <Button asChild variant="secondary" size="sm" className="max-md:hidden"><Link to="/listings/mine">{t('listings.browse.mine')}</Link></Button>
               </>
             )}
             <Button size="sm" iconLeft={<Plus className="size-4" />} onClick={() => openPost()} className="hidden md:inline-flex">{t('listings.browse.post')}</Button>
+            {viewToggle}
           </div>
         }
       />
@@ -240,19 +251,7 @@ export default function Browse() {
         resultCount={list.data ? total : undefined}
         sort={{ value: filters.sort, options: sortOptions, onChange: (v) => patch({ sort: v as Filters['sort'], page: 1 }) }}
         scopeToggle={{ value: scope, onChange: (v) => { setScope(v); patch({ page: 1 }); }, campusLabel: campus?.shortName }}
-        trailing={
-          <div className="flex items-center gap-2">
-            <SavedSearches filters={filters} onApply={(f) => setSp(toSearchParams(f, sp), { replace: true })} pristine={pristine} />
-            <SegmentedControl
-              size="sm"
-              label={t('listings.browse.view')}
-              className="md:hidden"
-              value={view}
-              onChange={(v) => { setView(v); const next = new URLSearchParams(sp); if (v === 'map') next.set('view', 'map'); else next.delete('view'); setSp(next, { replace: true }); }}
-              options={[{ value: 'map', label: t('listings.browse.viewMap'), icon: <MapIcon className="size-4" /> }, { value: 'list', label: t('listings.browse.viewList'), icon: <LayoutGrid className="size-4" /> }]}
-            />
-          </div>
-        }
+        trailing={<div className="hidden md:block"><SavedSearches filters={filters} onApply={(f) => setSp(toSearchParams(f, sp), { replace: true })} pristine={pristine} /></div>}
       />
 
       {nationwide && (
