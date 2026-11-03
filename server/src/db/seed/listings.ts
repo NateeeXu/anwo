@@ -12,7 +12,7 @@ import { getCampus } from '../../lib/campuses';
 import { nearestStop } from '../../lib/shuttle';
 import { logEvent } from '../../lib/events';
 
-export const version = 3;
+export const version = 4;
 
 function sid(key: string): string {
   const h = sha256('listing:' + key);
@@ -145,7 +145,7 @@ function describe(s: Spec): string {
   const roomsEn = s.bed === 0 ? 'studio' : `${s.bed} bd · ${s.bath} ba`;
   const zh = [
     s.hookZh,
-    `${s.hood}${s.prop === 'room' || s.prop === 'shared_room' ? '单间' : rooms}，${FURN[s.furn ?? 'none'][0]}，${LEASE[s.lease ?? 'sublease'][0]}。`,
+    `${s.hood} ${s.prop === 'room' || s.prop === 'shared_room' ? '单间' : rooms}，${FURN[s.furn ?? 'none'][0]}，${LEASE[s.lease ?? 'sublease'][0]}。`,
     `${s.from.replace(/-/g, '/')} 起${s.to ? `至 ${s.to.replace(/-/g, '/')}` : '，长期'}${s.flexible ? '，日期可商量' : ''}，最短 ${s.term ?? 1} 个月。`,
     s.utilities ? '租金已含水电网。' : s.utilitiesEst ? `水电网另算，每月约 $${Math.round(s.utilitiesEst / 100)}。` : '水电网按实际分摊。',
     s.roommates ? `现有 ${s.roommates} 位室友${s.gender === 'female' ? '，仅限女生' : s.gender === 'male' ? '，仅限男生' : ''}。` : '',

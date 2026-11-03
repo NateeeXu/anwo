@@ -67,7 +67,7 @@ Run: `GEOCODE_OFFLINE=1 DB_PATH=server/data/test-wanted.db npm run seed -- --mod
 
 - `npm run typecheck`: shared ✓, web ✓, server ✓ for all wanted files (at the time of writing the only server error is in another agent's in-progress `seed/chat.ts`).
 - API smoke (all flows incl. create/patch/pause/resume/delete, offer, contact, dismiss, admin moderate, job run) verified with a node script against port 4102.
-- `WEB_PORT=5102 node docs/modules/wanted.spec.mjs` → screenshots in `docs/screenshots/wanted/`: `browse-desktop`, `browse-filter-budget`, `browse-map`, `detail-owner-matches`, `matches-page`, `mine`, `digest`, `post-form` (full page), `post-created`, `offer-modal`, `offer-done`, `for-my-listings`, `browse-mobile`, `browse-mobile-filters`, `detail-mobile`, `detail-en`, `matches-dark`. Exits 1 on any page error or failed assertion; the create flow posts a real request through the form and deletes it afterwards.
+- `WEB_PORT=5102 node docs/modules/wanted.spec.mjs` → screenshots in `docs/screenshots/wanted/`: `browse-desktop`, `browse-filter-budget`, `browse-map`, `detail-owner-matches`, `matches-page`, `mine`, `digest`, `post-form` (full page), `post-created`, `offer-modal`, `offer-done`, `for-my-listings`, `browse-mobile`, `browse-mobile-filters`, `detail-mobile`, `detail-en`, `matches-dark`. Exits 1 on any page error or failed assertion; the create flow posts a real request through the form and deletes it afterwards, and the offer step picks a post the host has not offered on yet, so the spec is re-runnable without re-seeding.
 
 ## Known gaps
 

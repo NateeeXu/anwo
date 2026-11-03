@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { track } from '@/lib/track';
 
 export type RouteSummary = Pick<ShuttleRoute, 'id' | 'name' | 'shortName' | 'color'>;
-export type RouteListItem = Omit<ShuttleRoute, 'stops'> & { stopCount: number; stopIds: string[]; favorited?: boolean };
+export type RouteListItem = Omit<ShuttleRoute, 'stops'> & { stopCount: number; stopIds: string[]; favorited?: boolean; runsToday?: boolean };
 export type StopItem = ShuttleStop & { routes: RouteSummary[]; favorited?: boolean };
 export type RouteStop = ShuttleRoute['stops'][number] & { favorited?: boolean };
 export type CampusPublic = {

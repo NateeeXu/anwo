@@ -119,7 +119,7 @@ export default function Browse() {
     return out;
   }, [pins.data, activeId, visited, nationwide, campus]);
   const mapCenter = useMemo(() => (nationwide ? (cityResolved?.lat !== undefined ? ([cityResolved.lat, cityResolved.lng!] as [number, number]) : US_CENTER) : campusCenter(campus)), [nationwide, cityResolved, campus]);
-  const mapZoom = nationwide ? (cityResolved?.lat !== undefined ? 12 : US_ZOOM) : 13;
+  const mapZoom = nationwide ? (cityResolved?.lat !== undefined ? 12 : US_ZOOM) : 14;
 
   const onMarkerClick = useCallback((id: string) => {
     if (id === 'campus') return;

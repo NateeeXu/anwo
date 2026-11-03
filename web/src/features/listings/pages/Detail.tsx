@@ -36,6 +36,15 @@ const ICONS: Record<string, LucideIcon> = {
   microwave: Microwave, tv: Tv, shirt: Shirt, lock: Lock, accessibility: Accessibility, 'shopping-cart': ShoppingCart, 'plug-zap': PlugZap,
 };
 
+function tzLabel(timeZone: string, locale: string): string {
+  try {
+    const part = new Intl.DateTimeFormat(locale, { timeZone, timeZoneName: 'short' }).formatToParts(new Date()).find((p) => p.type === 'timeZoneName');
+    return part?.value ?? timeZone;
+  } catch {
+    return timeZone;
+  }
+}
+
 function Section({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
   return (
     <section className={cn('flex flex-col gap-3', className)}>
@@ -49,7 +58,7 @@ export default function Detail() {
   const { id = '' } = useParams();
   const [sp] = useSearchParams();
   const t = useT();
-  const { formatMoney, formatDate, formatDateRange, formatDistance, formatRooms, formatArea, formatRelative, formatNumber } = useLocale();
+  const { formatMoney, formatDate, formatDateRange, formatDistance, formatRooms, formatArea, formatRelative, formatNumber, intl } = useLocale();
   const { user } = useAuth();
   useShellOptions({ back: true });
   const q = useQuery({ queryKey: keys.detail(id), queryFn: () => listingsApi.detail(id, sp.get('boost')), enabled: !!id, retry: false });
@@ -190,7 +199,7 @@ export default function Detail() {
 
           <Section title={t('listings.detail.availability')}>
             <AvailabilityCalendar from={l.availableFrom} to={l.availableTo} ranges={l.availability} />
-            {campus && <p className="text-caption text-ink-3">{campus.timezone}</p>}
+            {campus && <p className="text-caption text-ink-3">{tzLabel(campus.timezone, intl)}</p>}
           </Section>
 
           {l.amenities.length > 0 && (

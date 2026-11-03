@@ -21,7 +21,7 @@ import { rateLimit } from '../../lib/ratelimit';
 import { nowDate, nowIso } from '../../lib/time';
 import {
   activeAlerts, buildTimetable, campusHasData, campusRoutes, campusStops, exportCampusRoutes, favoriteSet, importCampusRoutes, loadRoute, loadStop,
-  localInfo, nextDeparturesAtStop, routeDto, routeListDto, routeStops, routeStopsMany, routesByStop, serviceDayFor, stopsNear, stopsWithRoutes, toAlert, toRouteSummary, toStop,
+  localInfo, nextDeparturesAtStop, routeDepartures, routeDto, routeListDto, routeStops, routeStopsMany, routesByStop, serviceDayFor, stopsNear, stopsWithRoutes, toAlert, toRouteSummary, toStop,
   type AlertRow, type RequestRow, type StopRow,
 } from './lib';
 
@@ -56,7 +56,10 @@ router.get('/campus/:campusId', (req, res) => {
   logEvent(req, 'shuttle.view', { entityType: 'campus', entityId: campus.id, campusId: campus.id, props: { hasData: routeRows.length > 0 } });
   ok(res, {
     campus: campusPublic(campus),
-    routes: routeRows.map((r) => ({ ...routeListDto(r, stopsByRoute.get(r.id) ?? []), favorited: favRoutes.has(r.id) })),
+    routes: routeRows.map((r) => {
+      const stops = stopsByRoute.get(r.id) ?? [];
+      return { ...routeListDto(r, stops), favorited: favRoutes.has(r.id), runsToday: routeDepartures(r, stops, now.ymd, now.serviceDay).kind !== 'none' };
+    }),
     stops: stops.map((s) => ({ ...s, favorited: favStops.has(s.id) })),
     alerts: activeAlerts(campus.id),
     serviceDayToday: now.serviceDay,
@@ -74,7 +77,11 @@ router.get('/routes', (req, res) => {
   const rows = campusRoutes(campus.id, p.activeOnly);
   const stopsByRoute = routeStopsMany(rows.map((r) => r.id));
   const fav = favoriteSet(req.user?.id, 'route');
-  ok(res, rows.map((r) => ({ ...routeListDto(r, stopsByRoute.get(r.id) ?? []), favorited: fav.has(r.id) })));
+  const now = localInfo(campus.timezone);
+  ok(res, rows.map((r) => {
+    const stops = stopsByRoute.get(r.id) ?? [];
+    return { ...routeListDto(r, stops), favorited: fav.has(r.id), runsToday: routeDepartures(r, stops, now.ymd, now.serviceDay).kind !== 'none' };
+  }));
 });
 
 router.get('/routes/:id', (req, res) => {
