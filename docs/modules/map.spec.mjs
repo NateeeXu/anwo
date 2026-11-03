@@ -148,8 +148,7 @@ async function main() {
     await drawBar.waitFor();
     await page.waitForURL(/[?&]r=/);
     await drawBar.getByRole('radio').first().click(); // smallest preset (500 m, shown in the viewer's unit)
-    await page.waitForTimeout(600);
-    assert(/,500(&|$)/.test(page.url()), `radius 500 in URL (${page.url()})`);
+    await page.waitForURL(/r=[^&]*(%2C|,)500(&|$)/); // radius is written to the URL (debounced)
     const inside = await drawBar.innerText();
     assert(/圈内 \d+ 条/.test(inside), `draw count shown (${inside})`);
     await shot(page, 'draw-radius-desktop');
@@ -184,11 +183,11 @@ async function main() {
     assert(await page.locator('.anwo-bubble').count() > 50, 'one bubble per campus');
     await page.waitForTimeout(900);
     await shot(page, 'nationwide-desktop');
-    await nw.getByRole('button', { name: /伊利诺伊大学/ }).click();
+    await nw.getByRole('button', { name: /厄巴纳/ }).click();
     await page.getByTestId('map-rail').getByText(/伊利诺伊|UIUC/).first().waitFor();
     await marker(page, 'Grainger 工程图书馆').waitFor({ timeout: 15000 });
     await page.getByTestId('map-search-card').getByRole('radio', { name: /全美/ }).click();
-    await nw.getByRole('button', { name: /西北大学/ }).click();
+    await nw.getByRole('button', { name: /^\d+ 西北大学/ }).click();
     await marker(page, '主图书馆').waitFor({ timeout: 15000 });
 
     // ------------------------------------------------------------ 2. create flow: alice suggests a place

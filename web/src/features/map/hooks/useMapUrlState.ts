@@ -53,9 +53,11 @@ export function useMapUrlState() {
       const flush = () => {
         const p = pending.current;
         pending.current = {};
+        // Build from the live URL, not the router's render-time params: flushes run from timers and a stale
+        // `prev` would resurrect values written in between (layers, radius, selection).
         setParams(
-          (prev) => {
-            const next = new URLSearchParams(prev);
+          (() => {
+            const next = new URLSearchParams(window.location.search);
             if (p.center !== undefined) {
               if (p.center) next.set('c', `${p.center.lat.toFixed(5)},${p.center.lng.toFixed(5)}`);
               else next.delete('c');
@@ -81,7 +83,7 @@ export function useMapUrlState() {
               else next.delete('sel');
             }
             return next;
-          },
+          })(),
           { replace: true },
         );
       };
