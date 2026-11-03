@@ -205,7 +205,7 @@ async function run() {
   await page.waitForSelector('article', { timeout: 20000 });
   await settle(page, 600);
   await shot(page, MODULE, 'browse-dark');
-  await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
+  await page.evaluate(() => { document.documentElement.setAttribute('data-theme', 'light'); try { localStorage.setItem('theme', 'light'); } catch {} });
   await page.emulateMedia({ colorScheme: 'light' });
 
   await context.addCookies([{ name: 'lang', value: 'en', url: `http://127.0.0.1:${WEB_PORT}` }]);

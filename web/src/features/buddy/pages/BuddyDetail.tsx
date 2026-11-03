@@ -484,7 +484,7 @@ export default function BuddyDetail() {
                   const p = time.parts(o.startsAt);
                   return (
                     <li key={o.id} className={cn('flex items-center gap-3 px-4 py-2.5 text-small', p.isPast && 'text-ink-3')}>
-                      <span className="tnum w-24 shrink-0 text-ink">{time.dayLabel(o.startsAt, { withWeekday: true })}</span>
+                      <span className="tnum min-w-[7.5rem] shrink-0 whitespace-nowrap text-ink">{time.dayLabel(o.startsAt, { withWeekday: true })}</span>
                       <span className="tnum text-ink-2">{time.range(o.startsAt, o.endsAt, post.isAllDay).replace(/^.*?(\d{1,2}:\d{2})/, '$1')}</span>
                       {o.locationName && o.locationName !== post.locationName && <span className="truncate text-ink-3">· {o.locationName}</span>}
                       {o.status === 'done' && <Badge variant="neutral" size="sm" className="ml-auto">{t('buddy.card.closed')}</Badge>}

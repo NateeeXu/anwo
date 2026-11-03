@@ -11,10 +11,13 @@ import { addMembers, openConversation, postContextCard, postMessage, contextCard
 import { notify } from '../../lib/notify';
 import { sha256 } from '../../lib/ids';
 
-export const version = 3;
+export const version = 4;
 
 type MemberSpec = string | { email: string; status?: 'joined' | 'pending' | 'left' | 'declined'; note?: string; daysAgo?: number };
-type EventSpec = { day: number; time: string; durH?: number; loc?: string };
+/** days from today | next weekday (0 = Sun) + weeks | absolute campus-local date */
+type DaySpec = number | { dow: number; weeks?: number } | { date: string };
+const W = (dow: number, weeks = 0): DaySpec => ({ dow, weeks });
+type EventSpec = { day: DaySpec; time: string; durH?: number; loc?: string };
 type PostSpec = {
   key: string;
   campus: 'northwestern' | 'uiuc' | 'nyu' | 'usc';
@@ -23,8 +26,8 @@ type PostSpec = {
   title: string;
   zh: string;
   en: string;
-  /** days from today (campus-local); omit for no fixed time */
-  day?: number;
+  /** days from today (campus-local), next weekday, or absolute date; omit for no fixed time */
+  day?: DaySpec;
   /** HH:MM campus-local */
   time?: string;
   durH?: number;
@@ -107,7 +110,7 @@ const POSTS: PostSpec[] = [
     title: 'ORD 接机 · UA 851 北京→芝加哥 14:35 落地',
     zh: '周四 UA 851 从北京直飞，预计 14:35 落地 T5。我开车（RAV4，后备箱能放两个 28 寸箱子），顺路回 Evanston，可以接 2 位同学。油费分摊，到了再给。',
     en: 'UA 851 from Beijing lands at Terminal 5 around 14:35 on Thursday. I drive a RAV4 (room for two 28" suitcases) and am heading back to Evanston — two seats available. Gas split after arrival.',
-    day: 3, time: '14:35', durH: 3, loc: ORD_T5.name, lat: ORD_T5.lat, lng: ORD_T5.lng, dest: 'Evanston · Davis St', dlat: DAVIS.lat, dlng: DAVIS.lng,
+    day: W(4), time: '14:35', durH: 3, loc: ORD_T5.name, lat: ORD_T5.lat, lng: ORD_T5.lng, dest: 'Evanston · Davis St', dlat: DAVIS.lat, dlng: DAVIS.lng,
     langs: ['zh', 'en'], max: 3, verifiedOnly: true, minTrust: 1, cost: 2000, members: ['yiran.feng@u.northwestern.edu'], createdDaysAgo: 6, views: 148,
     chat: [{ from: 'yiran.feng@u.northwestern.edu', body: '我是 CA 985 转 UA 的，14:20 到，应该能赶上！' }, { from: 'siyuan.wu@u.northwestern.edu', body: '没问题，到了在 T5 出口 Door 5E 等我，我发车牌给你。' }],
   },
@@ -116,7 +119,7 @@ const POSTS: PostSpec[] = [
     title: 'ORD 接机 · CA 987 上海→芝加哥 周六 16:10',
     zh: '周六 CA 987 浦东出发，16:10 落地 T5。Kellogg 同学接新生，Uber XL 拼车回 Evanston，每人约 $25。先到的在 Starbucks 等。',
     en: 'CA 987 from Shanghai lands at T5 at 16:10 on Saturday. Sharing an Uber XL back to Evanston, roughly $25 each. Meet at the Starbucks in arrivals.',
-    day: 5, time: '16:10', durH: 3, loc: ORD_T5.name, lat: ORD_T5.lat, lng: ORD_T5.lng, dest: 'Evanston', dlat: NU.lat, dlng: NU.lng,
+    day: W(6), time: '16:10', durH: 3, loc: ORD_T5.name, lat: ORD_T5.lat, lng: ORD_T5.lng, dest: 'Evanston', dlat: NU.lat, dlng: NU.lng,
     langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, approval: true, cost: 2500,
     members: ['mengyao.xu@u.northwestern.edu', { email: 'tianyi.zhao@u.northwestern.edu', status: 'pending', note: '我也是这班，一个 24 寸箱子。' }], createdDaysAgo: 4, views: 93,
   },
@@ -125,7 +128,7 @@ const POSTS: PostSpec[] = [
     title: 'Midway 接机 · 西南航空 WN 1422 21:05 到',
     zh: '周日晚从 Austin 飞回来的西南 WN 1422，21:05 落地 Midway。想找同航班或前后半小时的同学一起打车回 Evanston，深夜 Uber 一个人太贵。',
     en: 'Southwest WN 1422 from Austin lands at Midway 21:05 Sunday. Looking for anyone on a flight within 30 minutes to share a ride to Evanston.',
-    day: 6, time: '21:05', durH: 2, loc: MDW.name, lat: MDW.lat, lng: MDW.lng, dest: 'Evanston', dlat: NU.lat, dlng: NU.lng, langs: ['zh', 'en'], max: 4, cost: 2200, members: ['leo.ma@u.northwestern.edu'], createdDaysAgo: 2, views: 41,
+    day: W(0), time: '21:05', durH: 2, loc: MDW.name, lat: MDW.lat, lng: MDW.lng, dest: 'Evanston', dlat: NU.lat, dlng: NU.lng, langs: ['zh', 'en'], max: 4, cost: 2200, members: ['leo.ma@u.northwestern.edu'], createdDaysAgo: 2, views: 41,
   },
   {
     key: 'nu-ord-winter', campus: 'northwestern', host: 'alice@u.northwestern.edu', type: 'airport_pickup',
@@ -147,9 +150,9 @@ const POSTS: PostSpec[] = [
     title: '周六 Costco Glenview 拼车 · 10:00 出发',
     zh: '每周六上午的 Costco 车，Tech 门口 10:00 集合，买完 12:30 左右回来。有后备箱，大米、水、纸巾随便囤。油费每人 $5。',
     en: 'The usual Saturday Costco run: meet outside Tech at 10:00, back around 12:30. Big trunk for rice, water and paper towels. $5 each for gas.',
-    day: 4, time: '10:00', durH: 2.5, loc: TECH.name, lat: TECH.lat, lng: TECH.lng, dest: COSTCO_GLENVIEW.name, dlat: COSTCO_GLENVIEW.lat, dlng: COSTCO_GLENVIEW.lng,
+    day: W(6), time: '10:00', durH: 2.5, loc: TECH.name, lat: TECH.lat, lng: TECH.lng, dest: COSTCO_GLENVIEW.name, dlat: COSTCO_GLENVIEW.lat, dlng: COSTCO_GLENVIEW.lng,
     langs: ['zh', 'en'], max: 4, cost: 500, members: ['alice@u.northwestern.edu', 'haoran.zhang@u.northwestern.edu'], createdDaysAgo: 5, views: 212,
-    events: [{ day: 4, time: '10:00', durH: 2.5 }, { day: 11, time: '10:00', durH: 2.5 }, { day: 18, time: '10:00', durH: 2.5 }],
+    events: [{ day: W(6), time: '10:00', durH: 2.5 }, { day: W(6, 1), time: '10:00', durH: 2.5 }, { day: W(6, 2), time: '10:00', durH: 2.5 }],
     chat: [{ from: 'alice@u.northwestern.edu', body: '我要买一箱气泡水，后备箱还放得下吗？' }, { from: 'zihao.guo@u.northwestern.edu', body: '放得下，后排座位也能放。' }],
   },
   {
@@ -157,21 +160,21 @@ const POSTS: PostSpec[] = [
     title: 'Mitsuwa 日超拼车 · 周日下午',
     zh: '周日下午去 Arlington Heights 的 Mitsuwa 买食材和拉面，顺便吃 food court。车上还有 3 个位置，14:00 Noyes 站出发。',
     en: 'Sunday afternoon trip to Mitsuwa in Arlington Heights for groceries and ramen at the food court. Three seats left, leaving Noyes station at 14:00.',
-    day: 6, time: '14:00', durH: 3.5, loc: 'Noyes 站', lat: 42.0583, lng: -87.6836, dest: MITSUWA.name, dlat: MITSUWA.lat, dlng: MITSUWA.lng, langs: ['en', 'ja', 'zh'], max: 4, cost: 600, members: ['minjae.park@u.northwestern.edu'], createdDaysAgo: 3, views: 64,
+    day: W(0), time: '14:00', durH: 3.5, loc: 'Noyes 站', lat: 42.0583, lng: -87.6836, dest: MITSUWA.name, dlat: MITSUWA.lat, dlng: MITSUWA.lng, langs: ['en', 'ja', 'zh'], max: 4, cost: 600, members: ['minjae.park@u.northwestern.edu'], createdDaysAgo: 3, views: 64,
   },
   {
     key: 'nu-hmart', campus: 'northwestern', host: 'minjae.park@u.northwestern.edu', type: 'carpool',
     title: 'H Mart Niles 周三晚拼车',
     zh: '周三晚 18:30 去 H Mart Niles 囤泡菜和韩国零食，大概 1 小时。Davis 站集合，油费 AA。',
     en: 'Wednesday 18:30 run to H Mart Niles for kimchi and snacks, about an hour. Meet at Davis station, split gas.',
-    day: 2, time: '18:30', durH: 1.5, loc: DAVIS.name, lat: DAVIS.lat, lng: DAVIS.lng, dest: HMART_NILES.name, dlat: HMART_NILES.lat, dlng: HMART_NILES.lng, langs: ['ko', 'en', 'zh'], max: 4, cost: 400, members: ['daniel.kim@u.northwestern.edu', 'sophia.wang@u.northwestern.edu'], createdDaysAgo: 2, views: 58,
+    day: W(3), time: '18:30', durH: 1.5, loc: DAVIS.name, lat: DAVIS.lat, lng: DAVIS.lng, dest: HMART_NILES.name, dlat: HMART_NILES.lat, dlng: HMART_NILES.lng, langs: ['ko', 'en', 'zh'], max: 4, cost: 400, members: ['daniel.kim@u.northwestern.edu', 'sophia.wang@u.northwestern.edu'], createdDaysAgo: 2, views: 58,
   },
   {
     key: 'nu-chinatown', campus: 'northwestern', host: 'mengyao.xu@u.northwestern.edu', type: 'carpool',
     title: '周六去 Chinatown 吃早茶 + 买菜',
     zh: '周六上午坐 Purple Line 转 Red Line 去 Chinatown 吃早茶（MingHin），顺便去 Richwell 买调料。11:00 Davis 站集合，拼桌人多点菜多。',
     en: 'Saturday dim sum at MingHin in Chinatown via the Purple + Red Line, then groceries at Richwell Market. Meet at Davis station at 11:00 — more people, more dishes.',
-    day: 11, time: '11:00', durH: 4, loc: DAVIS.name, lat: DAVIS.lat, lng: DAVIS.lng, dest: CHINATOWN.name, dlat: CHINATOWN.lat, dlng: CHINATOWN.lng, langs: ['zh'], max: 6, cost: 3000, members: ['jiaqi.huang@u.northwestern.edu', 'xinyi.lin@u.northwestern.edu', 'grace.hu@u.northwestern.edu'], createdDaysAgo: 2, views: 120,
+    day: W(6, 1), time: '11:00', durH: 4, loc: DAVIS.name, lat: DAVIS.lat, lng: DAVIS.lng, dest: CHINATOWN.name, dlat: CHINATOWN.lat, dlng: CHINATOWN.lng, langs: ['zh'], max: 6, cost: 3000, members: ['jiaqi.huang@u.northwestern.edu', 'xinyi.lin@u.northwestern.edu', 'grace.hu@u.northwestern.edu'], createdDaysAgo: 2, views: 120,
   },
   {
     key: 'nu-roommate-grace', campus: 'northwestern', host: 'grace.hu@u.northwestern.edu', type: 'roommate',
@@ -199,9 +202,9 @@ const POSTS: PostSpec[] = [
     title: 'CS 336 算法 · 周二周四晚自习小组',
     zh: '每周二、周四 19:00 在 Main Library 2 楼小组间刷 CS 336 的作业，互相讲题。欢迎同课的同学，不限年级。',
     en: 'CS 336 problem sets every Tuesday and Thursday at 19:00, group room on Main Library 2F. Explain, argue, repeat. Anyone in the class is welcome.',
-    day: 1, time: '19:00', durH: 2.5, loc: NU_LIB.name, lat: NU_LIB.lat, lng: NU_LIB.lng, langs: ['en', 'zh', 'ko'], max: 6,
+    day: W(2), time: '19:00', durH: 2.5, loc: NU_LIB.name, lat: NU_LIB.lat, lng: NU_LIB.lng, langs: ['en', 'zh', 'ko'], max: 6,
     members: ['tianyi.zhao@u.northwestern.edu', 'kai.tanaka@u.northwestern.edu'], createdDaysAgo: 20, views: 310,
-    events: [{ day: 1, time: '19:00', durH: 2.5 }, { day: 3, time: '19:00', durH: 2.5 }, { day: 8, time: '19:00', durH: 2.5 }, { day: 10, time: '19:00', durH: 2.5 }, { day: 15, time: '19:00', durH: 2.5 }, { day: 17, time: '19:00', durH: 2.5 }],
+    events: [{ day: W(2), time: '19:00', durH: 2.5 }, { day: W(4), time: '19:00', durH: 2.5 }, { day: W(2, 1), time: '19:00', durH: 2.5 }, { day: W(4, 1), time: '19:00', durH: 2.5 }, { day: W(2, 2), time: '19:00', durH: 2.5 }, { day: W(4, 2), time: '19:00', durH: 2.5 }],
     chat: [{ from: 'daniel.kim@u.northwestern.edu', body: 'This week: DP + amortized analysis. Bring questions from PS4.' }],
   },
   {
@@ -209,27 +212,27 @@ const POSTS: PostSpec[] = [
     title: 'GRE 背单词打卡 · 每天早上 8 点 Norris',
     zh: '工作日每天早上 8:00 在 Norris 一楼咖啡区背单词一小时，互相抽查。坚持到 12 月考试。来的人多就换二楼。',
     en: 'Weekday GRE vocab at 8:00 in the Norris ground-floor café, one hour, quiz each other. Running until the December test date.',
-    day: 1, time: '08:00', durH: 1, loc: NORRIS.name, lat: NORRIS.lat, lng: NORRIS.lng, langs: ['zh'], max: 8, minTrust: 0,
+    day: W(1), time: '08:00', durH: 1, loc: NORRIS.name, lat: NORRIS.lat, lng: NORRIS.lng, langs: ['zh'], max: 8, minTrust: 0,
     members: ['yiran.feng@u.northwestern.edu', 'ethan.luo@u.northwestern.edu'], createdDaysAgo: 9, views: 97,
-    events: [{ day: 1, time: '08:00', durH: 1 }, { day: 2, time: '08:00', durH: 1 }, { day: 3, time: '08:00', durH: 1 }, { day: 7, time: '08:00', durH: 1 }, { day: 8, time: '08:00', durH: 1 }, { day: 9, time: '08:00', durH: 1 }, { day: 10, time: '08:00', durH: 1 }],
+    events: [1, 2, 3, 4, 5].flatMap((d) => [{ day: W(d), time: '08:00', durH: 1 }, { day: W(d, 1), time: '08:00', durH: 1 }]),
   },
   {
     key: 'nu-study-kellogg', campus: 'northwestern', host: 'nina.zhou@u.northwestern.edu', type: 'study',
     title: 'Kellogg 案例讨论组 · 周日下午 Global Hub',
     zh: '周日 14:00 Global Hub 3 楼讨论下周的 case，提前一天在群里分工。偏好同 section 的同学。',
     en: 'Sunday 14:00 case prep on Global Hub 3F for next week\'s classes; we split the work in the group chat a day ahead. Same-section classmates preferred.',
-    day: 6, time: '14:00', durH: 3, loc: KELLOGG.name, lat: KELLOGG.lat, lng: KELLOGG.lng, langs: ['en', 'zh'], max: 5, verifiedOnly: true, minTrust: 2, approval: true,
+    day: W(0), time: '14:00', durH: 3, loc: KELLOGG.name, lat: KELLOGG.lat, lng: KELLOGG.lng, langs: ['en', 'zh'], max: 5, verifiedOnly: true, minTrust: 2, approval: true,
     members: ['yuting.chen@u.northwestern.edu', 'ruoxi.sun@u.northwestern.edu'], createdDaysAgo: 7, views: 54,
-    events: [{ day: 6, time: '14:00', durH: 3 }, { day: 13, time: '14:00', durH: 3 }],
+    events: [{ day: W(0), time: '14:00', durH: 3 }, { day: W(0, 1), time: '14:00', durH: 3 }],
   },
   {
     key: 'nu-gym-spac', campus: 'northwestern', host: 'sophia.wang@u.northwestern.edu', type: 'gym',
     title: 'SPAC 力量训练搭子 · 一三五早 7 点',
     zh: '一三五早上 7:00 SPAC 二楼器械区，练 1 小时，互相保护和督促。新手也欢迎，我可以带动作。',
     en: 'Mon/Wed/Fri 7:00 strength sessions on SPAC 2F, one hour, spotting each other. Beginners welcome — I can walk you through the lifts.',
-    day: 2, time: '07:00', durH: 1, loc: SPAC.name, lat: SPAC.lat, lng: SPAC.lng, langs: ['zh', 'en'], max: 4,
+    day: W(1), time: '07:00', durH: 1, loc: SPAC.name, lat: SPAC.lat, lng: SPAC.lng, langs: ['zh', 'en'], max: 4,
     members: ['alice@u.northwestern.edu', 'chloe.deng@u.northwestern.edu'], createdDaysAgo: 14, views: 143,
-    events: [{ day: 2, time: '07:00', durH: 1 }, { day: 4, time: '07:00', durH: 1 }, { day: 7, time: '07:00', durH: 1 }, { day: 9, time: '07:00', durH: 1 }, { day: 11, time: '07:00', durH: 1 }],
+    events: [1, 3, 5].flatMap((d) => [{ day: W(d), time: '07:00', durH: 1 }, { day: W(d, 1), time: '07:00', durH: 1 }]),
     chat: [{ from: 'sophia.wang@u.northwestern.edu', body: '明早练背，带好腕带～' }, { from: 'alice@u.northwestern.edu', body: '收到，我 6:50 到。' }],
   },
   {
@@ -237,35 +240,35 @@ const POSTS: PostSpec[] = [
     title: 'Lakefill 晨跑 5K · 周六 8:00',
     zh: '周六早上 8:00 从 Clark Street Beach 出发沿湖跑 5K，配速 6 分左右，跑完一起去 Norris 吃早餐。',
     en: 'Saturday 8:00 lakefill 5K from Clark Street Beach, easy 6:00/km pace, breakfast at Norris afterwards.',
-    day: 4, time: '08:00', durH: 1.5, loc: CLARK_BEACH.name, lat: CLARK_BEACH.lat, lng: CLARK_BEACH.lng, langs: ['zh', 'en'], max: 8, minTrust: 0, members: ['haoran.zhang@u.northwestern.edu', 'ethan.luo@u.northwestern.edu'], createdDaysAgo: 3, views: 71,
+    day: W(6), time: '08:00', durH: 1.5, loc: CLARK_BEACH.name, lat: CLARK_BEACH.lat, lng: CLARK_BEACH.lng, langs: ['zh', 'en'], max: 8, minTrust: 0, members: ['haoran.zhang@u.northwestern.edu', 'ethan.luo@u.northwestern.edu'], createdDaysAgo: 3, views: 71,
   },
   {
     key: 'nu-basketball', campus: 'northwestern', host: 'haoran.zhang@u.northwestern.edu', type: 'gym',
     title: '周末篮球 · Blomquist 三对三',
     zh: '周日下午 15:00 Blomquist 打三对三，缺两个人。水平不限，开心就好。',
     en: 'Sunday 15:00 pickup 3v3 at Blomquist, two spots open. Any level, just for fun.',
-    day: 6, time: '15:00', durH: 2, loc: 'Blomquist Recreation Center', lat: 42.0553, lng: -87.6792, langs: ['zh', 'en'], max: 6, minTrust: 0, members: ['daniel.kim@u.northwestern.edu', 'zihao.guo@u.northwestern.edu', 'leo.ma@u.northwestern.edu'], createdDaysAgo: 1, views: 44,
+    day: W(0), time: '15:00', durH: 2, loc: 'Blomquist Recreation Center', lat: 42.0553, lng: -87.6792, langs: ['zh', 'en'], max: 6, minTrust: 0, members: ['daniel.kim@u.northwestern.edu', 'zihao.guo@u.northwestern.edu', 'leo.ma@u.northwestern.edu'], createdDaysAgo: 1, views: 44,
   },
   {
     key: 'nu-dinner-hotpot', campus: 'northwestern', host: 'jiaqi.huang@u.northwestern.edu', type: 'dining',
     title: '周五晚火锅局 · Lao Sze Chuan',
     zh: '周五 18:30 Lao Sze Chuan 吃火锅，人多可以点双拼锅。AA，大概每人 $30。想认识新朋友的来。',
     en: 'Friday 18:30 hot pot at Lao Sze Chuan — enough people for a split pot. Dutch, about $30 each. Come meet new people.',
-    day: 3, time: '18:30', durH: 2.5, loc: LAOSZECHUAN.name, lat: LAOSZECHUAN.lat, lng: LAOSZECHUAN.lng, langs: ['zh', 'en'], max: 8, cost: 3000, members: ['mengyao.xu@u.northwestern.edu', 'xinyi.lin@u.northwestern.edu', 'bob@u.northwestern.edu', 'grace.hu@u.northwestern.edu'], createdDaysAgo: 2, views: 166,
+    day: W(5), time: '18:30', durH: 2.5, loc: LAOSZECHUAN.name, lat: LAOSZECHUAN.lat, lng: LAOSZECHUAN.lng, langs: ['zh', 'en'], max: 8, cost: 3000, members: ['mengyao.xu@u.northwestern.edu', 'xinyi.lin@u.northwestern.edu', 'bob@u.northwestern.edu', 'grace.hu@u.northwestern.edu'], createdDaysAgo: 2, views: 166,
   },
   {
     key: 'nu-brunch', campus: 'northwestern', host: 'chloe.deng@u.northwestern.edu', type: 'dining',
     title: '周日 brunch · Le Peep Evanston',
     zh: '周日 10:30 Le Peep 吃 brunch，聊聊实习和找房。4 人小桌，先到先得。',
     en: 'Sunday 10:30 brunch at Le Peep, internship and housing chat. Table for four, first come first served.',
-    day: 6, time: '10:30', durH: 1.5, loc: 'Le Peep Evanston', lat: 42.0467, lng: -87.6793, langs: ['zh', 'en'], max: 4, cost: 2000, members: ['sophia.wang@u.northwestern.edu', 'jiaqi.huang@u.northwestern.edu', 'alice@u.northwestern.edu'], status: 'full', createdDaysAgo: 2, views: 52,
+    day: W(0), time: '10:30', durH: 1.5, loc: 'Le Peep Evanston', lat: 42.0467, lng: -87.6793, langs: ['zh', 'en'], max: 4, cost: 2000, members: ['sophia.wang@u.northwestern.edu', 'jiaqi.huang@u.northwestern.edu', 'alice@u.northwestern.edu'], status: 'full', createdDaysAgo: 2, views: 52,
   },
   {
     key: 'nu-thanksgiving', campus: 'northwestern', host: 'xinyi.lin@u.northwestern.edu', type: 'dining',
     title: '感恩节留校聚餐 · 一起做火鸡',
     zh: '感恩节不回家的同学一起做饭，我家在 Hinman Ave，有烤箱。每人带一个菜，火鸡我负责。下午 16:00 开始准备。',
     en: 'Thanksgiving potluck for everyone staying on campus. My place on Hinman Ave has an oven — I handle the turkey, bring one dish each. Prep starts 16:00.',
-    day: 23, time: '16:00', durH: 5, loc: 'Hinman Ave（具体地址群里发）', lat: 42.0497, lng: -87.6753, langs: ['zh', 'en'], max: 10, verifiedOnly: true, minTrust: 1, approval: true, cost: 1500,
+    day: { date: '2026-11-26' }, time: '16:00', durH: 5, loc: 'Hinman Ave（具体地址群里发）', lat: 42.0497, lng: -87.6753, langs: ['zh', 'en'], max: 10, verifiedOnly: true, minTrust: 1, approval: true, cost: 1500,
     members: ['wenjun.liu@u.northwestern.edu', 'boyang.he@u.northwestern.edu', 'mengyao.xu@u.northwestern.edu', { email: 'kai.tanaka@u.northwestern.edu', status: 'pending', note: 'Can bring Japanese curry and help with dishes!' }], createdDaysAgo: 5, views: 231,
   },
   {
@@ -273,7 +276,7 @@ const POSTS: PostSpec[] = [
     title: 'Starved Rock 徒步一日游 · 周六',
     zh: '周六开车去 Starved Rock 看峡谷和瀑布，早上 7:30 出发，傍晚回来。我有车，油费和停车费平摊，带好水和零食。',
     en: 'Saturday day trip to Starved Rock for the canyons and waterfalls. Leaving 7:30, back by evening. I drive; split gas and parking, bring water and snacks.',
-    day: 11, time: '07:30', durH: 11, loc: 'Sherman Ave & Davis St', lat: 42.0474, lng: -87.6815, dest: STARVED_ROCK.name, dlat: STARVED_ROCK.lat, dlng: STARVED_ROCK.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 1500,
+    day: W(6, 1), time: '07:30', durH: 11, loc: 'Sherman Ave & Davis St', lat: 42.0474, lng: -87.6815, dest: STARVED_ROCK.name, dlat: STARVED_ROCK.lat, dlng: STARVED_ROCK.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 1500,
     members: ['wenjun.liu@u.northwestern.edu', 'siyuan.wu@u.northwestern.edu'], createdDaysAgo: 4, views: 188,
     chat: [{ from: 'wenjun.liu@u.northwestern.edu', body: '那天天气预报 8 度，记得穿防滑的鞋。' }],
   },
@@ -282,29 +285,29 @@ const POSTS: PostSpec[] = [
     title: '周日去 Art Institute 看展 + Millennium Park',
     zh: '周日 11:00 坐 Purple Line 去市区，先看 Art Institute（学生票），下午 Millennium Park 拍照。晚饭看大家心情。',
     en: 'Sunday 11:00 Purple Line downtown: Art Institute (student tickets) then photos at Millennium Park. Dinner wherever the group feels like.',
-    day: 13, time: '11:00', durH: 7, loc: DAVIS.name, lat: DAVIS.lat, lng: DAVIS.lng, dest: MILLENNIUM.name, dlat: MILLENNIUM.lat, dlng: MILLENNIUM.lng, langs: ['zh', 'en'], max: 6, cost: 2500, members: ['jiaqi.huang@u.northwestern.edu'], createdDaysAgo: 1, views: 39,
+    day: W(0, 1), time: '11:00', durH: 7, loc: DAVIS.name, lat: DAVIS.lat, lng: DAVIS.lng, dest: MILLENNIUM.name, dlat: MILLENNIUM.lat, dlng: MILLENNIUM.lng, langs: ['zh', 'en'], max: 6, cost: 2500, members: ['jiaqi.huang@u.northwestern.edu'], createdDaysAgo: 1, views: 39,
   },
   {
     key: 'nu-chunwan', campus: 'northwestern', host: 'ruoxi.sun@u.northwestern.edu', type: 'event',
     title: '2027 西北春晚 · 志愿者与观众群',
     zh: '2 月 6 日除夕晚 CSSA 春晚在 Cahn Auditorium，需要 10 位志愿者（签到、后台、摄影）。观众也可以加群抢前排票。',
     en: 'CSSA Spring Festival Gala on Lunar New Year\'s Eve (Feb 6) at Cahn Auditorium. Need 10 volunteers (check-in, backstage, photo). Audience members can join for early tickets.',
-    day: 95, time: '18:00', durH: 4, loc: 'Cahn Auditorium', lat: 42.0501, lng: -87.6799, langs: ['zh', 'en'], max: 30, minTrust: 0, members: ['alice@u.northwestern.edu', 'tianyi.zhao@u.northwestern.edu', 'yiran.feng@u.northwestern.edu', 'ethan.luo@u.northwestern.edu', 'leo.ma@u.northwestern.edu'], createdDaysAgo: 10, views: 402,
+    day: { date: '2027-02-06' }, time: '18:00', durH: 4, loc: 'Cahn Auditorium', lat: 42.0501, lng: -87.6799, langs: ['zh', 'en'], max: 30, minTrust: 0, members: ['alice@u.northwestern.edu', 'tianyi.zhao@u.northwestern.edu', 'yiran.feng@u.northwestern.edu', 'ethan.luo@u.northwestern.edu', 'leo.ma@u.northwestern.edu'], createdDaysAgo: 10, views: 402,
   },
   {
     key: 'nu-career-fair', campus: 'northwestern', host: 'bob@u.northwestern.edu', type: 'event',
     title: 'MEM 秋季招聘会一起去 · 互相改简历',
     zh: '下周四 13:00 Norris 招聘会，前一天晚上一起过一遍简历和 elevator pitch。有 2025 拿到 offer 的学长会来分享。',
     en: 'MEM career fair next Thursday 13:00 at Norris. We\'ll review resumes and elevator pitches the night before, with a 2025 grad who landed an offer.',
-    day: 10, time: '13:00', durH: 3, loc: NORRIS.name, lat: NORRIS.lat, lng: NORRIS.lng, langs: ['zh', 'en'], max: 12, members: ['haoran.zhang@u.northwestern.edu', 'leo.ma@u.northwestern.edu', 'sophia.wang@u.northwestern.edu'], createdDaysAgo: 3, views: 97,
-    events: [{ day: 9, time: '20:00', durH: 2, loc: 'Main Library 小组间' }, { day: 10, time: '13:00', durH: 3 }],
+    day: W(4, 1), time: '13:00', durH: 3, loc: NORRIS.name, lat: NORRIS.lat, lng: NORRIS.lng, langs: ['zh', 'en'], max: 12, members: ['haoran.zhang@u.northwestern.edu', 'leo.ma@u.northwestern.edu', 'sophia.wang@u.northwestern.edu'], createdDaysAgo: 3, views: 97,
+    events: [{ day: W(3, 1), time: '20:00', durH: 2, loc: 'Main Library 小组间' }, { day: W(4, 1), time: '13:00', durH: 3 }],
   },
   {
     key: 'nu-black-friday', campus: 'northwestern', host: 'siyuan.wu@u.northwestern.edu', type: 'costco_run',
     title: 'Black Friday Costco + Best Buy 扫货车',
     zh: '黑五早上 7:00 出发，先 Costco Glenview 再 Best Buy Skokie，买完直接送回宿舍。后备箱大，显示器、吸尘器都能放。',
     en: 'Black Friday run: leaving 7:00, Costco Glenview first then Best Buy Skokie, straight back to campus. Big trunk — monitors and vacuums fit.',
-    day: 24, time: '07:00', durH: 4, loc: TECH.name, lat: TECH.lat, lng: TECH.lng, dest: COSTCO_GLENVIEW.name, dlat: COSTCO_GLENVIEW.lat, dlng: COSTCO_GLENVIEW.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 800, members: ['zihao.guo@u.northwestern.edu'], createdDaysAgo: 1, views: 61,
+    day: { date: '2026-11-27' }, time: '07:00', durH: 4, loc: TECH.name, lat: TECH.lat, lng: TECH.lng, dest: COSTCO_GLENVIEW.name, dlat: COSTCO_GLENVIEW.lat, dlng: COSTCO_GLENVIEW.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 800, members: ['zihao.guo@u.northwestern.edu'], createdDaysAgo: 1, views: 61,
   },
   {
     key: 'nu-target', campus: 'northwestern', host: 'ethan.luo@u.northwestern.edu', type: 'other',
@@ -334,7 +337,7 @@ const POSTS: PostSpec[] = [
     title: '周三韩餐局 · 取消',
     zh: '周三晚 Koco Table 吃韩餐。因为临时有考试取消了，抱歉。',
     en: 'Wednesday Korean dinner at Koco Table. Cancelled because of a surprise exam — sorry.',
-    day: 2, time: '18:00', durH: 2, loc: 'Koco Table', lat: 42.0469, lng: -87.6803, langs: ['zh', 'en'], max: 5, cost: 2500, status: 'cancelled', members: ['alice@u.northwestern.edu'], createdDaysAgo: 6, views: 33,
+    day: W(3), time: '18:00', durH: 2, loc: 'Koco Table', lat: 42.0469, lng: -87.6803, langs: ['zh', 'en'], max: 5, cost: 2500, status: 'cancelled', members: ['alice@u.northwestern.edu'], createdDaysAgo: 6, views: 33,
   },
 
   // ---------------- UIUC (8)
@@ -343,38 +346,38 @@ const POSTS: PostSpec[] = [
     title: 'Thanksgiving ORD carpool · leaving Wed 6:00',
     zh: '感恩节周三早上 6:00 从 Illini Union 出发开去 ORD，大约 2.5 小时。回程周日晚。油费每人 $25。',
     en: 'Driving from Illini Union to O\'Hare on Thanksgiving Wednesday at 6:00, about 2.5 hours; return Sunday evening. $25 each for gas.',
-    day: 22, time: '06:00', durH: 3, loc: GREEN_ST.name, lat: GREEN_ST.lat, lng: GREEN_ST.lng, dest: ORD_T1.name, dlat: ORD_T1.lat, dlng: ORD_T1.lng, langs: ['en', 'zh'], max: 4, verifiedOnly: true, minTrust: 1, cost: 2500, members: ['qianqian.wang@illinois.edu'], createdDaysAgo: 3, views: 77,
+    day: { date: '2026-11-25' }, time: '06:00', durH: 3, loc: GREEN_ST.name, lat: GREEN_ST.lat, lng: GREEN_ST.lng, dest: ORD_T1.name, dlat: ORD_T1.lat, dlng: ORD_T1.lng, langs: ['en', 'zh'], max: 4, verifiedOnly: true, minTrust: 1, cost: 2500, members: ['qianqian.wang@illinois.edu'], createdDaysAgo: 3, views: 77,
   },
   {
     key: 'uiuc-cmi', campus: 'uiuc', host: 'yuxuan.li@illinois.edu', type: 'airport_pickup',
     title: 'CMI 接机 · AA 3640 周五 22:15',
     zh: '周五晚 AA 3640 从 Dallas 到 Willard，22:15 落地。我去接朋友，顺路可以多带 2 人回 Green St。',
     en: 'AA 3640 from Dallas lands at Willard 22:15 Friday. Picking up a friend, two spare seats back to Green St.',
-    day: 3, time: '22:15', durH: 1.5, loc: CMI.name, lat: CMI.lat, lng: CMI.lng, dest: 'Green St', dlat: GREEN_ST.lat, dlng: GREEN_ST.lng, langs: ['zh', 'en'], max: 3, verifiedOnly: true, minTrust: 1, cost: 500, createdDaysAgo: 2, views: 29,
+    day: W(5), time: '22:15', durH: 1.5, loc: CMI.name, lat: CMI.lat, lng: CMI.lng, dest: 'Green St', dlat: GREEN_ST.lat, dlng: GREEN_ST.lng, langs: ['zh', 'en'], max: 3, verifiedOnly: true, minTrust: 1, cost: 500, createdDaysAgo: 2, views: 29,
   },
   {
     key: 'uiuc-costco', campus: 'uiuc', host: 'qianqian.wang@illinois.edu', type: 'costco_run',
     title: '周六 Costco Champaign 拼车',
     zh: '周六 11:00 从 Siebel 门口出发去 Costco，大概 1.5 小时。有会员卡，没卡的可以一起结账。',
     en: 'Saturday 11:00 Costco run from Siebel, about 1.5 hours. I have a membership — happy to check out together.',
-    day: 4, time: '11:00', durH: 1.5, loc: SIEBEL.name, lat: SIEBEL.lat, lng: SIEBEL.lng, dest: COSTCO_CHAMPAIGN.name, dlat: COSTCO_CHAMPAIGN.lat, dlng: COSTCO_CHAMPAIGN.lng, langs: ['zh', 'en'], max: 4, cost: 400, members: ['ryan.zhu@illinois.edu', 'hana.sato@illinois.edu'], createdDaysAgo: 4, views: 85,
-    events: [{ day: 4, time: '11:00', durH: 1.5 }, { day: 11, time: '11:00', durH: 1.5 }],
+    day: W(6), time: '11:00', durH: 1.5, loc: SIEBEL.name, lat: SIEBEL.lat, lng: SIEBEL.lng, dest: COSTCO_CHAMPAIGN.name, dlat: COSTCO_CHAMPAIGN.lat, dlng: COSTCO_CHAMPAIGN.lng, langs: ['zh', 'en'], max: 4, cost: 400, members: ['ryan.zhu@illinois.edu', 'hana.sato@illinois.edu'], createdDaysAgo: 4, views: 85,
+    events: [{ day: W(6), time: '11:00', durH: 1.5 }, { day: W(6, 1), time: '11:00', durH: 1.5 }],
   },
   {
     key: 'uiuc-study-cs225', campus: 'uiuc', host: 'yuxuan.li@illinois.edu', type: 'study',
     title: 'CS 225 / 374 Grainger 自习组 · 周三 18:00',
     zh: '周三 18:00 Grainger 4 楼靠窗长桌，一起写 MP 和复习 374。偶尔点披萨。',
     en: 'Wednesday 18:00 at the window tables on Grainger 4F: MPs and 374 review. Pizza sometimes.',
-    day: 2, time: '18:00', durH: 3, loc: GRAINGER.name, lat: GRAINGER.lat, lng: GRAINGER.lng, langs: ['zh', 'en'], max: 6, minTrust: 0, members: ['jason.tan@illinois.edu', 'ryan.zhu@illinois.edu'], createdDaysAgo: 16, views: 190,
-    events: [{ day: 2, time: '18:00', durH: 3 }, { day: 9, time: '18:00', durH: 3 }, { day: 16, time: '18:00', durH: 3 }],
+    day: W(3), time: '18:00', durH: 3, loc: GRAINGER.name, lat: GRAINGER.lat, lng: GRAINGER.lng, langs: ['zh', 'en'], max: 6, minTrust: 0, members: ['jason.tan@illinois.edu', 'ryan.zhu@illinois.edu'], createdDaysAgo: 16, views: 190,
+    events: [{ day: W(3), time: '18:00', durH: 3 }, { day: W(3, 1), time: '18:00', durH: 3 }, { day: W(3, 2), time: '18:00', durH: 3 }],
   },
   {
     key: 'uiuc-arc', campus: 'uiuc', host: 'hana.sato@illinois.edu', type: 'gym',
     title: 'ARC morning swim · Tue/Thu 7:30',
     zh: '周二周四早 7:30 ARC 游泳 40 分钟，之后一起吃早饭。',
     en: 'Tuesday and Thursday 7:30 swim at ARC, 40 minutes, breakfast after.',
-    day: 1, time: '07:30', durH: 1, loc: ARC.name, lat: ARC.lat, lng: ARC.lng, langs: ['en', 'ja'], max: 4, members: ['qianqian.wang@illinois.edu'], createdDaysAgo: 11, views: 48,
-    events: [{ day: 1, time: '07:30', durH: 1 }, { day: 3, time: '07:30', durH: 1 }, { day: 8, time: '07:30', durH: 1 }, { day: 10, time: '07:30', durH: 1 }],
+    day: W(2), time: '07:30', durH: 1, loc: ARC.name, lat: ARC.lat, lng: ARC.lng, langs: ['en', 'ja'], max: 4, members: ['qianqian.wang@illinois.edu'], createdDaysAgo: 11, views: 48,
+    events: [{ day: W(2), time: '07:30', durH: 1 }, { day: W(4), time: '07:30', durH: 1 }, { day: W(2, 1), time: '07:30', durH: 1 }, { day: W(4, 1), time: '07:30', durH: 1 }],
   },
   {
     key: 'uiuc-roommate', campus: 'uiuc', host: 'meilin.gao@illinois.edu', type: 'roommate',
@@ -388,14 +391,14 @@ const POSTS: PostSpec[] = [
     title: '周五晚 Green St 麻辣烫局',
     zh: '周五 19:00 Green St 的麻辣烫，吃完去 Kung Fu Tea。新生多认识认识。',
     en: 'Friday 19:00 malatang on Green St, bubble tea after. New students, come say hi.',
-    day: 3, time: '19:00', durH: 2, loc: GREEN_ST.name, lat: GREEN_ST.lat, lng: GREEN_ST.lng, langs: ['zh'], max: 6, minTrust: 0, cost: 1800, members: ['jason.tan@illinois.edu'], createdDaysAgo: 1, views: 22,
+    day: W(5), time: '19:00', durH: 2, loc: GREEN_ST.name, lat: GREEN_ST.lat, lng: GREEN_ST.lng, langs: ['zh'], max: 6, minTrust: 0, cost: 1800, members: ['jason.tan@illinois.edu'], createdDaysAgo: 1, views: 22,
   },
   {
     key: 'uiuc-chicago-weekend', campus: 'uiuc', host: 'qianqian.wang@illinois.edu', type: 'travel',
     title: '周末去芝加哥 · Amtrak 拼票 + 住宿分摊',
     zh: '下下周末坐 Amtrak Illini 去芝加哥两天，Airbnb 四人分摊，看 Bean、逛 Chinatown。',
     en: 'Weekend in Chicago the week after next on the Amtrak Illini, four-way Airbnb split, the Bean and Chinatown.',
-    day: 18, time: '08:00', durH: 36, loc: 'Illinois Terminal', lat: 40.1162, lng: -88.2424, dest: CHINATOWN.name, dlat: CHINATOWN.lat, dlng: CHINATOWN.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, approval: true, cost: 12000, members: ['hana.sato@illinois.edu'], createdDaysAgo: 2, views: 57,
+    day: W(6, 2), time: '08:00', durH: 36, loc: 'Illinois Terminal', lat: 40.1162, lng: -88.2424, dest: CHINATOWN.name, dlat: CHINATOWN.lat, dlng: CHINATOWN.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, approval: true, cost: 12000, members: ['hana.sato@illinois.edu'], createdDaysAgo: 2, views: 57,
   },
 
   // ---------------- NYU (7)
@@ -404,43 +407,43 @@ const POSTS: PostSpec[] = [
     title: 'JFK 接机拼车 · MU 587 周四 13:20 落地 T4',
     zh: '周四 MU 587 上海→JFK，13:20 到 T4。拼一辆 Uber XL 到 Greenwich Village，每人约 $30。',
     en: 'MU 587 from Shanghai lands at JFK T4 at 13:20 Thursday. Sharing an Uber XL to Greenwich Village, about $30 each.',
-    day: 3, time: '13:20', durH: 3, loc: JFK_T4.name, lat: JFK_T4.lat, lng: JFK_T4.lng, dest: 'Greenwich Village', dlat: NYU.lat, dlng: NYU.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 3000, members: ['mia.cheng@nyu.edu'], createdDaysAgo: 4, views: 66,
+    day: W(4), time: '13:20', durH: 3, loc: JFK_T4.name, lat: JFK_T4.lat, lng: JFK_T4.lng, dest: 'Greenwich Village', dlat: NYU.lat, dlng: NYU.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 3000, members: ['mia.cheng@nyu.edu'], createdDaysAgo: 4, views: 66,
   },
   {
     key: 'nyu-lga', campus: 'nyu', host: 'kevin.xie@nyu.edu', type: 'airport_pickup',
     title: 'LGA 接机 · DL 1278 周日 20:45',
     zh: '周日 DL 1278 从 Atlanta 到 LGA Terminal B，20:45 落地，一起打车回 East Village。',
     en: 'DL 1278 from Atlanta lands at LGA Terminal B 20:45 Sunday. Splitting a cab to the East Village.',
-    day: 6, time: '20:45', durH: 2, loc: LGA.name, lat: LGA.lat, lng: LGA.lng, dest: 'East Village', dlat: 40.7265, dlng: -73.9815, langs: ['zh', 'en'], max: 3, cost: 2000, createdDaysAgo: 2, views: 19,
+    day: W(0), time: '20:45', durH: 2, loc: LGA.name, lat: LGA.lat, lng: LGA.lng, dest: 'East Village', dlat: 40.7265, dlng: -73.9815, langs: ['zh', 'en'], max: 3, cost: 2000, createdDaysAgo: 2, views: 19,
   },
   {
     key: 'nyu-study-bobst', campus: 'nyu', host: 'lucia.fernandez@nyu.edu', type: 'study',
     title: 'Bobst study group · Spanish/English, weeknights',
     zh: '工作日晚 19:00 Bobst LL1 一起自习，互相练西语/英语口语，学期末一起复习。',
     en: 'Weeknight 19:00 study sessions at Bobst LL1 with Spanish/English conversation breaks. Finals review together.',
-    day: 1, time: '19:00', durH: 2, loc: BOBST.name, lat: BOBST.lat, lng: BOBST.lng, langs: ['es', 'en'], max: 5, minTrust: 0, members: ['anqi.yang@nyu.edu'], createdDaysAgo: 12, views: 73,
-    events: [{ day: 1, time: '19:00', durH: 2 }, { day: 3, time: '19:00', durH: 2 }, { day: 8, time: '19:00', durH: 2 }],
+    day: W(1), time: '19:00', durH: 2, loc: BOBST.name, lat: BOBST.lat, lng: BOBST.lng, langs: ['es', 'en'], max: 5, minTrust: 0, members: ['anqi.yang@nyu.edu'], createdDaysAgo: 12, views: 73,
+    events: [{ day: W(1), time: '19:00', durH: 2 }, { day: W(3), time: '19:00', durH: 2 }, { day: W(1, 1), time: '19:00', durH: 2 }],
   },
   {
     key: 'nyu-flushing', campus: 'nyu', host: 'anqi.yang@nyu.edu', type: 'carpool',
     title: '周六去法拉盛吃东北菜 + 买菜（7 号线）',
     zh: '周六 12:00 Washington Sq 集合坐 7 号线去 Flushing，吃东北菜，逛新世界商城超市。',
     en: 'Saturday 12:00 from Washington Square on the 7 train to Flushing for Dongbei food and New World Mall groceries.',
-    day: 4, time: '12:00', durH: 5, loc: WSP.name, lat: WSP.lat, lng: WSP.lng, dest: FLUSHING.name, dlat: FLUSHING.lat, dlng: FLUSHING.lng, langs: ['zh'], max: 6, cost: 2500, members: ['kevin.xie@nyu.edu', 'mia.cheng@nyu.edu'], createdDaysAgo: 3, views: 94,
+    day: W(6), time: '12:00', durH: 5, loc: WSP.name, lat: WSP.lat, lng: WSP.lng, dest: FLUSHING.name, dlat: FLUSHING.lat, dlng: FLUSHING.lng, langs: ['zh'], max: 6, cost: 2500, members: ['kevin.xie@nyu.edu', 'mia.cheng@nyu.edu'], createdDaysAgo: 3, views: 94,
   },
   {
     key: 'nyu-costco', campus: 'nyu', host: 'kevin.xie@nyu.edu', type: 'costco_run',
     title: 'Brooklyn Costco 拼车 · 周日上午',
     zh: '周日 10:00 租 Zipcar 去 Sunset Park Costco，车费 4 人平摊，大件直接送到楼下。',
     en: 'Sunday 10:00 Zipcar to the Sunset Park Costco, four-way split on the car, bulk items dropped at your door.',
-    day: 6, time: '10:00', durH: 3, loc: 'Astor Place', lat: 40.7301, lng: -73.9914, dest: COSTCO_BK.name, dlat: COSTCO_BK.lat, dlng: COSTCO_BK.lng, langs: ['zh', 'en'], max: 4, cost: 1500, members: ['anqi.yang@nyu.edu'], createdDaysAgo: 2, views: 40,
+    day: W(0), time: '10:00', durH: 3, loc: 'Astor Place', lat: 40.7301, lng: -73.9914, dest: COSTCO_BK.name, dlat: COSTCO_BK.lat, dlng: COSTCO_BK.lng, langs: ['zh', 'en'], max: 4, cost: 1500, members: ['anqi.yang@nyu.edu'], createdDaysAgo: 2, views: 40,
   },
   {
     key: 'nyu-gym', campus: 'nyu', host: 'mia.cheng@nyu.edu', type: 'gym',
     title: 'Palladium 瑜伽课搭子 · 周三 18:00',
     zh: '周三 18:00 Palladium 的 vinyasa 课，一个人不好意思去，找人一起。',
     en: 'Wednesday 18:00 vinyasa class at Palladium — looking for company so I actually go.',
-    day: 2, time: '18:00', durH: 1, loc: PALLADIUM.name, lat: PALLADIUM.lat, lng: PALLADIUM.lng, langs: ['zh', 'en'], max: 3, minTrust: 0, createdDaysAgo: 1, views: 15,
+    day: W(3), time: '18:00', durH: 1, loc: PALLADIUM.name, lat: PALLADIUM.lat, lng: PALLADIUM.lng, langs: ['zh', 'en'], max: 3, minTrust: 0, createdDaysAgo: 1, views: 15,
   },
   {
     key: 'nyu-roommate', campus: 'nyu', host: 'anqi.yang@nyu.edu', type: 'roommate',
@@ -456,37 +459,37 @@ const POSTS: PostSpec[] = [
     title: 'LAX 接机 · CA 983 周六 11:50 TBIT',
     zh: '周六 CA 983 北京→洛杉矶，11:50 落地 TBIT。我有车，可接 3 人回 USC 周边，油费 $10/人。',
     en: 'CA 983 from Beijing lands at TBIT 11:50 Saturday. Three seats back to the USC area, $10 each.',
-    day: 4, time: '11:50', durH: 3, loc: LAX_TBIT.name, lat: LAX_TBIT.lat, lng: LAX_TBIT.lng, dest: 'USC Village', dlat: USC_VILLAGE.lat, dlng: USC_VILLAGE.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 1000, members: ['jingyi.cao@usc.edu'], createdDaysAgo: 3, views: 58,
+    day: W(6), time: '11:50', durH: 3, loc: LAX_TBIT.name, lat: LAX_TBIT.lat, lng: LAX_TBIT.lng, dest: 'USC Village', dlat: USC_VILLAGE.lat, dlng: USC_VILLAGE.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 1, cost: 1000, members: ['jingyi.cao@usc.edu'], createdDaysAgo: 3, views: 58,
   },
   {
     key: 'usc-costco', campus: 'usc', host: 'jingyi.cao@usc.edu', type: 'costco_run',
     title: 'Costco Los Feliz + 99 Ranch 周日采购',
     zh: '周日 10:00 USC Village 门口出发，先 Costco 再去 San Gabriel 99 Ranch，下午 15:00 前回来。',
     en: 'Sunday 10:00 from USC Village: Costco first, then 99 Ranch in San Gabriel, back before 15:00.',
-    day: 6, time: '10:00', durH: 5, loc: USC_VILLAGE.name, lat: USC_VILLAGE.lat, lng: USC_VILLAGE.lng, dest: RANCH99.name, dlat: RANCH99.lat, dlng: RANCH99.lng, langs: ['zh', 'en'], max: 4, cost: 800, members: ['weichen.du@usc.edu', 'hongyu.shi@usc.edu'], createdDaysAgo: 2, views: 49,
+    day: W(0), time: '10:00', durH: 5, loc: USC_VILLAGE.name, lat: USC_VILLAGE.lat, lng: USC_VILLAGE.lng, dest: RANCH99.name, dlat: RANCH99.lat, dlng: RANCH99.lng, langs: ['zh', 'en'], max: 4, cost: 800, members: ['weichen.du@usc.edu', 'hongyu.shi@usc.edu'], createdDaysAgo: 2, views: 49,
   },
   {
     key: 'usc-runyon', campus: 'usc', host: 'ava.nguyen@usc.edu', type: 'travel',
     title: 'Runyon Canyon hike · Sunday 8:00',
     zh: '周日早上 8:00 Runyon Canyon 徒步，大约 1.5 小时，看 Hollywood sign。拼车从 Lyon Center 出发。',
     en: 'Sunday 8:00 Runyon Canyon hike, about 90 minutes with the Hollywood sign view. Carpooling from Lyon Center.',
-    day: 6, time: '08:00', durH: 3, loc: LYON.name, lat: LYON.lat, lng: LYON.lng, dest: RUNYON.name, dlat: RUNYON.lat, dlng: RUNYON.lng, langs: ['en'], max: 5, minTrust: 0, cost: 500, members: ['jingyi.cao@usc.edu'], createdDaysAgo: 4, views: 62,
-    events: [{ day: 6, time: '08:00', durH: 3 }, { day: 13, time: '08:00', durH: 3 }],
+    day: W(0), time: '08:00', durH: 3, loc: LYON.name, lat: LYON.lat, lng: LYON.lng, dest: RUNYON.name, dlat: RUNYON.lat, dlng: RUNYON.lng, langs: ['en'], max: 5, minTrust: 0, cost: 500, members: ['jingyi.cao@usc.edu'], createdDaysAgo: 4, views: 62,
+    events: [{ day: W(0), time: '08:00', durH: 3 }, { day: W(0, 1), time: '08:00', durH: 3 }],
   },
   {
     key: 'usc-study', campus: 'usc', host: 'jingyi.cao@usc.edu', type: 'study',
     title: 'CSCI 570 算法期末复习 · Leavey 周二晚',
     zh: '周二 20:00 Leavey 2 楼刷 570 往年题，一起对答案。',
     en: 'Tuesday 20:00 on Leavey 2F: CSCI 570 past exams, compare answers.',
-    day: 1, time: '20:00', durH: 2.5, loc: LEAVEY.name, lat: LEAVEY.lat, lng: LEAVEY.lng, langs: ['zh', 'en'], max: 6, members: ['weichen.du@usc.edu'], createdDaysAgo: 5, views: 83,
-    events: [{ day: 1, time: '20:00', durH: 2.5 }, { day: 8, time: '20:00', durH: 2.5 }],
+    day: W(2), time: '20:00', durH: 2.5, loc: LEAVEY.name, lat: LEAVEY.lat, lng: LEAVEY.lng, langs: ['zh', 'en'], max: 6, members: ['weichen.du@usc.edu'], createdDaysAgo: 5, views: 83,
+    events: [{ day: W(2), time: '20:00', durH: 2.5 }, { day: W(2, 1), time: '20:00', durH: 2.5 }],
   },
   {
     key: 'usc-joshua-tree', campus: 'usc', host: 'hongyu.shi@usc.edu', type: 'travel',
     title: 'Joshua Tree 露营两天一夜 · 下下周末',
     zh: '下下周六早 7:00 出发去 Joshua Tree 露营看星星，周日下午回。我有车和两顶帐篷，露营地费用平摊。',
     en: 'Joshua Tree camping the weekend after next: leaving Saturday 7:00, back Sunday afternoon. I have a car and two tents; campsite fee split.',
-    day: 18, time: '07:00', durH: 32, loc: LYON.name, lat: LYON.lat, lng: LYON.lng, dest: JOSHUA.name, dlat: JOSHUA.lat, dlng: JOSHUA.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 2, approval: true, cost: 4500, members: ['jingyi.cao@usc.edu', { email: 'ava.nguyen@usc.edu', status: 'pending', note: 'I have a camp stove and can drive part of the way.' }], createdDaysAgo: 3, views: 97,
+    day: W(6, 2), time: '07:00', durH: 32, loc: LYON.name, lat: LYON.lat, lng: LYON.lng, dest: JOSHUA.name, dlat: JOSHUA.lat, dlng: JOSHUA.lng, langs: ['zh', 'en'], max: 4, verifiedOnly: true, minTrust: 2, approval: true, cost: 4500, members: ['jingyi.cao@usc.edu', { email: 'ava.nguyen@usc.edu', status: 'pending', note: 'I have a camp stove and can drive part of the way.' }], createdDaysAgo: 3, views: 97,
   },
 ];
 
@@ -496,8 +499,22 @@ function tzOffsetMs(timeZone: string, at: Date): number {
   const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
   return Date.UTC(get('year'), get('month') - 1, get('day'), get('hour') % 24, get('minute')) - at.getTime();
 }
-/** ISO instant for `day` days from today at HH:MM campus-local. */
-function localIso(timeZone: string, day: number, hhmm: string): string {
+/** Resolves a DaySpec to "days from today" in the campus timezone (next weekday is always in the future). */
+function dayOffset(timeZone: string, d: DaySpec): number {
+  if (typeof d === 'number') return d;
+  const now = new Date(nowMs());
+  const local = new Date(now.getTime() + tzOffsetMs(timeZone, now));
+  const todayUtc = Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate());
+  if ('date' in d) {
+    const [y, m, dd] = d.date.split('-').map(Number) as [number, number, number];
+    return Math.round((Date.UTC(y, m - 1, dd) - todayUtc) / DAY);
+  }
+  const delta = (d.dow - local.getUTCDay() + 7) % 7 || 7;
+  return delta + (d.weeks ?? 0) * 7;
+}
+/** ISO instant for `day` from today at HH:MM campus-local. */
+function localIso(timeZone: string, daySpec: DaySpec, hhmm: string): string {
+  const day = dayOffset(timeZone, daySpec);
   const now = new Date(nowMs());
   const local = new Date(now.getTime() + tzOffsetMs(timeZone, now));
   const [h, m] = hhmm.split(':').map(Number) as [number, number];
@@ -564,7 +581,7 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
       for (const e of p.events ?? []) {
         const s = localIso(campus.timezone, e.day, e.time);
         q.run('INSERT INTO buddy_events (id, post_id, campus_id, starts_at, ends_at, location_name, lat, lng, status, reminder_sent_at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)',
-          [uid(), id, campus.id, s, e.durH ? new Date(new Date(s).getTime() + e.durH * HOUR).toISOString() : null, e.loc ?? p.loc ?? null, p.lat ?? null, p.lng ?? null, e.day < 0 ? 'done' : 'scheduled', createdAt]);
+          [uid(), id, campus.id, s, e.durH ? new Date(new Date(s).getTime() + e.durH * HOUR).toISOString() : null, e.loc ?? p.loc ?? null, p.lat ?? null, p.lng ?? null, dayOffset(campus.timezone, e.day) < 0 ? 'done' : 'scheduled', createdAt]);
       }
 
       // group chat on first joined member (DATA_MODEL §3.8)

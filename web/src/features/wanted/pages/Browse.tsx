@@ -83,7 +83,7 @@ export default function WantedBrowse() {
   const groupSelected = filters.groupSize !== undefined || filters.groupSizeMin !== undefined;
   const anySelected = budgetSelected || dateSelected || groupSelected || filters.bedroomsMin !== undefined || !!filters.furnishedPref;
 
-  const budgetMenu = (close: () => void) => (
+  const budgetMenu = (close?: () => void) => (
     <div className="flex w-[320px] max-w-full flex-col gap-3">
       <PriceRange
         value={[filters.budgetMin ?? BUDGET_BOUNDS[0], filters.budgetMax ?? BUDGET_BOUNDS[1]]}
@@ -94,10 +94,10 @@ export default function WantedBrowse() {
         onChange={([lo, hi]) => setFilters({ budgetMin: lo > BUDGET_BOUNDS[0] ? lo : undefined, budgetMax: hi < BUDGET_BOUNDS[1] ? hi : undefined })}
       />
       <p className="text-caption text-ink-3">{t('wanted.filter.budgetHint')}</p>
-      <Button size="sm" variant="secondary" onClick={close}>{t('wanted.filter.done')}</Button>
+      {close && <Button size="sm" variant="secondary" onClick={close}>{t('wanted.filter.done')}</Button>}
     </div>
   );
-  const dateMenu = (close: () => void) => (
+  const dateMenu = (close?: () => void) => (
     <div className="flex w-[560px] max-w-full flex-col gap-3">
       <DateRange
         label={t('wanted.filter.dates')}
@@ -110,38 +110,38 @@ export default function WantedBrowse() {
           { label: t('wanted.filter.presetFall'), start: '2027-08-15', end: '2027-09-30' },
         ]}
       />
-      <Button size="sm" variant="secondary" onClick={close}>{t('wanted.filter.done')}</Button>
+      {close && <Button size="sm" variant="secondary" onClick={close}>{t('wanted.filter.done')}</Button>}
     </div>
   );
-  const groupMenu = (close: () => void) => (
+  const groupMenu = (close?: () => void) => (
     <div className="flex flex-col gap-2">
       <SegmentedControl
         size="sm"
         fullWidth
         label={t('wanted.filter.group')}
         value={filters.groupSizeMin === 3 ? '3+' : filters.groupSize ? String(filters.groupSize) : 'any'}
-        onChange={(v) => { setFilters(v === 'any' ? { groupSize: undefined, groupSizeMin: undefined } : v === '3+' ? { groupSize: undefined, groupSizeMin: 3 } : { groupSize: Number(v), groupSizeMin: undefined }); close(); }}
+        onChange={(v) => { setFilters(v === 'any' ? { groupSize: undefined, groupSizeMin: undefined } : v === '3+' ? { groupSize: undefined, groupSizeMin: 3 } : { groupSize: Number(v), groupSizeMin: undefined }); close?.(); }}
         options={[{ value: 'any', label: t('wanted.filter.any') }, { value: '1', label: t('wanted.group.one') }, { value: '2', label: t('wanted.group.n', { n: 2 }) }, { value: '3+', label: t('wanted.group.plus', { n: 3 }) }]}
       />
     </div>
   );
-  const bedroomsMenu = (close: () => void) => (
+  const bedroomsMenu = (close?: () => void) => (
     <SegmentedControl
       size="sm"
       fullWidth
       label={t('wanted.filter.bedrooms')}
       value={filters.bedroomsMin ? String(filters.bedroomsMin) : 'any'}
-      onChange={(v) => { setFilters({ bedroomsMin: v === 'any' ? undefined : Number(v) }); close(); }}
+      onChange={(v) => { setFilters({ bedroomsMin: v === 'any' ? undefined : Number(v) }); close?.(); }}
       options={[{ value: 'any', label: t('wanted.filter.any') }, { value: '1', label: '1+' }, { value: '2', label: '2+' }, { value: '3', label: '3+' }]}
     />
   );
-  const furnishedMenu = (close: () => void) => (
+  const furnishedMenu = (close?: () => void) => (
     <SegmentedControl
       size="sm"
       fullWidth
       label={t('wanted.filter.furnished')}
       value={filters.furnishedPref ?? 'any'}
-      onChange={(v) => { setFilters({ furnishedPref: v === 'any' ? undefined : (v as WantedFilters['furnishedPref']) }); close(); }}
+      onChange={(v) => { setFilters({ furnishedPref: v === 'any' ? undefined : (v as WantedFilters['furnishedPref']) }); close?.(); }}
       options={[{ value: 'any', label: t('wanted.filter.any') }, { value: 'partial', label: t('wanted.furnished.partial') }, { value: 'full', label: t('wanted.furnished.full') }]}
     />
   );
@@ -267,11 +267,11 @@ export default function WantedBrowse() {
       <Sheet open={sheet} onClose={() => setSheet(false)} title={t('wanted.filter.title')} snap="full" footer={<Button fullWidth variant="primary" onClick={() => setSheet(false)}>{t('wanted.filter.show', { n: total })}</Button>}>
         <div className="flex flex-col gap-5">
           <Select label={t('wanted.sort.label')} value={filters.sort ?? 'recent'} options={sortOptions} onChange={(v) => setFilters({ sort: v as WantedFilters['sort'] })} />
-          {budgetMenu(() => undefined)}
-          {dateMenu(() => undefined)}
-          {groupMenu(() => undefined)}
-          {bedroomsMenu(() => undefined)}
-          {furnishedMenu(() => undefined)}
+          {budgetMenu()}
+          {dateMenu()}
+          {groupMenu()}
+          {bedroomsMenu()}
+          {furnishedMenu()}
           {anySelected && <Button variant="ghost" onClick={reset}>{t('wanted.filter.reset')}</Button>}
         </div>
       </Sheet>
