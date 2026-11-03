@@ -119,7 +119,7 @@ export default function Browse() {
     return out;
   }, [pins.data, activeId, visited, nationwide, campus]);
   const mapCenter = useMemo(() => (nationwide ? (cityResolved?.lat !== undefined ? ([cityResolved.lat, cityResolved.lng!] as [number, number]) : US_CENTER) : campusCenter(campus)), [nationwide, cityResolved, campus]);
-  const mapZoom = nationwide ? (cityResolved?.lat !== undefined ? 12 : US_ZOOM) : 14;
+  const mapZoom = nationwide ? (cityResolved?.lat !== undefined ? 12 : US_ZOOM) : 13;
 
   const onMarkerClick = useCallback((id: string) => {
     if (id === 'campus') return;
@@ -210,8 +210,8 @@ export default function Browse() {
       onMarkerHover={setHoverId}
       onMarkerClick={onMarkerClick}
       onBoundsChange={bounds.onBoundsChange}
-      fitToMarkers={!bbox}
-      clusterThreshold={nationwide ? 1 : 60}
+      fitToMarkers={nationwide && !bbox}
+      clusterThreshold={nationwide ? 1 : 24}
       className="size-full"
       overlay={
         bounds.moved && !bbox ? (
@@ -326,7 +326,6 @@ export default function Browse() {
         </div>
       </Sheet>
 
-      <Button className="fixed bottom-20 right-4 z-layer-nav shadow-lg md:hidden" size="md" iconLeft={<Plus className="size-4" />} onClick={() => openPost()}>{t('listings.browse.post')}</Button>
     </div>
   );
 }

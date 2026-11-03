@@ -20,7 +20,7 @@ type Tab = (typeof TABS)[number];
 
 function MineInner() {
   const t = useT();
-  const { formatDate, formatNumber } = useLocale();
+  const { formatDate, formatNumber, formatMoney } = useLocale();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>('all');
@@ -100,7 +100,7 @@ function MineInner() {
                 <div className="h-12 w-16 shrink-0 overflow-hidden rounded-sm bg-sunken">{l.coverUrl && <img src={l.coverUrl} alt="" className="size-full object-cover dark:brightness-[.92]" />}</div>
                 <div className="min-w-0">
                   <p className="truncate text-body font-medium text-ink">{l.title}</p>
-                  <p className="truncate text-small text-ink-3">{l.addressDisplay} · {formatNumber(l.priceCents / 100, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}/mo{l.activeBoost ? ` · ${t('common.boosted')}` : ''}</p>
+                  <p className="truncate text-small text-ink-3">{l.addressDisplay} · {formatMoney(l.priceCents, { perMonth: true, compact: true })}{l.activeBoost ? ` · ${t('common.boosted')}` : ''}</p>
                 </div>
               </div>
             ),

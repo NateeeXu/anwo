@@ -54,10 +54,10 @@ export const WantedCard = forwardRef<HTMLElement, WantedCardProps>(function Want
       data-status={wanted.status}
     >
       <Link to={`/wanted/${wanted.id}`} className="absolute inset-0 rounded-card" aria-label={wanted.title} />
-      <div className="pointer-events-none relative flex min-w-0 flex-1 gap-3 lg:gap-4">
-        <div className="flex shrink-0 flex-col items-start gap-1">
+      <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:gap-3 lg:gap-4">
+        <div className="flex shrink-0 items-center gap-2 sm:flex-col sm:items-start sm:gap-1">
           <Price cents={wanted.budgetMinCents} maxCents={wanted.budgetMaxCents} size="stub" className={cn(closed && 'bg-sunken text-ink-3')} />
-          <span className="pl-0.5 text-caption text-ink-3">{t('wanted.card.perMonth')}</span>
+          <span className="text-caption text-ink-3 sm:pl-0.5">{t('wanted.card.perMonth')}</span>
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <h3 className="truncate text-body font-semibold text-ink">
@@ -99,11 +99,11 @@ export const WantedCard = forwardRef<HTMLElement, WantedCardProps>(function Want
           )}
           {!compact && (
             <div className="mt-1 flex items-center gap-2 text-small text-ink-2">
-              <Avatar src={wanted.author.avatarUrl} name={wanted.author.name} size="xs" trustLevel={wanted.author.trustLevel} />
-              <span className="truncate">{wanted.author.name}</span>
-              <TrustBadge level={wanted.author.trustLevel} size="inline" />
-              <span className="text-ink-3" aria-hidden>·</span>
-              <span className="text-ink-3">{formatRelative(wanted.createdAt)}</span>
+              <Avatar src={wanted.author.avatarUrl} name={wanted.author.name} size="xs" trustLevel={wanted.author.trustLevel} className="shrink-0" />
+              <span className="min-w-0 truncate">{wanted.author.name}</span>
+              <TrustBadge level={wanted.author.trustLevel} size="inline" className="shrink-0" />
+              <span className="shrink-0 text-ink-3" aria-hidden>·</span>
+              <span className="shrink-0 whitespace-nowrap text-ink-3">{formatRelative(wanted.createdAt)}</span>
               {wanted.matchCount > 0 && (
                 <Badge variant="accent" size="sm" icon={<Sparkles />} className="ml-auto shrink-0">
                   {t('wanted.matches', { n: wanted.matchCount })}

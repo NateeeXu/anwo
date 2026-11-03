@@ -93,9 +93,9 @@ await step('filters + sort + saved search', async () => {
 
 await step('detail desktop', async () => {
   await page.goto(`/listings/${firstId}`);
-  await page.locator('h1').first().waitFor({ timeout: 15000 });
+  await page.locator('main h1').first().waitFor({ timeout: 15000 });
   await settle(page, 1200);
-  if (!(await page.locator('h1').first().textContent())) throw new Error('no title');
+  if (!(await page.locator('main h1').first().textContent())) throw new Error('no title');
   await shot(page, MODULE, 'detail-desktop');
   await page.getByRole('button', { name: '分享' }).first().click();
   await page.waitForTimeout(400);

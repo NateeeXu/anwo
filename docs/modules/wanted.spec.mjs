@@ -146,8 +146,17 @@ await step('create', async () => {
 await step('offer', async () => {
   const { context, page } = await newPage(browser);
   await login(page, 'chloe.deng@u.northwestern.edu');
-  await page.goto('/wanted/wseed-w-19');
-  await page.waitForSelector('h1.text-h1:has-text("合租")', { timeout: 20000 });
+  // pick the first Northwestern post Chloe has not offered on yet (the spec stays re-runnable without re-seeding)
+  let picked = null;
+  for (const id of ['wseed-w-19', 'wseed-w-08', 'wseed-w-13', 'wseed-w-17', 'wseed-w-11']) {
+    const r = await page.request.get(`/api/wanted/${id}`);
+    const j = await r.json().catch(() => null);
+    if (j?.ok && j.data.status === 'active' && !j.data.myOffer) { picked = id; break; }
+  }
+  expect(!!picked, 'found a post Chloe has not offered on yet');
+  await page.goto(`/wanted/${picked}`);
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
+  await page.getByRole('button', { name: '我有房源，推荐给 TA' }).waitFor({ timeout: 20000 });
   await page.getByRole('button', { name: '我有房源，推荐给 TA' }).click();
   const dialog = page.getByRole('dialog');
   await dialog.locator('[role="radiogroup"] [role="radio"]').first().waitFor({ timeout: 20000 });
