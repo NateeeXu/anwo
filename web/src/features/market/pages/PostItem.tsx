@@ -14,6 +14,7 @@ import { Head } from '@/app/Head';
 import { RequireTrust } from '@/app/guards';
 import { errorMessage, fieldError } from '@/app/errors';
 import { useAuth } from '@/lib/auth';
+import { useDebounce } from '@/lib/hooks';
 import { useCampus } from '@/lib/campus';
 import { campusCenter } from '@/lib/geo';
 import { cn } from '@/lib/cn';
@@ -63,7 +64,8 @@ function ItemForm({ existing }: { existing?: Item }) {
   useEffect(() => { if (!f.campusId && campusId) set('campusId', campusId); }, [campusId, f.campusId]);
 
   const formCampus = campuses.find((c) => c.id === f.campusId) ?? campus;
-  const suggestion = usePriceSuggestion(f.category, f.condition, f.campusId, !f.isFree && f.category !== 'free');
+  const debouncedTitle = useDebounce(f.title.trim(), 500);
+  const suggestion = usePriceSuggestion(f.category, f.condition, f.campusId, !f.isFree && f.category !== 'free', debouncedTitle);
   const myBundles = useBundles({ sellerId: user?.id, status: 'active' }, !!user);
 
   const pin: MapMarker[] = f.pickupLat != null && f.pickupLng != null ? [{ id: 'pickup', lat: f.pickupLat, lng: f.pickupLng, kind: 'item', label: f.pickupLabel.slice(0, 16) || t('market.detail.pickup'), selected: true }] : [];

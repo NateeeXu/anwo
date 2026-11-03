@@ -6,7 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import { MUST_HAVE_KEYS, WantedInput, type AreaInput } from '@shared/schemas/wanted';
 import { PropertyType } from '@shared/enums';
-import { Button, Checkbox, DateRange, EmptyState, FilterChip, Input, PriceRange, SegmentedControl, Select, Switch, Textarea } from '@/components';
+import { Button, Checkbox, EmptyState, FilterChip, Input, PriceRange, SegmentedControl, Select, Switch, Textarea } from '@/components';
 import { useAuth } from '@/lib/auth';
 import { useCampus } from '@/lib/campus';
 import { useLocale, useT } from '@/lib/i18n';
@@ -59,6 +59,7 @@ function FormInner({ editId }: { editId?: string }) {
   const [loadedDraft, setLoadedDraft] = useState(false);
   const [hydrated, setHydrated] = useState(!editId);
   const summaryRef = useRef<HTMLDivElement>(null);
+  const today = new Date().toISOString().slice(0, 10);
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm((f) => ({ ...f, [k]: v }));
   const toggle = (k: 'propertyTypes' | 'mustHaves' | 'niceToHaves', v: string) => setForm((f) => ({ ...f, [k]: f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v] }));
 
@@ -166,7 +167,10 @@ function FormInner({ editId }: { editId?: string }) {
 
         <section className={sectionCls}>
           <h2 className={h2Cls}>{t('wanted.form.sectionDates')}</h2>
-          <DateRange label={t('wanted.form.moveInWindow')} hint={t('wanted.form.moveInHint')} value={{ start: form.moveInFrom, end: form.moveInTo }} onChange={(v) => setForm((f) => ({ ...f, moveInFrom: v.start, moveInTo: v.end }))} error={errors.moveInFrom ?? errors.moveInTo} months={2} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input type="date" label={t('wanted.form.moveInFrom')} required value={form.moveInFrom ?? ''} min={today} onChange={(e) => setForm((f) => ({ ...f, moveInFrom: e.target.value || null, moveInTo: f.moveInTo && e.target.value && f.moveInTo < e.target.value ? e.target.value : f.moveInTo }))} error={errors.moveInFrom} hint={t('wanted.form.moveInHint')} />
+            <Input type="date" label={t('wanted.form.moveInTo')} required value={form.moveInTo ?? ''} min={form.moveInFrom ?? today} onChange={(e) => set('moveInTo', e.target.value || null)} error={errors.moveInTo} hint={t('wanted.form.moveInToHint')} />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Input type="date" label={t('wanted.form.moveOut')} optional value={form.moveOutDate ?? ''} min={form.moveInFrom ?? undefined} onChange={(e) => set('moveOutDate', e.target.value || null)} hint={t('wanted.form.moveOutHint')} error={errors.moveOutDate} />
             <Select label={t('wanted.form.flexibleDays')} value={String(form.flexibleDays)} onChange={(v) => set('flexibleDays', Number(v))} options={[0, 3, 7, 14, 30].map((d) => ({ value: String(d), label: d === 0 ? t('wanted.form.flexNone') : t('wanted.form.flexDays', { n: d }) }))} />

@@ -251,7 +251,7 @@ export default function WantedBrowse() {
               height="100%"
               markers={markers}
               circles={circles}
-              fitToMarkers={markers.length > 1}
+              fitToMarkers={nationwide && markers.length > 1}
               clusterThreshold={Infinity}
               className="rounded-card"
               aria-label={t('wanted.browse.mapLabel')}

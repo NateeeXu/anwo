@@ -139,7 +139,7 @@ export function itemDto(r: MarketItemRow, req: Request | null, opts: ItemDtoOpti
     if (b && b.status !== 'removed') item.bundle = bundleDto(b, { withListing: true });
   }
   if (opts.withSuggestion && r.status !== 'sold') {
-    const s = priceSuggestion({ category: r.category, condition: r.condition, campusId: r.campus_id, excludeId: r.id });
+    const s = priceSuggestion({ category: r.category, condition: r.condition, campusId: r.campus_id, excludeId: r.id, title: r.title });
     if (s) item.suggestedPrice = s;
   }
   if (opts.withSimilar) item.similar = similarItems(r, req);
@@ -202,11 +202,18 @@ function roundPrice(cents: number): number {
  * Median + IQR of sold (last 180 d, sold price, fallback list price) and active items of the same category and condition ± 1 step.
  * Campus first when it has ≥ 5 samples, otherwise nationwide. Free items are excluded. Returns null when fewer than 3 samples exist.
  */
-export function priceSuggestion(input: { category: string; condition: string; campusId?: string | null; excludeId?: string | null }): PriceSuggestion | null {
+const TITLE_STOP = new Set(['the', 'and', 'for', 'with', 'size', 'new', 'like', 'good', 'used', 'set', 'free', 'obo', 'black', 'white', 'grey', 'gray', 'blue', 'red', 'inch', 'edition', 'men', 'women', 'mens', 'womens']);
+/** Significant latin tokens (≥ 3 chars, not stop words) of a title, for "similar item" matching. */
+export function titleTokens(title: string | null | undefined): string[] {
+  if (!title) return [];
+  return [...new Set(title.toLowerCase().match(/[a-z0-9][a-z0-9+\-]{2,}/g) ?? [])].filter((w) => !TITLE_STOP.has(w) && !/^\d+(e|gb|tb|qt|lb|lbs|cm|mm|ft)?$/.test(w));
+}
+
+export function priceSuggestion(input: { category: string; condition: string; campusId?: string | null; excludeId?: string | null; title?: string | null }): PriceSuggestion | null {
   const conds = conditionNeighbours(input.condition);
   const since = new Date(Date.now() - 180 * 24 * 3600 * 1000).toISOString();
   const sql = (campusFilter: boolean) =>
-    `SELECT CASE WHEN m.status = 'sold' AND m.sold_price_cents IS NOT NULL AND m.sold_price_cents > 0 THEN m.sold_price_cents ELSE m.price_cents END AS cents
+    `SELECT CASE WHEN m.status = 'sold' AND m.sold_price_cents IS NOT NULL AND m.sold_price_cents > 0 THEN m.sold_price_cents ELSE m.price_cents END AS cents, m.title
        FROM market_items m
       WHERE m.category = ? AND m.condition IN (${placeholders(conds.length)}) AND m.is_free = 0 AND m.price_cents > 0 AND m.moderation_status = 'ok'
         AND ((m.status = 'sold' AND m.sold_at >= ?) OR m.status IN ('active','reserved'))
@@ -214,12 +221,21 @@ export function priceSuggestion(input: { category: string; condition: string; ca
       ORDER BY cents`;
   const baseParams: (string | number)[] = [input.category, ...conds, since];
   if (input.excludeId) baseParams.push(input.excludeId);
+  type R = { cents: number; title: string };
+  // when a title is known, prefer items that share a significant word with it (e.g. "ipad", "trek", "calculus")
+  const tokens = titleTokens(input.title);
+  const narrow = (rows: R[]): R[] => {
+    if (!tokens.length) return rows;
+    const hit = rows.filter((r) => { const tt = titleTokens(r.title); return tokens.some((w) => tt.includes(w)); });
+    return hit.length >= 3 ? hit : rows;
+  };
   let basis: PriceSuggestion['basis'] = 'campus';
-  let rows: { cents: number }[] = [];
-  if (input.campusId) rows = q.all<{ cents: number }>(sql(true), [...baseParams, input.campusId]);
+  let rows: R[] = [];
+  if (input.campusId) rows = narrow(q.all<R>(sql(true), [...baseParams, input.campusId]));
   if (rows.length < 5) {
     basis = 'nationwide';
-    rows = q.all<{ cents: number }>(sql(false), baseParams);
+    const nat = narrow(q.all<R>(sql(false), baseParams));
+    if (nat.length > rows.length) rows = nat; else basis = 'campus';
   }
   if (rows.length < 3) return null;
   const sorted = rows.map((r) => r.cents).sort((a, b) => a - b);

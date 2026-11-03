@@ -198,6 +198,11 @@ await step('bundle form', async () => {
   await settle(page, 600);
 });
 
+await step('cleanup created rows', async () => {
+  const m = page.url().match(/\/market\/bundles\/([0-9a-f-]{36})$/);
+  if (m) await page.request.delete(`/api/market/bundles/${m[1]}`, { headers: { 'X-Requested-With': 'fetch' } });
+  if (createdId) await page.request.delete(`/api/market/items/${createdId}`, { headers: { 'X-Requested-With': 'fetch' } });
+});
 await step('logout alice', async () => { await logout(page); });
 
 // ---- english + dark (desktop)

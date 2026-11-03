@@ -177,7 +177,7 @@ router.get('/wishlist', requireAuth, (req, res) => {
 router.get('/price-suggestion', requireAuth, (req, res) => {
   const p = parseQuery(req, PriceSuggestionQuery);
   const campusId = p.campusId ?? resolveCampusId(req).id;
-  const s = priceSuggestion({ category: p.category, condition: p.condition, campusId });
+  const s = priceSuggestion({ category: p.category, condition: p.condition, campusId, title: p.title });
   ok(res, s ?? { suggestedCents: 0, lowCents: 0, highCents: 0, sampleSize: 0, basis: 'nationwide' });
 });
 

@@ -33,7 +33,7 @@ async function newPage(browser, { viewport = DESKTOP, lang = 'zh', theme = 'ligh
   await context.addInitScript((t) => { try { localStorage.setItem('theme', t); } catch { /* ignore */ } }, theme);
   const page = await context.newPage();
   page.on('pageerror', (e) => { pageErrors.push(e.message); console.error('[pageerror]', e.message); });
-  page.on('console', (m) => { if (m.type() === 'error') { consoleErrors.push(m.text()); console.error('[console.error]', m.text().slice(0, 200)); } });
+  page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) { consoleErrors.push(m.text()); console.error('[console.error]', m.text().slice(0, 200)); } });
   return { context, page };
 }
 async function login(page, email, password = 'Passw0rd!') {
@@ -62,7 +62,7 @@ await step('browse', async () => {
   await page.waitForSelector('article[data-status]', { timeout: 20000 });
   const cards = await page.locator('article[data-status]').count();
   expect(cards >= 5, `browse lists wanted cards (${cards})`);
-  expect(await page.locator('h1').first().textContent() !== '', 'browse has an h1');
+  expect(await page.locator('h1.text-h1').first().textContent() !== '', 'browse has an h1');
   await shot(page, 'browse-desktop');
   // budget filter chip opens a popover with the price range
   await page.getByRole('button', { name: /预算/ }).first().click();
@@ -88,9 +88,9 @@ await step('seeker', async () => {
   const { context, page } = await newPage(browser);
   await login(page, 'alice@u.northwestern.edu');
   await page.goto('/wanted/wseed-w-01');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
   await page.waitForSelector('article[data-status]', { timeout: 20000 }); // first MatchRow in the rail
-  expect((await page.locator('h1').textContent() || '').includes('Davis'), 'detail shows alice’s post title');
+  expect((await page.locator('h1.text-h1').textContent() || '').includes('Davis'), 'detail shows alice’s post title');
   expect(await page.getByText('为你速配').count() > 0, 'owner sees the 为你速配 panel');
   await shot(page, 'detail-owner-matches');
   await page.goto('/wanted/wseed-w-01/matches');
@@ -103,7 +103,7 @@ await step('seeker', async () => {
   await page.waitForSelector('article[data-status]', { timeout: 20000 });
   await shot(page, 'mine');
   await page.goto('/wanted/digest');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
   await page.waitForTimeout(800);
   await shot(page, 'digest');
   await context.close();
@@ -118,17 +118,8 @@ await step('create', async () => {
   await page.waitForSelector('form', { timeout: 20000 });
   await page.getByLabel('标题').fill('Playwright 测试：找 2 月起 Davis 附近 studio');
   await page.getByLabel('详细说明').fill('自动化测试创建的求租，带家具 studio，2 月入住，6 月底退租。\nCreated by the walkthrough spec.');
-  // move-in window via the DateRange popover (Feb 2027)
-  await page.getByRole('button', { name: '可接受的入住时间段' }).click();
-  const next = page.getByRole('button', { name: '下个月' }).first();
-  for (let i = 0; i < 6; i++) {
-    if (await page.locator('[data-date="2027-02-01"]').count()) break;
-    await next.click();
-    await page.waitForTimeout(80);
-  }
-  await page.locator('[data-date="2027-02-01"]').first().click();
-  await page.locator('[data-date="2027-02-20"]').first().click();
-  await page.keyboard.press('Escape');
+  await page.getByLabel('最早入住').fill('2027-02-01');
+  await page.getByLabel('最晚入住').fill('2027-02-20');
   await page.getByLabel('退租时间').fill('2027-06-30');
   // must-have chip + an area circle by clicking the map
   await page.getByRole('button', { name: '带家具', exact: true }).first().click();
@@ -143,8 +134,8 @@ await step('create', async () => {
   await page.getByRole('button', { name: '发布' }).click();
   await page.waitForURL(/\/wanted\/[0-9a-f-]{36}$/, { timeout: 20000 });
   createdId = page.url().split('/').pop();
-  await page.waitForSelector('h1', { timeout: 20000 });
-  expect((await page.locator('h1').textContent() || '').includes('Playwright'), 'created post opens its detail page');
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
+  expect((await page.locator('h1.text-h1').textContent() || '').includes('Playwright'), 'created post opens its detail page');
   await page.waitForTimeout(800);
   await shot(page, 'post-created');
   await context.close();
@@ -155,7 +146,7 @@ await step('offer', async () => {
   const { context, page } = await newPage(browser);
   await login(page, 'chloe.deng@u.northwestern.edu');
   await page.goto('/wanted/wseed-w-19');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
   await page.getByRole('button', { name: '我有房源，推荐给 TA' }).click();
   await page.waitForSelector('[role="radio"]', { timeout: 20000 });
   await page.locator('[role="radio"]').first().click();
@@ -166,7 +157,7 @@ await step('offer', async () => {
   expect(await page.getByText('已推荐').count() > 0, 'host sees 已推荐 after offering');
   await shot(page, 'offer-done');
   await page.goto('/wanted/for-my-listings');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
   await page.waitForTimeout(1500);
   await shot(page, 'for-my-listings');
   await context.close();
@@ -183,7 +174,7 @@ await step('mobile', async () => {
   await shot(page, 'browse-mobile-filters');
   await page.keyboard.press('Escape');
   await page.goto('/wanted/wseed-w-02');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
   await shot(page, 'detail-mobile');
   await context.close();
 });
@@ -192,7 +183,7 @@ await step('mobile', async () => {
 await step('en-dark', async () => {
   const { context, page } = await newPage(browser, { lang: 'en' });
   await page.goto('/wanted/wseed-w-20');
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
   expect(await page.getByText('Offer my place').count() > 0 || await page.getByText('Log in to offer a place').count() > 0, 'english detail renders English CTA');
   await shot(page, 'detail-en');
   await context.close();

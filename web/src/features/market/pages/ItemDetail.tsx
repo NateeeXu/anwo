@@ -176,8 +176,14 @@ export default function ItemDetail() {
         {/* ---------------------------------------------------------- main */}
         <div className="min-w-0 lg:col-span-7">
           <div className={cn(inactive && 'opacity-70', sold && 'grayscale')}>
-            {photos.length > 0 ? (
+            {photos.length >= 3 ? (
               <PhotoGallery photos={photos} layout="hero" aspect="1" onOpen={(i) => track('item.photo_open', { entityType: 'market_item', entityId: d.id, props: { index: i } })} />
+            ) : photos.length > 0 ? (
+              <div className={cn('grid gap-2 overflow-hidden rounded-lg', photos.length === 2 ? 'grid-cols-2' : 'grid-cols-1 sm:max-w-[520px]')}>
+                {photos.map((p) => (
+                  <img key={p.id} src={p.src} alt={p.alt} className="aspect-square w-full bg-sunken object-cover dark:brightness-[.92]" />
+                ))}
+              </div>
             ) : (
               <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-sunken text-ink-4 sm:aspect-[4/3]">
                 <CategoryIcon category={d.category} className="size-16" />

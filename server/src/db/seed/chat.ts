@@ -489,7 +489,7 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
         } else if (m.kind === 'image') {
           const uploadId = insertSeedUpload({ path: m.image, purpose: 'seed', ownerId: users[m.from]! });
           insertMessage(users[m.from]!, 'image', m.text ?? null, uploadId, null, at, n++);
-        } else {
+        } else if (m.from) {
           insertMessage(users[m.from]!, 'text', m.text, null, null, at, n++);
         }
       }

@@ -40,7 +40,7 @@ export const marketKeys = {
   pins: (p: ItemListParams) => ['market', 'pins', p] as const,
   item: (id: string) => ['market', 'item', id] as const,
   categories: (campusId?: string | null) => ['market', 'categories', campusId ?? 'none'] as const,
-  suggestion: (category: string, condition: string, campusId?: string | null) => ['market', 'suggestion', category, condition, campusId ?? 'none'] as const,
+  suggestion: (category: string, condition: string, campusId?: string | null, title?: string) => ['market', 'suggestion', category, condition, campusId ?? 'none', title ?? ''] as const,
   wishlist: (page: number) => ['market', 'wishlist', page] as const,
   mine: (status: string, page: number) => ['market', 'mine', status, page] as const,
   bundle: (id: string) => ['market', 'bundle', id] as const,
@@ -66,10 +66,10 @@ export function useItem(id: string | undefined, opts: Partial<UseQueryOptions<It
 export function useCategories(campusId?: string | null) {
   return useQuery({ queryKey: marketKeys.categories(campusId), queryFn: () => api<{ campusId: string | null; categories: CategoryCount[] }>('/api/market/categories', { query: { campusId: campusId ?? undefined } }), staleTime: 60_000 });
 }
-export function usePriceSuggestion(category: string | null, condition: string, campusId?: string | null, enabled = true) {
+export function usePriceSuggestion(category: string | null, condition: string, campusId?: string | null, enabled = true, title?: string) {
   return useQuery({
-    queryKey: marketKeys.suggestion(category ?? '', condition, campusId),
-    queryFn: () => api<PriceSuggestion>('/api/market/price-suggestion', { query: { category: category ?? undefined, condition, campusId: campusId ?? undefined } }),
+    queryKey: marketKeys.suggestion(category ?? '', condition, campusId, title),
+    queryFn: () => api<PriceSuggestion>('/api/market/price-suggestion', { query: { category: category ?? undefined, condition, campusId: campusId ?? undefined, title: title || undefined } }),
     enabled: enabled && !!category,
     staleTime: 60_000,
   });

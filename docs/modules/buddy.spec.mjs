@@ -179,8 +179,14 @@ async function run() {
   // ---------------------------------------------------------------- 4. host approval (yuting, L3)
   await login(page, 'yuting.chen@u.northwestern.edu');
   await page.goto(`/buddy/${ca987.id}?tab=requests`);
-  await page.getByRole('tab', { name: /申请/ }).waitFor({ timeout: 20000 });
-  await settle(page);
+  await page.waitForSelector('main h1', { timeout: 20000 });
+  await settle(page, 800);
+  try {
+    await page.getByRole('button', { name: '通过' }).first().waitFor({ timeout: 15000 });
+  } catch (e) {
+    console.error('[debug] buttons:', (await page.locator('main button').allInnerTexts()).join(' | '), 'url', page.url());
+    throw e;
+  }
   await shot(page, MODULE, 'detail-host-requests');
   const approveButtons = page.getByRole('button', { name: '通过' });
   const nApprove = await approveButtons.count();
