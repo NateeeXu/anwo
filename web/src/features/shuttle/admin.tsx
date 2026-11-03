@@ -2,11 +2,11 @@
 // Tabs: service alerts (create / edit / activate / deactivate / delete, audited server-side, notifies users who saved
 // the route) · campus requests (status workflow) · JSON import / export so new campuses can be added without code.
 import { useEffect, useMemo, useState } from 'react';
-import { Download, FileJson, Megaphone, MoreHorizontal, Pencil, Plus, Power, Trash2 } from 'lucide-react';
+import { Download, FileJson, Megaphone, Pencil, Plus, Power, PowerOff, Trash2 } from 'lucide-react';
 import { useSearchParams } from 'react-router';
 import type { AlertSeverity } from '@shared/enums';
 import type { AlertCreateInput } from '@shared/schemas/shuttle';
-import { Badge, Button, Checkbox, DropdownMenu, EmptyState, Input, Modal, PageHeader, Pagination, Select, Table, Tabs, Textarea, type Column } from '@/components';
+import { Badge, Button, Checkbox, EmptyState, Input, Modal, PageHeader, Pagination, Select, Table, Tabs, Textarea, type Column } from '@/components';
 import { Head } from '@/app/Head';
 import { errorMessage, fieldError } from '@/app/errors';
 import { useCampus } from '@/lib/campus';
@@ -90,19 +90,21 @@ function AlertsTab({ campusId }: { campusId: string }) {
     { key: 'window', header: t('shuttle.admin.col.window'), width: 200, hideOnMobile: true, render: (a) => <span className="block text-small text-ink-2 tnum"><span className="block whitespace-nowrap">{formatDate(a.startsAt, 'datetime')}</span><span className="block whitespace-nowrap">→ {a.endsAt ? formatDate(a.endsAt, 'datetime') : '∞'}</span></span> },
     { key: 'status', header: t('shuttle.admin.col.status'), width: 110, render: (a) => { const s = statusOf(a); return <span className="whitespace-nowrap"><Badge variant={s.variant} size="sm">{s.label}</Badge></span>; } },
   ];
-  const rowActions = (a: AdminAlert) => (
-    <DropdownMenu
-      label={t('shuttle.admin.col.actions')}
-      align="end"
-      trigger={<Button variant="ghost" size="sm" iconOnly aria-label={t('shuttle.admin.col.actions')}><MoreHorizontal /></Button>}
-      items={[
-        { label: t('common.edit'), icon: <Pencil />, onSelect: () => setEditing(a) },
-        { label: a.isActive ? t('shuttle.admin.deactivate') : t('shuttle.admin.activate'), icon: <Power />, onSelect: () => patch.mutate({ id: a.id, patch: { isActive: !a.isActive } }, { onSuccess: () => toast.success(t('shuttle.admin.updated')), onError: (e) => toast.error(errorMessage(t, e)) }) },
-        'separator',
-        { label: t('shuttle.admin.delete'), icon: <Trash2 />, danger: true, onSelect: () => setConfirmDelete(a) },
-      ]}
-    />
-  );
+  // Inline icon buttons rather than a DropdownMenu: one click per action, and see "Integration requests" in
+  // docs/modules/shuttle.md for the DropdownMenu positioning issue inside table rows.
+  const rowActions = (a: AdminAlert) => {
+    const toggleLabel = a.isActive ? t('shuttle.admin.deactivate') : t('shuttle.admin.activate');
+    return (
+      <div className="flex items-center justify-end gap-0.5">
+        <Button variant="ghost" size="sm" iconOnly aria-label={t('common.edit')} title={t('common.edit')} onClick={() => setEditing(a)}><Pencil /></Button>
+        <Button variant="ghost" size="sm" iconOnly aria-label={toggleLabel} title={toggleLabel} loading={patch.isPending && patch.variables?.id === a.id}
+          onClick={() => patch.mutate({ id: a.id, patch: { isActive: !a.isActive } }, { onSuccess: () => toast.success(t('shuttle.admin.updated')), onError: (e) => toast.error(errorMessage(t, e)) })}>
+          {a.isActive ? <PowerOff /> : <Power />}
+        </Button>
+        <Button variant="ghost" size="sm" iconOnly aria-label={t('shuttle.admin.delete')} title={t('shuttle.admin.delete')} className="text-danger" onClick={() => setConfirmDelete(a)}><Trash2 /></Button>
+      </div>
+    );
+  };
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end">

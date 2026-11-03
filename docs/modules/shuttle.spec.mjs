@@ -223,13 +223,12 @@ async function main() {
       await page.getByText(new RegExp(`规格测试 ${RUN}`)).first().waitFor();
       await shot(page, 'alert-live-desktop');
 
-      // deactivate through the row menu
+      // deactivate through the row action
       await page.goto('/shuttle/admin');
       const row = page.locator('tr', { hasText: `规格测试 ${RUN}` }).first();
       await row.waitFor();
-      await row.getByRole('button', { name: /操作/ }).click();
-      await page.getByRole('menuitem', { name: /停用/ }).click();
-      await page.waitForTimeout(800);
+      await row.getByRole('button', { name: /停用/ }).click();
+      await page.getByText(/已更新/).first().waitFor();
       const after = await (await page.request.get(`${BASE}/api/shuttle/admin/alerts?campusId=northwestern&pageSize=50`)).json();
       const deactivated = after.data.items.find((a) => a.id === createdAlertId);
       assert(deactivated && !deactivated.isActive, 'alert deactivated');
