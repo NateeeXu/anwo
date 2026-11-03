@@ -7,7 +7,8 @@ import { Check, Database, Eye, EyeOff, Inbox, MapPin, Pencil, Plus, Trash2, X } 
 import { Link, useSearchParams } from 'react-router';
 import { PoiCategory } from '@shared/enums';
 import type { PoiInput, PoiSuggestion, PoiSuggestionStatus } from '@shared/schemas/map';
-import { Badge, Button, EmptyState, Input, Modal, PageHeader, Select, StatTile, Switch, Table, Tabs, Textarea, type Column } from '@/components';
+import { Badge, Button, EmptyState, Input, Modal, PageHeader, Select, StatTile, Switch, Table, Tabs, Textarea, inputBoxClasses, type Column } from '@/components';
+import { cn } from '@/lib/cn';
 import { MapView, type MapMarker } from '@/components/map';
 import { Head } from '@/app/Head';
 import { errorMessage, fieldError } from '@/app/errors';
@@ -17,6 +18,7 @@ import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { keys, mapApi, type AdminPoi } from './api';
 import { poiCategoryKey } from './labels';
+import { CategoryPicker } from './components/CategoryPicker';
 
 type AdminTab = 'suggestions' | 'pois' | 'cache';
 
@@ -280,10 +282,15 @@ function PoiFormModal({ open, poi, campusId, center, onClose, onSaved }: { open:
     >
       <form id="poi-form" onSubmit={submit} className="grid gap-4 md:grid-cols-2" noValidate data-testid="poi-form">
         <div className="flex flex-col gap-3">
-          <Select label={t('map.admin.campus')} searchable value={f.campusId} onChange={(v) => set('campusId', v)} options={campuses.map((x) => ({ value: x.id, label: `${x.shortName} · ${x.city}, ${x.state}`, text: `${x.shortName} ${x.name}` }))} />
+          <label className="flex flex-col gap-1.5">
+            <span className="text-caption text-ink-2">{t('map.admin.campus')}</span>
+            <select value={f.campusId} onChange={(e) => set('campusId', e.target.value)} className={cn(inputBoxClasses({}), 'appearance-auto text-[16px] text-ink md:text-body')}>
+              {campuses.map((x) => <option key={x.id} value={x.id}>{x.shortName} · {x.city}, {x.state}</option>)}
+            </select>
+          </label>
           <Input label={t('map.admin.form.name')} value={f.name} onChange={(e) => set('name', e.target.value)} error={fe('name')} required maxLength={120} />
           <Input label={t('map.admin.form.nameZh')} value={f.nameZh} onChange={(e) => set('nameZh', e.target.value)} maxLength={120} optional />
-          <Select label={t('map.admin.category')} value={f.category} onChange={(v) => set('category', v as PoiCategory)} options={PoiCategory.map((x) => ({ value: x, label: t(poiCategoryKey(x)) }))} />
+          <CategoryPicker label={t('map.admin.category')} value={f.category} onChange={(v) => set('category', v)} />
           <Input label={t('map.admin.form.address')} value={f.address} onChange={(e) => set('address', e.target.value)} maxLength={200} optional />
           <Input label={t('map.admin.form.url')} value={f.url} onChange={(e) => set('url', e.target.value)} error={fe('url')} type="url" optional />
           <Input label={t('map.admin.form.tags')} value={f.tags} onChange={(e) => set('tags', e.target.value)} optional />

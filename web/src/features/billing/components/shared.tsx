@@ -78,7 +78,7 @@ export function FeatureList({ features, className }: { features: string[]; class
 }
 
 // ---------------------------------------------------------------- SVG charts (brand-neutral, token colors)
-export function LineChart({ series, height = 160, className, formatValue, labels }: { series: { key: string; label: string; values: number[]; color: string }[]; height?: number; className?: string; formatValue?: (v: number) => string; labels: string[] }) {
+export function LineChart({ series, height = 160, className, formatValue, labels, fill = true }: { series: { key: string; label: string; values: number[]; color: string; width?: number }[]; height?: number; className?: string; formatValue?: (v: number) => string; labels: string[]; fill?: boolean }) {
   const id = useId();
   const width = 600;
   const padL = 44;
@@ -109,8 +109,8 @@ export function LineChart({ series, height = 160, className, formatValue, labels
         const area = `${d} L${x(s.values.length - 1).toFixed(1)},${y(0)} L${x(0)},${y(0)} Z`;
         return (
           <g key={s.key}>
-            <path d={area} fill={s.color} opacity={0.08} />
-            <path d={d} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+            {fill && <path d={area} fill={s.color} opacity={0.08} />}
+            <path d={d} fill="none" stroke={s.color} strokeWidth={s.width ?? 2} strokeLinejoin="round" strokeLinecap="round" />
           </g>
         );
       })}

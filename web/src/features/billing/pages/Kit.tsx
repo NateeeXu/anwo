@@ -3,11 +3,11 @@
 // 「我已办好」 checkbox), left rail checklist 「落地第一周」 (server for members, localStorage for visitors).
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Check, CircleAlert, ListChecks, Share2 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { Badge, Button, Card, Checkbox, Chip, EmptyState, SegmentedControl, Skeleton } from '@/components';
 import { Head } from '@/app/Head';
 import { useAuth } from '@/lib/auth';
-import { useCampus } from '@/lib/campus';
+import { getCampusById, useCampus } from '@/lib/campus';
 import { cn } from '@/lib/cn';
 import { useLocale, useT } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
@@ -35,10 +35,11 @@ export function useKitChecklist(serverDone: string[] | undefined) {
   return { isDone: (slug: string) => set.has(slug), toggle, count: set.size };
 }
 
-export function PartnerCard({ p, done, onToggle, placement = 'kit', compact }: { p: PartnerDto; done?: boolean; onToggle?: () => void; placement?: string; compact?: boolean }) {
+export function PartnerCard({ p, done, onToggle, placement = 'kit', compact, campusOverride }: { p: PartnerDto; done?: boolean; onToggle?: () => void; placement?: string; compact?: boolean; campusOverride?: string | null }) {
   const t = useT();
   const { isZh } = useLocale();
-  const { campusId } = useCampus();
+  const { campusId: myCampusId } = useCampus();
+  const campusId = campusOverride ?? myCampusId;
   const name = isZh ? p.nameZh || p.name : p.name;
   const tagline = isZh ? p.taglineZh || p.tagline : p.tagline;
   const promo = isZh ? p.promoTextZh || p.promoText : p.promoText;
@@ -70,9 +71,17 @@ export function PartnerCard({ p, done, onToggle, placement = 'kit', compact }: {
   );
 }
 
-export default function KitPage() {
+/** Public pre-arrival share page `/kit/share/:campusId` — same Kit scoped to the shared campus (no login, no campus switch). */
+export function KitSharePage() {
+  const { campusId } = useParams();
+  return <KitPage campusOverride={campusId ?? null} shared />;
+}
+
+export default function KitPage({ campusOverride, shared }: { campusOverride?: string | null; shared?: boolean } = {}) {
   const t = useT();
-  const { campus, campusId } = useCampus();
+  const mine = useCampus();
+  const campusId = campusOverride ?? mine.campusId;
+  const campus = campusOverride ? getCampusById(campusOverride) : mine.campus;
   const { status } = useAuth();
   const { isZh } = useLocale();
   const localName = (p: PartnerDto) => (isZh ? p.nameZh || p.name : p.name);
@@ -84,7 +93,7 @@ export default function KitPage() {
   const all = categories.flatMap((c) => c.partners);
   const checklistItems = all.filter((p) => p.stages.includes('first_7_days') || p.stages.includes('before_you_fly')).slice(0, 8);
   const share = async () => {
-    const url = `${window.location.origin}/kit?campus=${campusId ?? ''}`;
+    const url = `${window.location.origin}/kit/share/${campusId ?? ''}`;
     try { if (navigator.share) await navigator.share({ title: t('billing.kit.shareTitle', { campus: campus?.shortName ?? '' }), url }); else { await navigator.clipboard.writeText(url); toast.success(t('billing.success.copied')); } } catch { /* dismissed */ }
   };
   return (
@@ -97,6 +106,7 @@ export default function KitPage() {
           {campus && <span className="text-small text-ink-3">· {campus.shortName}</span>}
           <Button variant="ghost" size="sm" iconLeft={<Share2 />} onClick={share} className="ml-auto">{t('billing.kit.share')}</Button>
         </div>
+        {shared && <p className="rounded-sm bg-accent-soft px-3 py-2 text-small text-accent-text-strong">{t('billing.kit.sharedBanner', { campus: campus?.shortName ?? '' })}</p>}
         <p className="text-small text-ink-2">{t('billing.kit.intro')}</p>
         <p className="text-caption text-ink-3">{t('billing.kit.disclosure')}</p>
         <SegmentedControl label={t('billing.kit.stage')} size="sm" value={stage} onChange={(v) => setStage(v as Stage | 'all')} options={[{ value: 'all', label: t('billing.kit.stage.all') }, ...STAGES.map((s) => ({ value: s, label: t(`billing.kit.stage.${s}`) }))]} />
@@ -124,7 +134,7 @@ export default function KitPage() {
             <section key={c.key} aria-labelledby={`kit-${c.key}`}>
               <div className="mb-3 flex items-baseline justify-between"><h2 id={`kit-${c.key}`} className="text-h2 text-ink">{t(`billing.kit.category.${c.key}`)}</h2><span className="text-caption text-ink-3">{t(`billing.kit.categoryHint.${c.key}`)}</span></div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                {c.partners.map((p) => <PartnerCard key={p.id} p={p} done={checklist.isDone(p.slug)} onToggle={() => checklist.toggle(p.slug)} />)}
+                {c.partners.map((p) => <PartnerCard key={p.id} p={p} done={checklist.isDone(p.slug)} onToggle={() => checklist.toggle(p.slug)} campusOverride={campusOverride} placement={shared ? 'onboarding' : 'kit'} />)}
               </div>
             </section>
           ))}

@@ -196,8 +196,7 @@ async function main() {
     await modal.waitFor();
     await modal.getByLabel('英文名称').fill(suggestionName);
     await modal.getByLabel('中文名称').fill(`Norbucks 咖啡 ${RUN}`);
-    await modal.getByRole('button', { name: /选择类型/ }).or(modal.getByLabel('类型')).first().click();
-    await page.getByRole('option', { name: '餐饮' }).click();
+    await modal.getByRole('radio', { name: '餐饮' }).click();
     const mini = modal.locator('.leaflet-container');
     const mb = await mini.boundingBox();
     await page.mouse.click(mb.x + mb.width * 0.62, mb.y + mb.height * 0.4);
@@ -205,7 +204,7 @@ async function main() {
     await modal.getByLabel('补充说明').fill('Norris 一楼的咖啡店，期末周开到很晚。');
     await shot(page, 'suggest-modal-desktop');
     await page.getByRole('button', { name: '提交' }).click();
-    await page.getByTestId('my-suggestions').getByText(suggestionName).waitFor();
+    await page.getByTestId('my-suggestions').getByText(`Norbucks 咖啡 ${RUN}`).waitFor();
     await page.getByTestId('my-suggestions').getByText('审核中').first().waitFor();
     await page.keyboard.press('Escape');
 

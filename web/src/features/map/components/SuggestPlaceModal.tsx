@@ -4,9 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, Clock, MapPin, ShieldCheck, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
-import { PoiCategory } from '@shared/enums';
+import type { PoiCategory } from '@shared/enums';
 import type { PoiSuggestion, PoiSuggestionInput } from '@shared/schemas/map';
-import { Badge, Button, EmptyState, Input, Modal, Select, Skeleton, Tabs, Textarea } from '@/components';
+import { Badge, Button, EmptyState, Input, Modal, Skeleton, Tabs, Textarea } from '@/components';
 import { MapView, type MapMarker } from '@/components/map';
 import { errorMessage, fieldError } from '@/app/errors';
 import { loginPath } from '@/app/guards';
@@ -17,6 +17,7 @@ import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { keys, mapApi } from '../api';
 import { poiCategoryKey } from '../labels';
+import { CategoryPicker } from './CategoryPicker';
 
 export type SuggestPlaceModalProps = {
   open: boolean;
@@ -140,14 +141,7 @@ export function SuggestPlaceModal({ open, onClose, initialPoint, initialTab = 'n
           <Input label={t('map.suggest.name')} value={form.name} onChange={(e) => set('name', e.target.value)} error={showErr('name')} maxLength={120} required placeholder="Clarke's Off Campus" />
           <Input label={t('map.suggest.nameZh')} value={form.nameZh} onChange={(e) => set('nameZh', e.target.value)} maxLength={120} optional placeholder={t('map.suggest.nameZhPh')} />
         </div>
-        <Select
-          label={t('map.suggest.category')}
-          value={form.category || null}
-          onChange={(v) => set('category', v as PoiCategory)}
-          placeholder={t('map.suggest.categoryPh')}
-          error={showErr('category')}
-          options={PoiCategory.map((c) => ({ value: c, label: t(poiCategoryKey(c)) }))}
-        />
+        <CategoryPicker label={t('map.suggest.category')} value={form.category || null} onChange={(v) => set('category', v)} error={showErr('category')} />
         <div className="flex flex-col gap-1.5">
           <span className="text-caption text-ink-2">{t('map.suggest.location')}</span>
           <MapView
