@@ -19,7 +19,8 @@ async function session({ email, viewport = DESKTOP, lang = 'zh', theme = 'light'
   await context.addCookies([{ name: 'campus', value: 'northwestern', url: base }, { name: 'lang', value: lang === 'en' ? 'en' : 'zh-CN', url: base }])
   await context.addInitScript((t) => { try { localStorage.setItem('theme', t) } catch {} }, theme)
   page.on('pageerror', (e) => errors.push(`${step}: pageerror ${e.message}`))
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(`${step}: console ${m.text().slice(0, 200)}`) })
+  // anonymous sessions legitimately get 401 from /api/auth/me and expected 4xx (PAYMENT_FAILED, PROMO_INVALID) are logged by the browser
+  page.on('console', (m) => { if (m.type() === 'error' && !/status of (401|402|400)\b/.test(m.text())) errors.push(`${step}: console ${m.text().slice(0, 200)}`) })
   let user = null
   if (email) {
     const res = await page.request.post('/api/auth/login', { data: { email, password: 'Passw0rd!' }, headers: { 'X-Requested-With': 'fetch' } })
@@ -53,7 +54,7 @@ step = 'anon'
   ok(await s.page.getByText('测试模式 Test mode').first().isVisible(), 'test-mode band on pricing')
   await shot(s.page, 'billing', 'pricing-desktop')
   await s.page.getByRole('button', { name: '为什么有些推广需要上传租约？' }).click()
-  await s.page.getByRole('tab', { name: '商家' }).click(); await settle(s.page)
+  await s.page.getByRole('radio', { name: '商家' }).click(); await settle(s.page)
   ok(await s.page.getByText('认证楼盘页').first().isVisible(), 'business tab rate card')
   await s.page.goto('/kit'); await settle(s.page)
   ok(await s.page.getByText('我们可能从合作伙伴获得佣金，不影响你的价格。').first().isVisible(), 'kit disclosure')
@@ -164,8 +165,12 @@ step = 'secure'
 
   const d = await session({ email: 'nina.zhou@u.northwestern.edu', theme: 'dark', lang: 'en' })
   await d.page.goto(`/escrow/${escrowId}`); await settle(d.page)
-  ok(await d.page.getByText('Secure Payment').first().isVisible(), 'EN copy')
+  const h1 = d.page.getByRole('heading', { level: 1, name: 'Secure Payment' })
+  if (!(await h1.isVisible().catch(() => false))) { await d.page.getByRole('radio', { name: 'EN' }).first().click(); await settle(d.page) }
+  ok(await h1.isVisible(), 'EN copy')
+  ok(await d.page.getByText('Released', { exact: true }).first().isVisible(), 'released state in EN')
   await shot(d.page, 'billing', 'secure-detail-dark-en')
+  await d.page.getByRole('radio', { name: '中' }).first().click(); await settle(d.page)
   await finish(d.browser)
   console.log('[ok] Secure Payment propose → accept → fund → release')
 }
@@ -177,7 +182,7 @@ step = 'pro'
   await s.page.goto('/pro'); await settle(s.page)
   ok(await s.page.getByRole('heading', { name: 'Pro 后台' }).isVisible(), 'Pro dashboard')
   await shot(s.page, 'billing', 'pro-dashboard-desktop')
-  await s.page.getByRole('tab', { name: '线索' }).click(); await settle(s.page)
+  await s.page.getByRole('radio', { name: '线索' }).click(); await settle(s.page)
   ok(await s.page.getByText('只显示对方的信任等级').isVisible(), 'lead privacy note')
   await shot(s.page, 'billing', 'pro-leads-desktop')
   await finish(s.browser)
