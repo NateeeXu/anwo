@@ -203,7 +203,11 @@ async function main() {
     await modal.getByLabel('地址').fill('1999 Campus Dr, Evanston, IL 60208');
     await modal.getByLabel('补充说明').fill('Norris 一楼的咖啡店，期末周开到很晚。');
     await shot(page, 'suggest-modal-desktop');
-    await page.getByRole('button', { name: '提交' }).click();
+    const [created] = await Promise.all([
+      page.waitForResponse((r) => r.url().endsWith('/api/map/suggestions') && r.request().method() === 'POST', { timeout: 15000 }),
+      page.getByRole('button', { name: '提交' }).click(),
+    ]);
+    assert(created.status() === 201, `suggestion created (${created.status()} ${await created.text()})`);
     await page.getByTestId('my-suggestions').getByText(`Norbucks 咖啡 ${RUN}`).waitFor();
     await page.getByTestId('my-suggestions').getByText('审核中').first().waitFor();
     await page.keyboard.press('Escape');
