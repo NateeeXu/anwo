@@ -66,8 +66,10 @@ export const mapApi = {
 };
 
 export function useLayers(params: LayersParams | null, enabled = true): UseQueryResult<LayersResponse> {
+  const { source: _source, ...keyParams } = params ?? { bbox: '' };
+  void _source;
   return useQuery({
-    queryKey: params ? keys.layers({ ...params, source: undefined }) : ['map', 'layers', 'disabled'],
+    queryKey: params ? keys.layers(keyParams) : ['map', 'layers', 'disabled'],
     queryFn: () => mapApi.layers(params!),
     enabled: enabled && !!params,
     placeholderData: (prev) => prev,

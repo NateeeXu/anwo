@@ -239,6 +239,7 @@ async function main() {
       await page.waitForFunction(() => (document.querySelector('textarea')?.value ?? '').includes('22 Illini'));
       await page.getByRole('button', { name: /^导入$/ }).click();
       await page.getByText(/导入完成/).first().waitFor();
+      await page.evaluate(() => { document.querySelector('textarea')?.scrollTo(0, 0); window.scrollTo(0, 0); });
       await shot(page, 'admin-import-desktop');
       const afterImport = (await (await page.request.get('/api/shuttle/routes?campusId=uiuc&activeOnly=false')).json()).data;
       assert(afterImport.length === before.length && afterImport.every((r) => before.some((b) => b.id === r.id && b.stopCount === r.stopCount)), 'import round-trip keeps route ids');

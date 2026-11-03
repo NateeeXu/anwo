@@ -76,19 +76,19 @@ function AlertsTab({ campusId }: { campusId: string }) {
     return { label: t('shuttle.admin.scheduled'), variant: 'info' as const };
   };
   const columns: Column<AdminAlert>[] = [
-    { key: 'severity', header: t('shuttle.admin.col.severity'), width: 110, render: (a) => <Badge variant={SEVERITY_VARIANT[a.severity]} size="sm">{t(`shuttle.alert.${a.severity}`)}</Badge> },
+    { key: 'severity', header: t('shuttle.admin.col.severity'), width: 84, render: (a) => <Badge variant={SEVERITY_VARIANT[a.severity]} size="sm">{t(`shuttle.alert.${a.severity}`)}</Badge> },
     {
       key: 'title', header: t('shuttle.admin.col.title'),
       render: (a) => (
-        <div className="min-w-[240px] max-w-[440px]">
+        <div className="min-w-[220px] max-w-[400px]">
           <p className="text-body text-ink">{alertTitle(a, locale)}</p>
           {locale === 'zh-CN' && a.titleZh ? <p className="truncate text-caption text-ink-3" lang="en">{a.title}</p> : a.titleZh && locale === 'en' ? <p className="truncate text-caption text-ink-3" lang="zh-CN">{a.titleZh}</p> : null}
         </div>
       ),
     },
-    { key: 'route', header: t('shuttle.admin.col.route'), width: 200, hideOnMobile: true, render: (a) => a.route ? <span className="flex items-center gap-2"><RouteSwatch color={a.route.color} size="sm" /><span className="truncate text-small">{a.route.name}</span></span> : <span className="text-small text-ink-3">{t('shuttle.admin.form.campusWide')}</span> },
-    { key: 'window', header: t('shuttle.admin.col.window'), width: 200, hideOnMobile: true, render: (a) => <span className="block text-small text-ink-2 tnum"><span className="block whitespace-nowrap">{formatDate(a.startsAt, 'datetime')}</span><span className="block whitespace-nowrap">→ {a.endsAt ? formatDate(a.endsAt, 'datetime') : '∞'}</span></span> },
-    { key: 'status', header: t('shuttle.admin.col.status'), width: 110, render: (a) => { const s = statusOf(a); return <span className="whitespace-nowrap"><Badge variant={s.variant} size="sm">{s.label}</Badge></span>; } },
+    { key: 'route', header: t('shuttle.admin.col.route'), width: 170, hideOnMobile: true, render: (a) => a.route ? <span className="flex items-center gap-2"><RouteSwatch color={a.route.color} size="sm" /><span className="line-clamp-2 text-small">{a.route.name}</span></span> : <span className="text-small text-ink-3">{t('shuttle.admin.form.campusWide')}</span> },
+    { key: 'window', header: t('shuttle.admin.col.window'), width: 170, hideOnMobile: true, render: (a) => <span className="block text-small text-ink-2 tnum"><span className="block whitespace-nowrap">{formatDate(a.startsAt, 'datetime')}</span><span className="block whitespace-nowrap">→ {a.endsAt ? formatDate(a.endsAt, 'datetime') : '∞'}</span></span> },
+    { key: 'status', header: t('shuttle.admin.col.status'), width: 92, render: (a) => { const s = statusOf(a); return <span className="whitespace-nowrap"><Badge variant={s.variant} size="sm">{s.label}</Badge></span>; } },
   ];
   // Inline icon buttons rather than a DropdownMenu: one click per action, and see "Integration requests" in
   // docs/modules/shuttle.md for the DropdownMenu positioning issue inside table rows.

@@ -98,7 +98,7 @@ export function CommuteCard({ lat, lng, campusId, variant = 'card', data, showTi
               </dd>
             </div>
           </dl>
-          <p className="text-caption text-ink-4">{t('map.commute.approxNote')}</p>
+          <p className="text-caption text-ink-3">{t('map.commute.approxNote')}</p>
         </>
       ) : null}
     </section>

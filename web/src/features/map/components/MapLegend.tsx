@@ -18,7 +18,7 @@ export function MapLegend({ className, compact }: { className?: string; compact?
   ];
   return (
     <div className={cn('rounded-card border border-line bg-surface shadow-md', compact ? 'p-3' : 'p-3', className)} aria-label={t('map.legend.title')} role="group">
-      <p className="mb-2 text-caption font-semibold uppercase tracking-caps text-ink-3">{t('map.legend.title')}</p>
+      <p className="mb-2 text-caption font-semibold text-ink-3">{t('map.legend.title')}</p>
       <ul className={cn('grid gap-x-4 gap-y-1.5', compact ? 'grid-cols-2' : 'grid-cols-1')}>
         {rows.map((r) => (
           <li key={r.key} className="flex h-7 items-center gap-2 text-caption text-ink-2">

@@ -98,6 +98,18 @@ export default function RouteDetailPage() {
   const description = splitBilingual(route.description, locale);
   const campusName = locale === 'zh-CN' && route.campus.nameZh ? route.campus.nameZh : route.campus.shortName;
 
+  const actions = (
+    <div className="flex flex-wrap items-center gap-2">
+      <FavoriteButton entityType="route" id={route.id} favorited={route.favorited} size="sm" label />
+      <Button variant="ghost" size="sm" iconLeft={<Share2 />} onClick={share}>{t('shuttle.route.share')}</Button>
+      {route.officialUrl ? (
+        <Button asChild variant="secondary" size="sm" iconRight={<ExternalLink />}>
+          <a href={route.officialUrl} target="_blank" rel="noreferrer noopener" onClick={() => track('shuttle.official_click', { entityType: 'shuttle_route', entityId: route.id })}>{t('shuttle.officialSchedule')}</a>
+        </Button>
+      ) : null}
+    </div>
+  );
+
   return wrap(
     <>
       <PageHeader
@@ -109,19 +121,10 @@ export default function RouteDetailPage() {
           </span>
         }
         subtitle={description || undefined}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <FavoriteButton entityType="route" id={route.id} favorited={route.favorited} size="sm" label />
-            <Button variant="ghost" size="sm" iconLeft={<Share2 />} onClick={share}>{t('shuttle.route.share')}</Button>
-            {route.officialUrl ? (
-              <Button asChild variant="secondary" size="sm" iconRight={<ExternalLink />}>
-                <a href={route.officialUrl} target="_blank" rel="noreferrer noopener" onClick={() => track('shuttle.official_click', { entityType: 'shuttle_route', entityId: route.id })}>{t('shuttle.officialSchedule')}</a>
-              </Button>
-            ) : null}
-          </div>
-        }
+        actions={isMobile ? undefined : actions}
       />
-      <AlertsBanner alerts={route.alerts} routes={[route]} linkRoutes={false} className="mb-4" />
+      {isMobile ? <div className="mt-3 mb-4">{actions}</div> : null}
+      <AlertsBanner alerts={route.alerts} routes={[route]} linkRoutes={false} className="my-4" />
 
       <dl className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Fact label={t('shuttle.route.headway')} value={route.headwayMin ? t('shuttle.everyMin', { n: route.headwayMin }) : '—'} />

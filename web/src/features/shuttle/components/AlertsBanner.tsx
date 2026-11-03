@@ -26,6 +26,7 @@ export function AlertsBanner({ alerts, routes, className, linkRoutes = true }: {
   const t = useT();
   const { locale, formatDate } = useLocale();
   const [dismissed, setDismissed] = useState<string[]>(readDismissed);
+  const [expanded, setExpanded] = useState<string[]>([]);
   const visible = alerts.filter((a) => !dismissed.includes(a.id));
   if (!visible.length) return null;
   const routeOf = (id: string | null) => (id ? routes?.find((r) => r.id === id) : undefined);
@@ -63,8 +64,17 @@ export function AlertsBanner({ alerts, routes, className, linkRoutes = true }: {
                   </>
                 ) : null}
               </div>
-              <p className="text-body font-medium text-current">{alertTitle(a, locale)}</p>
-              {body ? <p className="mt-0.5 text-small opacity-90">{body}</p> : null}
+              <p className="text-body font-medium text-current max-sm:text-small">{alertTitle(a, locale)}</p>
+              {body ? (
+                <>
+                  {/* small screens: the body stays behind a toggle so two alerts do not fill the first screen */}
+                  <p className={cn('mt-0.5 text-small opacity-90', !expanded.includes(a.id) && 'max-sm:hidden')}>{body}</p>
+                  <button type="button" onClick={() => setExpanded((x) => (x.includes(a.id) ? x.filter((i) => i !== a.id) : [...x, a.id]))} aria-expanded={expanded.includes(a.id)}
+                    className="mt-0.5 text-small font-medium underline underline-offset-2 sm:hidden">
+                    {expanded.includes(a.id) ? t('shuttle.alert.less') : t('shuttle.alert.more')}
+                  </button>
+                </>
+              ) : null}
             </div>
             <Button variant="ghost" size="sm" iconOnly aria-label={t('shuttle.alert.dismiss')} onClick={() => dismiss(a.id)} className="-mr-2 -mt-1 text-current hover:bg-transparent">
               <X />
