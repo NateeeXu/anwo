@@ -206,6 +206,7 @@ export default {
     'shuttle.admin.import.success': '导入完成：{routes} 条线路、{stops} 个站点、{rows} 条时刻；已关闭 {requests} 条申请。',
     'shuttle.admin.import.exported': '已导出 {n} 条线路到编辑框',
     'shuttle.admin.import.noData': '这个校区还没有线路',
+    'shuttle.admin.import.dedupeHint': '导入会按站点名称去重；同一校区内重名的站点会合并。',
   },
   en: {
     'shuttle.title': 'Shuttle',
@@ -411,5 +412,6 @@ export default {
     'shuttle.admin.import.success': 'Imported {routes} routes, {stops} stops and {rows} timetable rows; closed {requests} requests.',
     'shuttle.admin.import.exported': 'Exported {n} routes into the editor',
     'shuttle.admin.import.noData': 'This campus has no routes yet',
+    'shuttle.admin.import.dedupeHint': 'Stops are deduplicated by name within a campus.',
   },
 };
