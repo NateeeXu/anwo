@@ -6,6 +6,7 @@ import { EmptyState } from '@/components';
 import { NoMessages } from '@/components/illustrations';
 import { useIsMobile } from '@/lib/hooks';
 import { useT } from '@/lib/i18n';
+import { cn } from '@/lib/cn';
 import { useWsPolling } from '@/lib/ws';
 import { useAuth } from '@/lib/auth';
 import { Head } from '@/app/Head';
@@ -41,7 +42,7 @@ function ChatLayout() {
 
   useChatRealtime(id);
   const mobileThread = isMobile && !!id;
-  useShellOptions({ layout: 'full', hideTabs: mobileThread, back: mobileThread ? true : undefined, title: mobileThread && threadTitle ? threadTitle : t('chat.title') });
+  useShellOptions({ layout: 'full', hideTabs: mobileThread, back: mobileThread ? true : undefined, title: t('chat.title') });
 
   useEffect(() => {
     if (filter === 'all') {
@@ -66,7 +67,12 @@ function ChatLayout() {
   );
 
   return (
-    <div className="relative flex h-[calc(100dvh-56px)] min-h-0 w-full flex-col md:h-[calc(100dvh-64px)]">
+    <div
+      className={cn(
+        'relative flex min-h-0 w-full flex-col',
+        isMobile ? (mobileThread ? 'h-[calc(100dvh-56px)]' : 'h-[calc(100dvh-56px-60px-env(safe-area-inset-bottom))]') : 'h-[calc(100dvh-64px)]',
+      )}
+    >
       <Head title={threadTitle ? `${threadTitle} · ${t('chat.title')}` : t('chat.title')} />
       {pill}
       <div className="mx-auto flex h-full min-h-0 w-full max-w-content flex-1">
@@ -86,7 +92,7 @@ function ChatLayout() {
         {/* thread column */}
         <div className={isMobile ? (mobileThread ? 'flex h-full min-h-0 w-full flex-col' : 'hidden') : 'flex h-full min-h-0 min-w-0 flex-1 flex-col'}>
           {id ? (
-            <ThreadView key={id} id={id} showBack={isMobile} />
+            <ThreadView key={id} id={id} showBack={false} />
           ) : (
             <div className="flex h-full items-center justify-center p-6">
               <EmptyState icon={<NoMessages size={140} />} title={t('chat.pick')} description={t('chat.pickHint')} />

@@ -23,6 +23,7 @@ const DESKTOP = { width: 1280, height: 800 };
 const MOBILE = { width: 390, height: 844 };
 const H = { 'X-Requested-With': 'fetch' };
 const RUN = Date.now().toString(36);
+const PHONE = `+1847555${String(Date.now() % 10000).padStart(4, '0')}`; // unique per run (a verified number cannot be reused)
 
 async function loadPlaywright() {
   try {
@@ -125,7 +126,7 @@ async function main() {
 
     // phone: open the step, request a code, use the dev code, confirm
     await page.locator('#phone').getByRole('button').click();
-    await page.getByLabel('手机号').fill('+1 847 555 0188');
+    await page.getByLabel('手机号').fill(PHONE);
     await page.getByRole('button', { name: '发送短信' }).click();
     const devCode = page.locator('#phone button.font-mono');
     await devCode.waitFor();
@@ -172,6 +173,8 @@ async function main() {
     const page = await ctx.newPage();
     watch(page, 'admin');
     await login(page, 'admin@example.edu');
+    // the seeded admin prefers English; pin the test DB admin to zh-CN so the zh selectors below stay deterministic
+    await page.request.patch(`${BASE}/api/users/me`, { data: { locale: 'zh-CN' }, headers: H });
     await page.goto('/verify/admin');
     await heading(page, '验证队列').waitFor();
     await page.locator('table tbody tr').first().waitFor();

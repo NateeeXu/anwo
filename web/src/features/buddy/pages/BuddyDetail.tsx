@@ -6,7 +6,7 @@ import {
   CalendarPlus, Check, CircleAlert, Clock, DollarSign, Eye, Flag, Globe, Lock, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Share2, ShieldAlert, Users, X,
 } from 'lucide-react';
 import { ReportReason } from '@shared/enums';
-import { Avatar, Badge, Button, Card, Checkbox, Chip, DropdownMenu, EmptyState, Modal, PageHeader, Select, Skeleton, Tabs, Textarea, TrustBadge } from '@/components';
+import { Avatar, Badge, Button, Card, Checkbox, Chip, DropdownMenu, EmptyState, Modal, Select, Skeleton, Tabs, Textarea, TrustBadge } from '@/components';
 import { StaticMapPreview } from '@/components/map';
 import { Head } from '@/app/Head';
 import { errorMessage } from '@/app/errors';
@@ -339,7 +339,6 @@ export default function BuddyDetail() {
   return (
     <div className="mx-auto w-full max-w-detail px-4 lg:px-8">
       <Head title={post.title} description={post.description.slice(0, 160)} />
-      <PageHeader back="/buddy" title="" className="sr-only" />
       {post.moderationStatus === 'hidden' && (
         <div role="alert" className="mb-4 flex items-center gap-2 rounded-card border border-line bg-sunken px-4 py-3 text-small text-ink-2">
           <ShieldAlert size={16} aria-hidden /> {t('buddy.detail.hiddenByAdmin')}

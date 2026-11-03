@@ -99,7 +99,7 @@ export const BuddyCard = forwardRef<HTMLElement, BuddyCardProps>(function BuddyC
         </div>
         <p className="flex min-w-0 items-center gap-1.5 truncate text-small text-ink-2">
           <Clock size={14} strokeWidth={1.75} className="shrink-0 text-ink-3" aria-hidden />
-          <span className="truncate">{timeText}</span>
+          <span className="shrink-0 whitespace-nowrap">{timeText}</span>
           {place && (
             <>
               <span className="text-ink-4" aria-hidden>·</span>
@@ -109,9 +109,9 @@ export const BuddyCard = forwardRef<HTMLElement, BuddyCardProps>(function BuddyC
           )}
         </p>
         <div className={cn('mt-auto flex items-center gap-2 pt-1', variant === 'row' && 'pt-0')}>
-          <AvatarStack users={members} max={3} size="xs" />
-          <span className="tnum text-small text-ink-2">{t('buddy.members', { n: post.memberCount, max: post.maxMembers })}</span>
-          <span className="no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto">
+          <AvatarStack users={members} max={3} size="xs" className="shrink-0" />
+          <span className="tnum shrink-0 whitespace-nowrap text-small text-ink-2">{t('buddy.members', { n: post.memberCount, max: post.maxMembers })}</span>
+          <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden [&>*]:shrink-0">
             {post.verifiedOnly && (
               <Chip size="sm" icon={<Lock size={12} strokeWidth={2} aria-hidden />}>
                 {t('common.verifiedOnly')}

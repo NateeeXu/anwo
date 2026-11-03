@@ -328,7 +328,7 @@ function FormInner({ editId }: { editId?: string }) {
                   onMapReady={(map) => {
                     map.on('click', (e: { latlng: { lat: number; lng: number } }) => patch({ destLat: +e.latlng.lat.toFixed(5), destLng: +e.latlng.lng.toFixed(5) }));
                   }}
-                  aria-label={t('buddy.form.destination')}
+                  aria-label={t('buddy.form.destinationMapHint')}
                 />
               </div>
               {f.destLat != null && (

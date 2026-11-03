@@ -88,9 +88,9 @@ async function run() {
   assert(!!costco && !!ca987 && !!study, 'seed posts found through the API');
 
   await page.goto(`/buddy/${costco.id}`);
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('main h1', { timeout: 20000 });
   await settle(page);
-  assert((await page.locator('h1').innerText()).includes('Costco'), 'detail h1');
+  assert((await page.locator('main h1').innerText()).includes('Costco'), 'detail h1');
   assert((await page.getByText('安全提示').count()) >= 1, 'safety card visible');
   await shot(page, MODULE, 'detail-desktop');
 
@@ -110,7 +110,7 @@ async function run() {
 
   // request-to-join flow (approval required)
   await page.goto(`/buddy/${ca987.id}`);
-  await page.waitForSelector('h1');
+  await page.waitForSelector('main h1');
   await settle(page);
   await page.getByRole('button', { name: '申请加入' }).first().click();
   await page.getByRole('dialog').getByLabel('我已阅读安全提示').check();
@@ -148,7 +148,7 @@ async function run() {
   await shot(page, MODULE, 'form-step-rules');
   await page.getByRole('button', { name: '发布', exact: true }).click();
   await page.waitForURL(/\/buddy\/[0-9a-f-]{36}$/, { timeout: 20000 });
-  await page.waitForSelector('h1');
+  await page.waitForSelector('main h1');
   await settle(page);
   const createdId = page.url().split('/').pop();
   const created = await apiGet(page, `/api/buddy/posts/${createdId}`);
@@ -204,7 +204,7 @@ async function run() {
 
   await context.addCookies([{ name: 'lang', value: 'en', url: `http://127.0.0.1:${WEB_PORT}` }]);
   await page.goto(`/buddy/${study.id}`);
-  await page.waitForSelector('h1', { timeout: 20000 });
+  await page.waitForSelector('main h1', { timeout: 20000 });
   await settle(page, 600);
   assert((await page.getByText('Safety tips').count()) >= 1, 'English safety card');
   await shot(page, MODULE, 'detail-en');
@@ -218,7 +218,7 @@ async function run() {
   await settle(mobile, 600);
   await shot(mobile, MODULE, 'browse-mobile');
   await mobile.goto(`/buddy/${costco.id}`);
-  await mobile.waitForSelector('h1', { timeout: 20000 });
+  await mobile.waitForSelector('main h1', { timeout: 20000 });
   await settle(mobile, 600);
   await shot(mobile, MODULE, 'detail-mobile', { fullPage: true });
   await mobile.goto('/buddy?view=calendar');

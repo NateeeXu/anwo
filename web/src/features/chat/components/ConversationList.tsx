@@ -48,7 +48,7 @@ export function ConversationList({ activeId, filter, onFilterChange, className }
   return (
     <section className={className} aria-label={t('chat.title')}>
       <div className="flex flex-col gap-3 px-3 pt-3 pb-2 md:px-4 md:pt-4">
-        <div className="flex items-center justify-between gap-2">
+        <div className="hidden items-center justify-between gap-2 md:flex">
           <h1 className="text-h2 text-ink">{t('chat.title')}</h1>
           <Button asChild variant="ghost" size="sm" iconOnly aria-label={t('chat.blocks.title')}>
             <Link to="/chat/blocks">
@@ -56,7 +56,14 @@ export function ConversationList({ activeId, filter, onFilterChange, className }
             </Link>
           </Button>
         </div>
-        <Input size="sm" type="search" value={q} onChange={(e) => setQ(e.target.value)} iconLeft={<Search />} placeholder={t('chat.search')} aria-label={t('chat.search')} clearable />
+        <div className="flex items-center gap-2">
+          <Input size="sm" type="search" value={q} onChange={(e) => setQ(e.target.value)} iconLeft={<Search />} placeholder={t('chat.search')} aria-label={t('chat.search')} clearable className="min-w-0 flex-1" />
+          <Button asChild variant="ghost" size="sm" iconOnly aria-label={t('chat.blocks.title')} className="md:hidden">
+            <Link to="/chat/blocks">
+              <ShieldBan />
+            </Link>
+          </Button>
+        </div>
         <Tabs items={tabs} value={filter} onChange={onFilterChange} variant="underline" label={t('chat.title')} className="-mb-2" />
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">

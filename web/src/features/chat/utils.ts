@@ -129,6 +129,10 @@ export function statusLabel(conv: Pick<ConversationDto, 'context'>, t: TFunction
 /** Context-card subtitle: buddy posts arrive as `type · ISO` from the server, so localize type and date client-side. */
 export function contextSubtitle(card: { type: string; subtitle?: string }, t: TFunction, formatDate: (iso: string, style?: 'short' | 'long' | 'monthDay' | 'weekday' | 'datetime') => string): string {
   const sub = card.subtitle ?? '';
+  if (card.type === 'market_item' && sub) {
+    const key = `item.category.${sub}`;
+    return t(key) === key ? sub : t(key);
+  }
   if (card.type !== 'buddy_post' || !sub) return sub;
   const [type, when] = sub.split(' · ');
   const typeKey = `buddy.type.${type ?? ''}`;

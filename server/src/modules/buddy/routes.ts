@@ -244,7 +244,9 @@ router.get('/calendar', rateLimit('reads'), (req, res) => {
   const fromIso = dayBoundary(p.from, tz, false);
   const toIso = dayBoundary(p.to, tz, true);
   if (new Date(toIso).getTime() - new Date(fromIso).getTime() > 63 * 24 * HOUR) throw new ApiError('VALIDATION', 'Range too large (max 62 days)', { fields: { to: 'max 62 days' } });
-  const events = listOccurrences({ campusId: scope.campusId, fromIso, toIso, types: p.type, viewerId: req.user?.id, mineOnly: !!p.mine });
+  const occ = listOccurrences({ campusId: scope.campusId, fromIso, toIso, types: p.type, viewerId: req.user?.id, mineOnly: !!p.mine });
+  const previews = new Map(withMemberPreview([...new Map(occ.map((o) => [o.post.id, o.post])).values()]).map((c) => [c.id, c]));
+  const events = occ.map((o) => ({ ...o, post: previews.get(o.post.id) ?? o.post }));
   ok(res, { events, campusId: scope.campusId, timezone: tz, from: p.from, to: p.to });
 });
 
