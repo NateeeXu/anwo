@@ -119,10 +119,20 @@ export function upsertMessage(list: LocalMessage[], incoming: LocalMessage): Loc
   return next;
 }
 
+const CONTEXT_STATUS_KEYS = new Set(['rented', 'sold', 'expired', 'closed', 'cancelled', 'full', 'removed', 'paused']);
 export function statusLabel(conv: Pick<ConversationDto, 'context'>, t: TFunction): string | null {
   const s = conv.context?.status;
-  if (!s) return null;
-  const key = `chat.context.status.${s}`;
-  const v = t(key);
-  return v === key ? null : v;
+  if (!s || !CONTEXT_STATUS_KEYS.has(s)) return null;
+  return t(`chat.context.status.${s}`);
+}
+
+/** Context-card subtitle: buddy posts arrive as `type · ISO` from the server, so localize type and date client-side. */
+export function contextSubtitle(card: { type: string; subtitle?: string }, t: TFunction, formatDate: (iso: string, style?: 'short' | 'long' | 'monthDay' | 'weekday' | 'datetime') => string): string {
+  const sub = card.subtitle ?? '';
+  if (card.type !== 'buddy_post' || !sub) return sub;
+  const [type, when] = sub.split(' · ');
+  const typeKey = `buddy.type.${type ?? ''}`;
+  const typeLabel = type ? (t(typeKey) === typeKey ? type : t(typeKey)) : '';
+  const whenLabel = when && !Number.isNaN(Date.parse(when)) ? formatDate(when, 'datetime') : when ?? '';
+  return [typeLabel, whenLabel].filter(Boolean).join(' · ');
 }

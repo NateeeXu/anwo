@@ -1,6 +1,7 @@
 // Buddy module — API types, query keys and hooks. REST contract: docs/API.md §10.
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
-import type { Buddy, BuddyCard, BuddyEvent, BuddyMemberRole, BuddyMemberStatus, BuddyStatus, Paginated, Report, ScopeInfo, UserPublic } from '@shared/types';
+import type { Buddy, BuddyCard, BuddyEvent, Paginated, Report, ScopeInfo, UserPublic } from '@shared/types';
+import type { BuddyMemberRole, BuddyMemberStatus, BuddyStatus } from '@shared/enums';
 import type { BuddyInput, BuddyPatch } from '@shared/schemas/buddy';
 import { api } from '@/lib/api';
 import { track } from '@/lib/track';

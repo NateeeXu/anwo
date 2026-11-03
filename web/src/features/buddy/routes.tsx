@@ -1,13 +1,18 @@
-// Module routes for "buddy" — owned by the buddy module agent; replace freely.
-// Contract: default-export a React Router RouteObject[] mounted as children of the app shell
-// (see docs/WEB.md). Paths are relative to "/" (no leading slash). Lazy-load heavy pages with
-// React.lazy — the router wraps every route element in Suspense with a skeleton fallback.
+// Module routes for "buddy" — /buddy, /buddy/mine, /buddy/:id, /buddy/:id/edit, /post/buddy (docs/WEB.md §2).
+import { lazy } from 'react';
 import type { RouteObject } from 'react-router';
-import { ModulePlaceholder } from '../../app/ModulePlaceholder';
+
+const BuddyBrowse = lazy(() => import('./pages/BuddyBrowse'));
+const BuddyDetail = lazy(() => import('./pages/BuddyDetail'));
+const BuddyMine = lazy(() => import('./pages/BuddyMine'));
+const BuddyForm = lazy(() => import('./pages/BuddyForm'));
 
 const routes: RouteObject[] = [
-  { path: 'buddy/*', element: <ModulePlaceholder moduleKey="buddy" titleKey="buddy.title" tabs /> },
-  { path: 'post/buddy', element: <ModulePlaceholder moduleKey="buddy" titleKey="buddy.post.buddy.title" tabs /> },
+  { path: 'buddy', element: <BuddyBrowse /> },
+  { path: 'buddy/mine', element: <BuddyMine /> },
+  { path: 'buddy/:id', element: <BuddyDetail /> },
+  { path: 'buddy/:id/edit', element: <BuddyForm /> },
+  { path: 'post/buddy', element: <BuddyForm /> },
 ];
 
 export default routes;

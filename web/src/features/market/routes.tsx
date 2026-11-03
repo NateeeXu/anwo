@@ -1,13 +1,25 @@
-// Module routes for "market" — owned by the market module agent; replace freely.
-// Contract: default-export a React Router RouteObject[] mounted as children of the app shell
-// (see docs/WEB.md). Paths are relative to "/" (no leading slash). Lazy-load heavy pages with
-// React.lazy — the router wraps every route element in Suspense with a skeleton fallback.
+// Module routes for "market" — owned by the market module agent. Mounted as children of the app shell (docs/WEB.md §2).
+import { lazy } from 'react';
 import type { RouteObject } from 'react-router';
-import { ModulePlaceholder } from '../../app/ModulePlaceholder';
+
+const MarketBrowse = lazy(() => import('./pages/MarketBrowse'));
+const ItemDetail = lazy(() => import('./pages/ItemDetail'));
+const PostItem = lazy(() => import('./pages/PostItem'));
+const MyItems = lazy(() => import('./pages/MyItems'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const BundleDetail = lazy(() => import('./pages/BundleDetail'));
+const BundleForm = lazy(() => import('./pages/BundleForm'));
 
 const routes: RouteObject[] = [
-  { path: 'market/*', element: <ModulePlaceholder moduleKey="market" titleKey="market.title" tabs /> },
-  { path: 'post/item', element: <ModulePlaceholder moduleKey="market" titleKey="market.post.item.title" tabs /> },
+  { path: 'market', element: <MarketBrowse /> },
+  { path: 'market/mine', element: <MyItems />, handle: { back: true } },
+  { path: 'market/wishlist', element: <Wishlist />, handle: { back: true } },
+  { path: 'market/bundles/new', element: <BundleForm />, handle: { back: true } },
+  { path: 'market/bundles/:id/edit', element: <BundleForm />, handle: { back: true } },
+  { path: 'market/bundles/:id', element: <BundleDetail />, handle: { back: true } },
+  { path: 'market/:id/edit', element: <PostItem />, handle: { back: true } },
+  { path: 'market/:id', element: <ItemDetail />, handle: { back: true } },
+  { path: 'post/item', element: <PostItem />, handle: { back: true } },
 ];
 
 export default routes;

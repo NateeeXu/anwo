@@ -75,7 +75,7 @@ export function IdStep({ status, onSubmitted }: { status: VerifyStatus; onSubmit
   const step = status.steps.id;
   const latest = step.request;
   const openRequest = latest && (latest.status === 'pending' || latest.status === 'in_review') ? latest : null;
-  const [showForm, setShowForm] = useState(!latest);
+  const [showForm, setShowForm] = useState(!latest || latest.status === 'cancelled');
   const submit = useSubmitId();
   const cancel = useCancelId();
 

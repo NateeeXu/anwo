@@ -286,6 +286,36 @@ router.post('/bundles/:id/close', requireAuth, writes, (req, res) => {
   ok(res, bundleDto(requireBundle(b.id), { withItems: true, withListing: true, withSeller: true, req }));
 });
 
+// "message seller" from a bundle page: opens the direct conversation with the bundle's first item as context card
+router.post('/bundles/:id/contact', requireTrust(1), writes, async (req, res) => {
+  const { id } = parseParams(req, idParam);
+  const b = requireBundle(id);
+  const me = req.user!;
+  if (b.seller_id === me.id) throw new ApiError('BAD_REQUEST', 'This is your own bundle');
+  if (b.status !== 'active') throw invalidState(b.status, 'contact');
+  const first = q.get<{ id: string }>("SELECT id FROM market_items WHERE bundle_id = ? AND status IN ('active','reserved') ORDER BY price_cents DESC LIMIT 1", [b.id]);
+  if (!first) throw new ApiError('INVALID_STATE', 'Bundle has no items', { data: { from: 'empty', to: 'contact' } });
+  const seller = q.get<{ verified_only_messaging: number; banned: number }>('SELECT verified_only_messaging, banned FROM users WHERE id = ?', [b.seller_id]);
+  if (!seller || seller.banned) throw new ApiError('NOT_FOUND', 'Seller unavailable');
+  if (isBlockedEither(me.id, b.seller_id)) throw new ApiError('BLOCKED', 'You cannot message this user');
+  if (seller.verified_only_messaging && me.trust_level < 1) throw new ApiError('VERIFIED_ONLY', 'Seller only accepts verified users');
+  const intro = me.locale === 'en' ? `Hi, I'm interested in your move-out bundle "${b.title}".` : `你好，我对你的搬家甩卖「${b.title}」感兴趣。`;
+  let conversationId: string;
+  let created = false;
+  try {
+    const r2 = await openChatConversation({ initiatorId: me.id, recipientId: b.seller_id, context: { type: 'market_item', id: first.id }, firstMessage: { kind: 'text', body: intro } });
+    conversationId = r2.conversationId; created = r2.created;
+  } catch (e) {
+    if (!(e instanceof ApiError && e.code === 'NOT_IMPLEMENTED')) throw e;
+    const r3 = openConversationRaw({ kind: 'direct', memberIds: [me.id, b.seller_id], campusId: b.campus_id, context: { type: 'market_item', id: first.id }, createdBy: me.id });
+    conversationId = r3.conversation.id; created = r3.created;
+    if (created) { const card = contextCardFor('market_item', first.id); if (card) postContextCard(conversationId, me.id, card); }
+    if (created) postMessage(conversationId, me.id, 'text', intro);
+  }
+  logEvent(req, 'item.contact_click', { entityType: 'market_bundle', entityId: b.id, campusId: b.campus_id, props: { created, conversationId, bundle: true } });
+  ok(res, { conversationId, created });
+});
+
 router.delete('/bundles/:id', requireAuth, writes, (req, res) => {
   const { id } = parseParams(req, idParam);
   const b = requireBundle(id);
