@@ -52,7 +52,7 @@ export function SaveButton({ id, saved: initial, variant = 'card', className }: 
   if (variant === 'rail') {
     return (
       <Button variant={saved ? 'secondary' : 'ghost'} size="sm" aria-pressed={saved} iconLeft={<Heart className={cn('size-4', saved && 'fill-current text-accent-text')} />} onClick={toggle} className={className}>
-        {saved ? t('common.saved') : t('common.save')}
+        {saved ? t('common.saved') : t('listings.card.save')}
       </Button>
     );
   }

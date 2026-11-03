@@ -5,7 +5,13 @@
 // Logs in as alice (L2) through the API, browses (desktop + mobile, map view), opens a detail page (light + dark),
 // saves/unsaves, checks /listings/mine and /listings/saved, posts a listing end-to-end through the 5-step wizard
 // (geocode → pin → photos → publish → success page) and takes the EN nationwide shot. Exit 1 on any page error.
-import { openApp, login, shot, finish, DESKTOP, MOBILE } from '../tools/shot.mjs';
+import { openApp, shot, finish, DESKTOP, MOBILE } from '../tools/shot.mjs';
+
+// Logs in through the API with the CSRF header the scaffold requires on writes (shot.mjs's login omits it and falls back to the UI form).
+async function login(page, email, password = 'Passw0rd!') {
+  const res = await page.request.post('/api/auth/login', { data: { email, password }, headers: { 'X-Requested-With': 'fetch' } });
+  if (!res.ok()) throw new Error(`login ${email} failed: ${res.status()}`);
+}
 
 const WEB_PORT = Number(process.env.WEB_PORT ?? 5101);
 const MODULE = 'listings';
