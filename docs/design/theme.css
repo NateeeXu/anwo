@@ -1,0 +1,427 @@
+/* =====================================================================
+   安窝 Anwo — design tokens for Tailwind CSS v4
+   Source of truth: docs/DESIGN.md §3. Keep names identical to tokens.json.
+   Usage: copy to web/src/styles/theme.css and `@import "tailwindcss"; @import "./theme.css";`
+   ---------------------------------------------------------------------
+   Rules:
+   - ONE accent hue (persimmon). No other chromatic color except semantics.
+   - Light is the default. Dark via [data-theme="dark"] or OS preference
+     when no explicit [data-theme="light"] is set.
+   - Utilities reference CSS variables at use time (`@theme inline`), so
+     switching data-theme re-colors everything without rebuilding.
+   ===================================================================== */
+
+@import "tailwindcss";
+
+/* Dark variant: `dark:` utilities respond to the data attribute, not only the OS. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ------------------------------------------------------------------ */
+/* 1. Raw palette (never used directly in components; see semantic set) */
+/* ------------------------------------------------------------------ */
+:root {
+  /* Persimmon ramp — the only accent hue */
+  --persimmon-50:  #FFF3EC;
+  --persimmon-100: #FFE1D1;
+  --persimmon-200: #FFCDB5;
+  --persimmon-300: #FFAB85;
+  --persimmon-400: #FB8A5A;
+  --persimmon-500: #E35A2B;   /* brand mark, pins, large display only (3.6:1 on paper) */
+  --persimmon-600: #C2410C;   /* primary button fill, accent TEXT on paper (4.9:1) */
+  --persimmon-700: #A23A12;   /* accent text on sunken / tinted surfaces (6.3:1) */
+  --persimmon-800: #822F11;
+  --persimmon-900: #67280F;
+  --persimmon-950: #3B1508;
+
+  /* Warm neutrals ("paper" and "ink") */
+  --stone-0:   #FFFFFF;
+  --stone-50:  #FBF8F3;
+  --stone-100: #F3EEE6;
+  --stone-200: #E7E0D5;
+  --stone-300: #CFC6B8;
+  --stone-400: #A39B90;
+  --stone-500: #6F6861;
+  --stone-600: #57514A;
+  --stone-700: #3A3531;
+  --stone-800: #272320;
+  --stone-850: #1D1A17;
+  --stone-900: #1C1917;
+  --stone-950: #141210;
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Semantic tokens — LIGHT (default)                                 */
+/* ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --paper:          var(--stone-50);   /* page background           */
+  --surface:        var(--stone-0);    /* cards, inputs, popovers   */
+  --sunken:         var(--stone-100);  /* wells, chips, table heads */
+  --overlay:        rgb(28 25 23 / 0.48); /* scrim behind modals     */
+  --inverse:        var(--stone-900);  /* inverse chips, selected pin, tooltip */
+
+  /* Lines */
+  --line:           var(--stone-200);  /* hairline borders          */
+  --line-strong:    var(--stone-300);  /* input borders, hover card */
+
+  /* Ink (text) */
+  --ink:            var(--stone-900);  /* 16.5:1 on paper           */
+  --ink-2:          var(--stone-600);  /* secondary, 7.4:1          */
+  --ink-3:          var(--stone-500);  /* tertiary/placeholder, 5.2:1 (4.75 on sunken) */
+  --ink-4:          var(--stone-400);  /* disabled & decorative icons only, 2.6:1 */
+  --ink-inverse:    var(--stone-50);   /* text on --inverse         */
+
+  /* Accent */
+  --accent:         var(--persimmon-600); /* fills + text, 4.9:1 on paper, 5.2:1 white-on */
+  --accent-hover:   var(--persimmon-700);
+  --accent-active:  var(--persimmon-800);
+  --accent-text:    var(--persimmon-600);
+  --accent-text-strong: var(--persimmon-700); /* use on sunken/tinted surfaces */
+  --accent-soft:    var(--persimmon-50);  /* tinted backgrounds      */
+  --accent-soft-line: var(--persimmon-200);
+  --accent-vivid:   var(--persimmon-500); /* logo, map pins, decorative, display numerals >= 24px */
+  --on-accent:      #FFFFFF;
+
+  /* Semantic */
+  --success:        #1E7245;  --success-soft: #E2F3E9;  --on-success: #FFFFFF;
+  --warning:        #8A5200;  --warning-soft: #FBEFD4;  --warning-fill: #F2B84B;
+  --danger:         #B42318;  --danger-soft:  #FDE8E6;  --on-danger:  #FFFFFF;
+  --info:           #2A5D8F;  --info-soft:    #E4EEF7;
+
+  /* Focus */
+  --focus-ring:     var(--persimmon-500);
+
+  /* Shadows (soft, few) */
+  --sh-sm:  0 1px 2px rgb(28 25 23 / 0.06);
+  --sh-md:  0 4px 16px -4px rgb(28 25 23 / 0.12), 0 1px 2px rgb(28 25 23 / 0.04);
+  --sh-lg:  0 16px 40px -12px rgb(28 25 23 / 0.18), 0 2px 6px rgb(28 25 23 / 0.06);
+  --sh-pin: 0 2px 6px rgb(28 25 23 / 0.18);
+
+  /* Map */
+  --map-tile-filter: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Semantic tokens — DARK                                           */
+/*    Applied by explicit attribute, or by OS preference when the app  */
+/*    has not forced light.                                            */
+/* ------------------------------------------------------------------ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper:          var(--stone-950);
+    --surface:        var(--stone-850);
+    --sunken:         var(--stone-800);
+    --overlay:        rgb(0 0 0 / 0.6);
+    --inverse:        #F2EDE6;
+    --line:           #2F2A26;
+    --line-strong:    #4A433D;
+    --ink:            #F2EDE6;   /* 16.1:1 */
+    --ink-2:          #BDB5AB;   /* 9.2:1  */
+    --ink-3:          #948C82;   /* 5.6:1 (4.7 on sunken) */
+    --ink-4:          #6B645C;
+    --ink-inverse:    var(--stone-950);
+    --accent:         var(--persimmon-600);
+    --accent-hover:   var(--persimmon-500);
+    --accent-active:  var(--persimmon-400);
+    --accent-text:    var(--persimmon-400);  /* 7.9:1 on paper */
+    --accent-text-strong: var(--persimmon-300);
+    --accent-soft:    var(--persimmon-950);
+    --accent-soft-line: var(--persimmon-900);
+    --accent-vivid:   var(--persimmon-500);
+    --on-accent:      #FFFFFF;
+    --success:        #5FCB8F;  --success-soft: #12291C;  --on-success: var(--stone-950);
+    --warning:        #F2B84B;  --warning-soft: #2E2108;  --warning-fill: #F2B84B;
+    --danger:         #F47F75;  --danger-soft:  #3A1512;  --on-danger:  var(--stone-950);
+    --info:           #82B4E3;  --info-soft:    #13233A;
+    --focus-ring:     var(--persimmon-400);
+    --sh-sm:  0 1px 2px rgb(0 0 0 / 0.4);
+    --sh-md:  0 4px 16px -4px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.04);
+    --sh-lg:  0 16px 40px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.05);
+    --sh-pin: 0 2px 6px rgb(0 0 0 / 0.5);
+    --map-tile-filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper:          var(--stone-950);
+  --surface:        var(--stone-850);
+  --sunken:         var(--stone-800);
+  --overlay:        rgb(0 0 0 / 0.6);
+  --inverse:        #F2EDE6;
+  --line:           #2F2A26;
+  --line-strong:    #4A433D;
+  --ink:            #F2EDE6;
+  --ink-2:          #BDB5AB;
+  --ink-3:          #948C82;
+  --ink-4:          #6B645C;
+  --ink-inverse:    var(--stone-950);
+  --accent:         var(--persimmon-600);
+  --accent-hover:   var(--persimmon-500);
+  --accent-active:  var(--persimmon-400);
+  --accent-text:    var(--persimmon-400);
+  --accent-text-strong: var(--persimmon-300);
+  --accent-soft:    var(--persimmon-950);
+  --accent-soft-line: var(--persimmon-900);
+  --accent-vivid:   var(--persimmon-500);
+  --on-accent:      #FFFFFF;
+  --success:        #5FCB8F;  --success-soft: #12291C;  --on-success: var(--stone-950);
+  --warning:        #F2B84B;  --warning-soft: #2E2108;  --warning-fill: #F2B84B;
+  --danger:         #F47F75;  --danger-soft:  #3A1512;  --on-danger:  var(--stone-950);
+  --info:           #82B4E3;  --info-soft:    #13233A;
+  --focus-ring:     var(--persimmon-400);
+  --sh-sm:  0 1px 2px rgb(0 0 0 / 0.4);
+  --sh-md:  0 4px 16px -4px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.04);
+  --sh-lg:  0 16px 40px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.05);
+  --sh-pin: 0 2px 6px rgb(0 0 0 / 0.5);
+  --map-tile-filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6);
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Non-color scales (plain variables; used by @theme below and JS)  */
+/* ------------------------------------------------------------------ */
+:root {
+  /* Easings (raw; exposed as ease-* utilities via @theme inline) */
+  --e-out:       cubic-bezier(0.2, 0, 0, 1);
+  --e-in-out:    cubic-bezier(0.4, 0, 0.2, 1);
+  --e-emphasis:  cubic-bezier(0.3, 1.2, 0.4, 1); /* pin select pop only */
+
+  /* Layout */
+  --shell-nav-h:     64px;   /* desktop top nav                */
+  --shell-nav-h-sm:  56px;   /* mobile top bar                 */
+  --shell-tabbar-h:  60px;   /* mobile bottom tab bar (+ safe-area) */
+  --gutter:          16px;   /* mobile side gutter             */
+  --gutter-lg:       32px;
+
+  /* Line heights per language (set on <html lang>) */
+  --lh-body: 1.5;
+}
+html[lang^="zh"] { --lh-body: 1.65; }
+
+/* Durations + z layers live in @theme (not inline) so --value() can resolve them. */
+@theme {
+  /* Motion durations: use `duration-token-base` or `transition-duration: var(--duration-base)` */
+  --duration-fast:  120ms;   /* hover, color, opacity         */
+  --duration-base:  180ms;   /* dropdowns, chips, toggles      */
+  --duration-slow:  280ms;   /* modal, drawer, page sections   */
+  --duration-sheet: 320ms;   /* bottom sheet slide             */
+
+  /* Z layers: use `z-layer-modal` etc. */
+  --z-base:     0;
+  --z-raised:   10;   /* sticky card controls, map pins       */
+  --z-sticky:   20;   /* page headers, filter bar             */
+  --z-nav:      30;   /* app shell top nav / bottom tab bar   */
+  --z-dropdown: 40;   /* menus, popovers, campus switcher     */
+  --z-overlay:  50;   /* scrim                                */
+  --z-modal:    60;   /* modal, sheet, drawer                 */
+  --z-toast:    70;
+  --z-tooltip:  80;
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Tailwind theme — utilities: bg-paper, text-ink-2, border-line,   */
+/*    rounded-card, shadow-md, font-sans, text-h2, ease-out, etc.      */
+/* ------------------------------------------------------------------ */
+@theme inline {
+  /* Wipe Tailwind's default palette so blue-500/purple-600 cannot leak in. */
+  --color-*: initial;
+
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* Surfaces */
+  --color-paper:    var(--paper);
+  --color-surface:  var(--surface);
+  --color-sunken:   var(--sunken);
+  --color-overlay:  var(--overlay);
+  --color-inverse:  var(--inverse);
+
+  /* Lines */
+  --color-line:        var(--line);
+  --color-line-strong: var(--line-strong);
+
+  /* Ink */
+  --color-ink:         var(--ink);
+  --color-ink-2:       var(--ink-2);
+  --color-ink-3:       var(--ink-3);
+  --color-ink-4:       var(--ink-4);
+  --color-ink-inverse: var(--ink-inverse);
+
+  /* Accent (semantic) */
+  --color-accent:             var(--accent);
+  --color-accent-hover:       var(--accent-hover);
+  --color-accent-active:      var(--accent-active);
+  --color-accent-text:        var(--accent-text);
+  --color-accent-text-strong: var(--accent-text-strong);
+  --color-accent-soft:        var(--accent-soft);
+  --color-accent-soft-line:   var(--accent-soft-line);
+  --color-accent-vivid:       var(--accent-vivid);
+  --color-on-accent:          var(--on-accent);
+
+  /* Accent ramp (raw, for charts / illustrations only) */
+  --color-persimmon-50:  var(--persimmon-50);
+  --color-persimmon-100: var(--persimmon-100);
+  --color-persimmon-200: var(--persimmon-200);
+  --color-persimmon-300: var(--persimmon-300);
+  --color-persimmon-400: var(--persimmon-400);
+  --color-persimmon-500: var(--persimmon-500);
+  --color-persimmon-600: var(--persimmon-600);
+  --color-persimmon-700: var(--persimmon-700);
+  --color-persimmon-800: var(--persimmon-800);
+  --color-persimmon-900: var(--persimmon-900);
+  --color-persimmon-950: var(--persimmon-950);
+
+  /* Semantic */
+  --color-success:      var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-on-success:   var(--on-success);
+  --color-warning:      var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-fill: var(--warning-fill);
+  --color-danger:       var(--danger);
+  --color-danger-soft:  var(--danger-soft);
+  --color-on-danger:    var(--on-danger);
+  --color-info:         var(--info);
+  --color-info-soft:    var(--info-soft);
+  --color-focus:        var(--focus-ring);
+
+  /* Typography */
+  --font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", "Noto Sans CJK SC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Inter", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Noto Sans Mono CJK SC", monospace;
+
+  /* Type scale: text-<name> sets size + line-height (+ weight/tracking via --text-<name>--*) */
+  --text-display: 2.5rem;    --text-display--line-height: 1.1;  --text-display--letter-spacing: -0.02em; --text-display--font-weight: 700;
+  --text-h1: 1.75rem;        --text-h1--line-height: 1.2;       --text-h1--letter-spacing: -0.015em;     --text-h1--font-weight: 700;
+  --text-display-sm: 2rem;   --text-display-sm--line-height: 1.125; --text-display-sm--letter-spacing: -0.02em; --text-display-sm--font-weight: 700; /* 32/36 mobile: text-display-sm md:text-display */
+  --text-h1-sm: 1.5rem;      --text-h1-sm--line-height: 1.25;   --text-h1-sm--letter-spacing: -0.015em;  --text-h1-sm--font-weight: 700;      /* 24/30 mobile: text-h1-sm md:text-h1 */
+  --text-h2: 1.375rem;       --text-h2--line-height: 1.27;      --text-h2--letter-spacing: -0.01em;      --text-h2--font-weight: 600;
+  --text-h3: 1.125rem;       --text-h3--line-height: 1.33;      --text-h3--font-weight: 600;
+  --text-body-lg: 1.0625rem; --text-body-lg--line-height: var(--lh-body);
+  --text-body: 0.9375rem;    --text-body--line-height: var(--lh-body);
+  --text-small: 0.8125rem;   --text-small--line-height: 1.4;
+  --text-caption: 0.75rem;   --text-caption--line-height: 1.33; --text-caption--font-weight: 500; --text-caption--letter-spacing: 0.01em;
+  --text-price-lg: 1.5rem;   --text-price-lg--line-height: 1.17; --text-price-lg--font-weight: 700; --text-price-lg--letter-spacing: -0.01em;
+  --text-price: 1.0625rem;   --text-price--line-height: 1.3;    --text-price--font-weight: 700;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.01em;
+  --tracking-caps: 0.06em;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.33;
+  --leading-body: var(--lh-body);
+  --leading-relaxed: 1.7;
+
+  /* Spacing: keep Tailwind's 4px base (--spacing: 0.25rem). Scale documented in DESIGN.md §3.4 */
+  --spacing: 0.25rem;
+
+  /* Radius — signature 14px card */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-ctl:  10px;   /* inputs, buttons, chips (non-pill) */
+  --radius-card: 14px;   /* SIGNATURE: every card, sheet top corners, modals */
+  --radius-lg:   20px;   /* image hero, large panels */
+  --radius-pill: 999px;
+  --radius-none: 0;
+
+  /* Shadows */
+  --shadow-sm:  var(--sh-sm);
+  --shadow-md:  var(--sh-md);
+  --shadow-lg:  var(--sh-lg);
+  --shadow-pin: var(--sh-pin);
+  --shadow-none: 0 0 #0000;
+
+  /* Motion */
+  --ease-out:      var(--e-out);
+  --ease-in-out:   var(--e-in-out);
+  --ease-emphasis: var(--e-emphasis);
+  --animate-fade-in:   fade-in var(--duration-base) var(--e-out) both;
+  --animate-rise-in:   rise-in var(--duration-slow) var(--e-out) both;
+  --animate-sheet-up:  sheet-up var(--duration-sheet) var(--e-out) both;
+  --animate-pin-pop:   pin-pop var(--duration-base) var(--e-emphasis) both;
+  --animate-shimmer:   shimmer 1.4s linear infinite;
+
+  /* Breakpoints (sm/md/lg/xl/2xl utilities) */
+  --breakpoint-sm: 40rem;    /* 640  */
+  --breakpoint-md: 48rem;    /* 768  */
+  --breakpoint-lg: 64rem;    /* 1024 */
+  --breakpoint-xl: 80rem;    /* 1280 */
+  --breakpoint-2xl: 90rem;   /* 1440 */
+
+  /* Content widths: max-w-content, max-w-reading, max-w-form */
+  --container-content: 75rem;   /* 1200 */
+  --container-detail:  70rem;   /* 1120 */
+  --container-reading: 45rem;   /* 720  */
+  --container-form:    36rem;   /* 576  */
+}
+
+@keyframes fade-in  { from { opacity: 0 } to { opacity: 1 } }
+@keyframes rise-in  { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+@keyframes sheet-up { from { transform: translateY(100%) } to { transform: none } }
+@keyframes pin-pop  { from { transform: scale(0.9) } to { transform: scale(1.08) } }
+@keyframes shimmer  { from { background-position: -200% 0 } to { background-position: 200% 0 } }
+
+/* ------------------------------------------------------------------ */
+/* 6. Base layer                                                        */
+/* ------------------------------------------------------------------ */
+@layer base {
+  html { -webkit-text-size-adjust: 100%; text-rendering: optimizeLegibility; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--lh-body);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss01"; /* Inter: single-storey a off, open digits — harmless if font absent */
+  }
+  /* Prices, counters, tables: always tabular digits */
+  .tnum, [data-tnum], table td, .price { font-variant-numeric: tabular-nums; }
+  /* Focus: 2px accent ring with 2px gap, everywhere, keyboard only */
+  :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+  ::selection { background: var(--persimmon-200); color: var(--stone-900); }
+  :root[data-theme="dark"] ::selection { background: var(--persimmon-800); color: #FFFFFF; }
+  img { color: var(--ink-3); } /* alt text color while loading */
+  /* Chinese punctuation hangs better with this; no effect on Latin */
+  html[lang^="zh"] body { hanging-punctuation: allow-end; }
+  /* Reduced motion: keep opacity fades, kill movement */
+  @media (prefers-reduced-motion: reduce) {
+    :root { --duration-fast: 0ms; --duration-base: 0ms; --duration-slow: 0ms; --duration-sheet: 0ms; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 7. Utilities that Tailwind cannot express from tokens               */
+/* ------------------------------------------------------------------ */
+@utility z-layer-* {
+  z-index: --value(--z-*);
+}
+@utility duration-token-* {
+  transition-duration: --value(--duration-*);
+}
+@utility skeleton {
+  background: linear-gradient(90deg, var(--sunken) 0%, var(--line) 50%, var(--sunken) 100%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+  border-radius: var(--radius-sm);
+  color: transparent;
+}
+@utility hairline {
+  border: 1px solid var(--line);
+}
+@utility map-tiles {
+  filter: var(--map-tile-filter);
+}

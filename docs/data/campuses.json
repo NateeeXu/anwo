@@ -1,0 +1,1214 @@
+[
+  {
+    "id": "northwestern",
+    "name": "Northwestern University",
+    "shortName": "Northwestern",
+    "nameZh": "西北大学",
+    "city": "Evanston",
+    "state": "IL",
+    "lat": 42.0565,
+    "lng": -87.6753,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "northwestern.edu",
+      "u.northwestern.edu"
+    ],
+    "intlStudentsApprox": 10000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.northwestern.edu/transportation-parking/shuttles/routes/tracker.html",
+    "metro": "Chicago"
+  },
+  {
+    "id": "uiuc",
+    "name": "University of Illinois Urbana-Champaign",
+    "shortName": "UIUC",
+    "nameZh": "伊利诺伊大学厄巴纳-香槟分校",
+    "city": "Urbana",
+    "state": "IL",
+    "lat": 40.1075,
+    "lng": -88.2272,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "illinois.edu"
+    ],
+    "intlStudentsApprox": 16000,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Champaign-Urbana"
+  },
+  {
+    "id": "nyu",
+    "name": "New York University",
+    "shortName": "NYU",
+    "nameZh": "纽约大学",
+    "city": "New York",
+    "state": "NY",
+    "lat": 40.7295,
+    "lng": -73.9965,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "nyu.edu"
+    ],
+    "intlStudentsApprox": 27000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.nyu.edu/life/travel-and-transportation/university-transportation.html",
+    "metro": "New York"
+  },
+  {
+    "id": "usc",
+    "name": "University of Southern California",
+    "shortName": "USC",
+    "nameZh": "南加州大学",
+    "city": "Los Angeles",
+    "state": "CA",
+    "lat": 34.0224,
+    "lng": -118.2851,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "usc.edu"
+    ],
+    "intlStudentsApprox": 15000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transnet.usc.edu/index.php/section/shuttles/",
+    "metro": "Los Angeles"
+  },
+  {
+    "id": "columbia",
+    "name": "Columbia University",
+    "shortName": "Columbia",
+    "nameZh": "哥伦比亚大学",
+    "city": "New York",
+    "state": "NY",
+    "lat": 40.8075,
+    "lng": -73.9626,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "columbia.edu"
+    ],
+    "intlStudentsApprox": 19500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.columbia.edu/node/661",
+    "metro": "New York"
+  },
+  {
+    "id": "bu",
+    "name": "Boston University",
+    "shortName": "BU",
+    "nameZh": "波士顿大学",
+    "city": "Boston",
+    "state": "MA",
+    "lat": 42.3505,
+    "lng": -71.1054,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "bu.edu"
+    ],
+    "intlStudentsApprox": 13000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.bu.edu/thebus/",
+    "metro": "Boston"
+  },
+  {
+    "id": "northeastern",
+    "name": "Northeastern University",
+    "shortName": "Northeastern",
+    "nameZh": "东北大学",
+    "city": "Boston",
+    "state": "MA",
+    "lat": 42.3398,
+    "lng": -71.0892,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "northeastern.edu",
+      "husky.neu.edu"
+    ],
+    "intlStudentsApprox": 21000,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Boston"
+  },
+  {
+    "id": "asu",
+    "name": "Arizona State University",
+    "shortName": "ASU",
+    "nameZh": "亚利桑那州立大学",
+    "city": "Tempe",
+    "state": "AZ",
+    "lat": 33.4242,
+    "lng": -111.9281,
+    "timezone": "America/Phoenix",
+    "eduDomains": [
+      "asu.edu"
+    ],
+    "intlStudentsApprox": 18000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://asu-shuttles.rider.peaktransit.com/",
+    "metro": "Phoenix"
+  },
+  {
+    "id": "purdue",
+    "name": "Purdue University",
+    "shortName": "Purdue",
+    "nameZh": "普渡大学",
+    "city": "West Lafayette",
+    "state": "IN",
+    "lat": 40.4237,
+    "lng": -86.9212,
+    "timezone": "America/Indiana/Indianapolis",
+    "eduDomains": [
+      "purdue.edu"
+    ],
+    "intlStudentsApprox": 11500,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Lafayette"
+  },
+  {
+    "id": "uc-berkeley",
+    "name": "University of California, Berkeley",
+    "shortName": "UC Berkeley",
+    "nameZh": "加州大学伯克利分校",
+    "city": "Berkeley",
+    "state": "CA",
+    "lat": 37.8719,
+    "lng": -122.2585,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "berkeley.edu"
+    ],
+    "intlStudentsApprox": 10500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://pt.berkeley.edu/transportation-mobility/bear-transit-campus-shuttles",
+    "metro": "San Francisco Bay Area"
+  },
+  {
+    "id": "ucla",
+    "name": "University of California, Los Angeles",
+    "shortName": "UCLA",
+    "nameZh": "加州大学洛杉矶分校",
+    "city": "Los Angeles",
+    "state": "CA",
+    "lat": 34.0689,
+    "lng": -118.4452,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "ucla.edu",
+      "g.ucla.edu"
+    ],
+    "intlStudentsApprox": 10500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.transportation.ucla.edu/getting-around-campus/bruinbus",
+    "metro": "Los Angeles"
+  },
+  {
+    "id": "ucsd",
+    "name": "University of California, San Diego",
+    "shortName": "UCSD",
+    "nameZh": "加州大学圣地亚哥分校",
+    "city": "La Jolla",
+    "state": "CA",
+    "lat": 32.8801,
+    "lng": -117.234,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "ucsd.edu"
+    ],
+    "intlStudentsApprox": 12000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.ucsd.edu/campus/shuttles/",
+    "metro": "San Diego"
+  },
+  {
+    "id": "uw",
+    "name": "University of Washington",
+    "shortName": "UW",
+    "nameZh": "华盛顿大学",
+    "city": "Seattle",
+    "state": "WA",
+    "lat": 47.6553,
+    "lng": -122.3035,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "uw.edu",
+      "washington.edu"
+    ],
+    "intlStudentsApprox": 9500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.uw.edu/getting-around/shuttles",
+    "metro": "Seattle"
+  },
+  {
+    "id": "umich",
+    "name": "University of Michigan",
+    "shortName": "Michigan",
+    "nameZh": "密歇根大学",
+    "city": "Ann Arbor",
+    "state": "MI",
+    "lat": 42.278,
+    "lng": -83.7382,
+    "timezone": "America/Detroit",
+    "eduDomains": [
+      "umich.edu"
+    ],
+    "intlStudentsApprox": 9000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://mbus.ltp.umich.edu/",
+    "metro": "Ann Arbor"
+  },
+  {
+    "id": "penn-state",
+    "name": "Pennsylvania State University",
+    "shortName": "Penn State",
+    "nameZh": "宾夕法尼亚州立大学",
+    "city": "University Park",
+    "state": "PA",
+    "lat": 40.7982,
+    "lng": -77.8599,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "psu.edu"
+    ],
+    "intlStudentsApprox": 8500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.psu.edu/campus-shuttle",
+    "metro": "State College"
+  },
+  {
+    "id": "ohio-state",
+    "name": "The Ohio State University",
+    "shortName": "Ohio State",
+    "nameZh": "俄亥俄州立大学",
+    "city": "Columbus",
+    "state": "OH",
+    "lat": 40.0067,
+    "lng": -83.0305,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "osu.edu",
+      "buckeyemail.osu.edu"
+    ],
+    "intlStudentsApprox": 7000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://ttm.osu.edu/cabs",
+    "metro": "Columbus"
+  },
+  {
+    "id": "texas-am",
+    "name": "Texas A&M University",
+    "shortName": "Texas A&M",
+    "nameZh": "德州农工大学",
+    "city": "College Station",
+    "state": "TX",
+    "lat": 30.6187,
+    "lng": -96.3365,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "tamu.edu"
+    ],
+    "intlStudentsApprox": 7000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transport.tamu.edu/transit.aspx",
+    "metro": "College Station"
+  },
+  {
+    "id": "ut-austin",
+    "name": "The University of Texas at Austin",
+    "shortName": "UT Austin",
+    "nameZh": "德克萨斯大学奥斯汀分校",
+    "city": "Austin",
+    "state": "TX",
+    "lat": 30.2849,
+    "lng": -97.7341,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "utexas.edu"
+    ],
+    "intlStudentsApprox": 7500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Austin"
+  },
+  {
+    "id": "ut-dallas",
+    "name": "The University of Texas at Dallas",
+    "shortName": "UT Dallas",
+    "nameZh": "德克萨斯大学达拉斯分校",
+    "city": "Richardson",
+    "state": "TX",
+    "lat": 32.9857,
+    "lng": -96.7502,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "utdallas.edu"
+    ],
+    "intlStudentsApprox": 9000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Dallas-Fort Worth"
+  },
+  {
+    "id": "georgia-tech",
+    "name": "Georgia Institute of Technology",
+    "shortName": "Georgia Tech",
+    "nameZh": "佐治亚理工学院",
+    "city": "Atlanta",
+    "state": "GA",
+    "lat": 33.7756,
+    "lng": -84.3963,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "gatech.edu"
+    ],
+    "intlStudentsApprox": 9500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://pts.gatech.edu/stinger-bus-routes",
+    "metro": "Atlanta"
+  },
+  {
+    "id": "cmu",
+    "name": "Carnegie Mellon University",
+    "shortName": "CMU",
+    "nameZh": "卡内基梅隆大学",
+    "city": "Pittsburgh",
+    "state": "PA",
+    "lat": 40.4433,
+    "lng": -79.9436,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "cmu.edu",
+      "andrew.cmu.edu"
+    ],
+    "intlStudentsApprox": 10000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.cmu.edu/transportation/transport/shuttle.html",
+    "metro": "Pittsburgh"
+  },
+  {
+    "id": "cornell",
+    "name": "Cornell University",
+    "shortName": "Cornell",
+    "nameZh": "康奈尔大学",
+    "city": "Ithaca",
+    "state": "NY",
+    "lat": 42.4534,
+    "lng": -76.4735,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "cornell.edu"
+    ],
+    "intlStudentsApprox": 7500,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Ithaca"
+  },
+  {
+    "id": "upenn",
+    "name": "University of Pennsylvania",
+    "shortName": "Penn",
+    "nameZh": "宾夕法尼亚大学",
+    "city": "Philadelphia",
+    "state": "PA",
+    "lat": 39.9522,
+    "lng": -75.1932,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "upenn.edu",
+      "seas.upenn.edu",
+      "sas.upenn.edu",
+      "wharton.upenn.edu"
+    ],
+    "intlStudentsApprox": 8000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.upenn.edu/pennrides",
+    "metro": "Philadelphia"
+  },
+  {
+    "id": "harvard",
+    "name": "Harvard University",
+    "shortName": "Harvard",
+    "nameZh": "哈佛大学",
+    "city": "Cambridge",
+    "state": "MA",
+    "lat": 42.3744,
+    "lng": -71.1169,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "harvard.edu",
+      "college.harvard.edu",
+      "g.harvard.edu",
+      "hbs.edu"
+    ],
+    "intlStudentsApprox": 9500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.harvard.edu/harvard-shuttle",
+    "metro": "Boston"
+  },
+  {
+    "id": "mit",
+    "name": "Massachusetts Institute of Technology",
+    "shortName": "MIT",
+    "nameZh": "麻省理工学院",
+    "city": "Cambridge",
+    "state": "MA",
+    "lat": 42.3601,
+    "lng": -71.0942,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "mit.edu"
+    ],
+    "intlStudentsApprox": 5500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://web.mit.edu/facilities/transportation/shuttles/index.html",
+    "metro": "Boston"
+  },
+  {
+    "id": "stanford",
+    "name": "Stanford University",
+    "shortName": "Stanford",
+    "nameZh": "斯坦福大学",
+    "city": "Stanford",
+    "state": "CA",
+    "lat": 37.4275,
+    "lng": -122.1697,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "stanford.edu"
+    ],
+    "intlStudentsApprox": 7000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.stanford.edu/getting-stanford/marguerite/marguerite-live-map",
+    "metro": "San Francisco Bay Area"
+  },
+  {
+    "id": "yale",
+    "name": "Yale University",
+    "shortName": "Yale",
+    "nameZh": "耶鲁大学",
+    "city": "New Haven",
+    "state": "CT",
+    "lat": 41.3163,
+    "lng": -72.9223,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "yale.edu"
+    ],
+    "intlStudentsApprox": 4500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://to.yale.edu/shuttle",
+    "metro": "New Haven"
+  },
+  {
+    "id": "princeton",
+    "name": "Princeton University",
+    "shortName": "Princeton",
+    "nameZh": "普林斯顿大学",
+    "city": "Princeton",
+    "state": "NJ",
+    "lat": 40.3431,
+    "lng": -74.6551,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "princeton.edu"
+    ],
+    "intlStudentsApprox": 3000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.princeton.edu/getting-around/tigertransit",
+    "metro": "New Jersey"
+  },
+  {
+    "id": "duke",
+    "name": "Duke University",
+    "shortName": "Duke",
+    "nameZh": "杜克大学",
+    "city": "Durham",
+    "state": "NC",
+    "lat": 36.0014,
+    "lng": -78.9382,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "duke.edu"
+    ],
+    "intlStudentsApprox": 5000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://parking.duke.edu/buses-vans/",
+    "metro": "Raleigh-Durham"
+  },
+  {
+    "id": "jhu",
+    "name": "Johns Hopkins University",
+    "shortName": "JHU",
+    "nameZh": "约翰斯·霍普金斯大学",
+    "city": "Baltimore",
+    "state": "MD",
+    "lat": 39.3299,
+    "lng": -76.6205,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "jhu.edu",
+      "jh.edu"
+    ],
+    "intlStudentsApprox": 10500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://jhfre.jhu.edu/ts/transportation/shuttle-services",
+    "metro": "Baltimore"
+  },
+  {
+    "id": "uchicago",
+    "name": "University of Chicago",
+    "shortName": "UChicago",
+    "nameZh": "芝加哥大学",
+    "city": "Chicago",
+    "state": "IL",
+    "lat": 41.7886,
+    "lng": -87.5987,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "uchicago.edu",
+      "chicagobooth.edu"
+    ],
+    "intlStudentsApprox": 7500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://safety-security.uchicago.edu/transportation/passiogo",
+    "metro": "Chicago"
+  },
+  {
+    "id": "wisconsin",
+    "name": "University of Wisconsin–Madison",
+    "shortName": "Wisconsin",
+    "nameZh": "威斯康星大学麦迪逊分校",
+    "city": "Madison",
+    "state": "WI",
+    "lat": 43.0766,
+    "lng": -89.4125,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "wisc.edu"
+    ],
+    "intlStudentsApprox": 8000,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Madison"
+  },
+  {
+    "id": "minnesota",
+    "name": "University of Minnesota, Twin Cities",
+    "shortName": "Minnesota",
+    "nameZh": "明尼苏达大学双城分校",
+    "city": "Minneapolis",
+    "state": "MN",
+    "lat": 44.974,
+    "lng": -93.2277,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "umn.edu"
+    ],
+    "intlStudentsApprox": 7000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://pts.umn.edu/transit/campus/gophertrip-ride-tracking",
+    "metro": "Minneapolis-St. Paul"
+  },
+  {
+    "id": "maryland",
+    "name": "University of Maryland, College Park",
+    "shortName": "Maryland",
+    "nameZh": "马里兰大学帕克分校",
+    "city": "College Park",
+    "state": "MD",
+    "lat": 38.9869,
+    "lng": -76.9426,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "umd.edu",
+      "terpmail.umd.edu"
+    ],
+    "intlStudentsApprox": 8000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.umd.edu/shuttle-um",
+    "metro": "Washington DC"
+  },
+  {
+    "id": "rutgers",
+    "name": "Rutgers University–New Brunswick",
+    "shortName": "Rutgers",
+    "nameZh": "罗格斯大学",
+    "city": "New Brunswick",
+    "state": "NJ",
+    "lat": 40.5008,
+    "lng": -74.4474,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "rutgers.edu",
+      "scarletmail.rutgers.edu"
+    ],
+    "intlStudentsApprox": 7000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://rutgers.passiogo.com/",
+    "metro": "New Jersey"
+  },
+  {
+    "id": "stony-brook",
+    "name": "Stony Brook University",
+    "shortName": "Stony Brook",
+    "nameZh": "石溪大学",
+    "city": "Stony Brook",
+    "state": "NY",
+    "lat": 40.9126,
+    "lng": -73.1234,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "stonybrook.edu"
+    ],
+    "intlStudentsApprox": 6500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.stonybrook.edu/mobility-and-parking/transportation/sbu-transit-shuttles/shuttles.html",
+    "metro": "Long Island"
+  },
+  {
+    "id": "buffalo",
+    "name": "University at Buffalo",
+    "shortName": "Buffalo",
+    "nameZh": "布法罗大学",
+    "city": "Buffalo",
+    "state": "NY",
+    "lat": 43.0008,
+    "lng": -78.789,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "buffalo.edu"
+    ],
+    "intlStudentsApprox": 6500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.buffalo.edu/parking/getting-around-UB/bus.html",
+    "metro": "Buffalo"
+  },
+  {
+    "id": "syracuse",
+    "name": "Syracuse University",
+    "shortName": "Syracuse",
+    "nameZh": "雪城大学",
+    "city": "Syracuse",
+    "state": "NY",
+    "lat": 43.0392,
+    "lng": -76.1351,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "syr.edu"
+    ],
+    "intlStudentsApprox": 5000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://parking.syr.edu/transportation/shuttle-information",
+    "metro": "Syracuse"
+  },
+  {
+    "id": "rochester",
+    "name": "University of Rochester",
+    "shortName": "Rochester",
+    "nameZh": "罗切斯特大学",
+    "city": "Rochester",
+    "state": "NY",
+    "lat": 43.1284,
+    "lng": -77.6295,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "rochester.edu",
+      "u.rochester.edu"
+    ],
+    "intlStudentsApprox": 5500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.rochester.edu/parking/shuttles/",
+    "metro": "Rochester"
+  },
+  {
+    "id": "indiana",
+    "name": "Indiana University Bloomington",
+    "shortName": "IU",
+    "nameZh": "印第安纳大学伯明顿分校",
+    "city": "Bloomington",
+    "state": "IN",
+    "lat": 39.1682,
+    "lng": -86.523,
+    "timezone": "America/Indiana/Indianapolis",
+    "eduDomains": [
+      "iu.edu",
+      "indiana.edu"
+    ],
+    "intlStudentsApprox": 6000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://campusbus.indiana.edu/",
+    "metro": "Bloomington"
+  },
+  {
+    "id": "iowa",
+    "name": "University of Iowa",
+    "shortName": "Iowa",
+    "nameZh": "爱荷华大学",
+    "city": "Iowa City",
+    "state": "IA",
+    "lat": 41.6611,
+    "lng": -91.536,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "uiowa.edu"
+    ],
+    "intlStudentsApprox": 2500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.uiowa.edu/cambus",
+    "metro": "Iowa City"
+  },
+  {
+    "id": "iowa-state",
+    "name": "Iowa State University",
+    "shortName": "Iowa State",
+    "nameZh": "爱荷华州立大学",
+    "city": "Ames",
+    "state": "IA",
+    "lat": 42.0266,
+    "lng": -93.6465,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "iastate.edu"
+    ],
+    "intlStudentsApprox": 3000,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Ames"
+  },
+  {
+    "id": "florida",
+    "name": "University of Florida",
+    "shortName": "UF",
+    "nameZh": "佛罗里达大学",
+    "city": "Gainesville",
+    "state": "FL",
+    "lat": 29.6436,
+    "lng": -82.3549,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "ufl.edu"
+    ],
+    "intlStudentsApprox": 6500,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Gainesville"
+  },
+  {
+    "id": "uga",
+    "name": "University of Georgia",
+    "shortName": "UGA",
+    "nameZh": "佐治亚大学",
+    "city": "Athens",
+    "state": "GA",
+    "lat": 33.948,
+    "lng": -83.3773,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "uga.edu"
+    ],
+    "intlStudentsApprox": 2500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://routes.uga.edu/",
+    "metro": "Athens"
+  },
+  {
+    "id": "emory",
+    "name": "Emory University",
+    "shortName": "Emory",
+    "nameZh": "埃默里大学",
+    "city": "Atlanta",
+    "state": "GA",
+    "lat": 33.7925,
+    "lng": -84.324,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "emory.edu"
+    ],
+    "intlStudentsApprox": 4000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://emory.passiogo.com/",
+    "metro": "Atlanta"
+  },
+  {
+    "id": "vanderbilt",
+    "name": "Vanderbilt University",
+    "shortName": "Vanderbilt",
+    "nameZh": "范德堡大学",
+    "city": "Nashville",
+    "state": "TN",
+    "lat": 36.1447,
+    "lng": -86.8027,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "vanderbilt.edu"
+    ],
+    "intlStudentsApprox": 3000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.vanderbilt.edu/transportation-parking/transportation-and-mobility/coummutecampus/",
+    "metro": "Nashville"
+  },
+  {
+    "id": "rice",
+    "name": "Rice University",
+    "shortName": "Rice",
+    "nameZh": "莱斯大学",
+    "city": "Houston",
+    "state": "TX",
+    "lat": 29.7174,
+    "lng": -95.4018,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "rice.edu"
+    ],
+    "intlStudentsApprox": 3500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Houston"
+  },
+  {
+    "id": "washu",
+    "name": "Washington University in St. Louis",
+    "shortName": "WashU",
+    "nameZh": "圣路易斯华盛顿大学",
+    "city": "St. Louis",
+    "state": "MO",
+    "lat": 38.6488,
+    "lng": -90.3108,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "wustl.edu",
+      "washu.edu"
+    ],
+    "intlStudentsApprox": 4500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://parking.wustl.edu/campus-shuttle-system/",
+    "metro": "St. Louis"
+  },
+  {
+    "id": "notre-dame",
+    "name": "University of Notre Dame",
+    "shortName": "Notre Dame",
+    "nameZh": "圣母大学",
+    "city": "Notre Dame",
+    "state": "IN",
+    "lat": 41.703,
+    "lng": -86.239,
+    "timezone": "America/Indiana/Indianapolis",
+    "eduDomains": [
+      "nd.edu"
+    ],
+    "intlStudentsApprox": 2000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.nd.edu/services/studentfacultystaff-transportation/",
+    "metro": "South Bend"
+  },
+  {
+    "id": "uc-davis",
+    "name": "University of California, Davis",
+    "shortName": "UC Davis",
+    "nameZh": "加州大学戴维斯分校",
+    "city": "Davis",
+    "state": "CA",
+    "lat": 38.5382,
+    "lng": -121.7617,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "ucdavis.edu"
+    ],
+    "intlStudentsApprox": 7000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://unitrans.ucdavis.edu/",
+    "metro": "Sacramento"
+  },
+  {
+    "id": "uc-irvine",
+    "name": "University of California, Irvine",
+    "shortName": "UC Irvine",
+    "nameZh": "加州大学欧文分校",
+    "city": "Irvine",
+    "state": "CA",
+    "lat": 33.6405,
+    "lng": -117.8443,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "uci.edu"
+    ],
+    "intlStudentsApprox": 7500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://shuttle.uci.edu/",
+    "metro": "Los Angeles"
+  },
+  {
+    "id": "ucsb",
+    "name": "University of California, Santa Barbara",
+    "shortName": "UCSB",
+    "nameZh": "加州大学圣塔芭芭拉分校",
+    "city": "Santa Barbara",
+    "state": "CA",
+    "lat": 34.414,
+    "lng": -119.8489,
+    "timezone": "America/Los_Angeles",
+    "eduDomains": [
+      "ucsb.edu",
+      "umail.ucsb.edu"
+    ],
+    "intlStudentsApprox": 3500,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Santa Barbara"
+  },
+  {
+    "id": "michigan-state",
+    "name": "Michigan State University",
+    "shortName": "Michigan State",
+    "nameZh": "密歇根州立大学",
+    "city": "East Lansing",
+    "state": "MI",
+    "lat": 42.7018,
+    "lng": -84.4822,
+    "timezone": "America/Detroit",
+    "eduDomains": [
+      "msu.edu"
+    ],
+    "intlStudentsApprox": 5000,
+    "hasShuttle": false,
+    "shuttleTrackerUrl": null,
+    "metro": "Lansing"
+  },
+  {
+    "id": "illinois-tech",
+    "name": "Illinois Institute of Technology",
+    "shortName": "Illinois Tech",
+    "nameZh": "伊利诺伊理工学院",
+    "city": "Chicago",
+    "state": "IL",
+    "lat": 41.8349,
+    "lng": -87.627,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "iit.edu",
+      "hawk.iit.edu"
+    ],
+    "intlStudentsApprox": 4000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Chicago"
+  },
+  {
+    "id": "drexel",
+    "name": "Drexel University",
+    "shortName": "Drexel",
+    "nameZh": "德雷塞尔大学",
+    "city": "Philadelphia",
+    "state": "PA",
+    "lat": 39.9566,
+    "lng": -75.1899,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "drexel.edu"
+    ],
+    "intlStudentsApprox": 4000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://drexel.edu/facilities/transportation/busServiceSchedules",
+    "metro": "Philadelphia"
+  },
+  {
+    "id": "temple",
+    "name": "Temple University",
+    "shortName": "Temple",
+    "nameZh": "天普大学",
+    "city": "Philadelphia",
+    "state": "PA",
+    "lat": 39.9812,
+    "lng": -75.1554,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "temple.edu"
+    ],
+    "intlStudentsApprox": 3000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://campusoperations.temple.edu/shuttle-services/flight",
+    "metro": "Philadelphia"
+  },
+  {
+    "id": "gwu",
+    "name": "The George Washington University",
+    "shortName": "GWU",
+    "nameZh": "乔治·华盛顿大学",
+    "city": "Washington",
+    "state": "DC",
+    "lat": 38.8997,
+    "lng": -77.0485,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "gwu.edu",
+      "gwmail.gwu.edu"
+    ],
+    "intlStudentsApprox": 4500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.gwu.edu/mount-vernon-shuttle-vern-express",
+    "metro": "Washington DC"
+  },
+  {
+    "id": "georgetown",
+    "name": "Georgetown University",
+    "shortName": "Georgetown",
+    "nameZh": "乔治城大学",
+    "city": "Washington",
+    "state": "DC",
+    "lat": 38.9076,
+    "lng": -77.0723,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "georgetown.edu"
+    ],
+    "intlStudentsApprox": 4000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.georgetown.edu/",
+    "metro": "Washington DC"
+  },
+  {
+    "id": "pitt",
+    "name": "University of Pittsburgh",
+    "shortName": "Pitt",
+    "nameZh": "匹兹堡大学",
+    "city": "Pittsburgh",
+    "state": "PA",
+    "lat": 40.4444,
+    "lng": -79.9608,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "pitt.edu"
+    ],
+    "intlStudentsApprox": 4500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.pc.pitt.edu/shuttle-services",
+    "metro": "Pittsburgh"
+  },
+  {
+    "id": "brandeis",
+    "name": "Brandeis University",
+    "shortName": "Brandeis",
+    "nameZh": "布兰迪斯大学",
+    "city": "Waltham",
+    "state": "MA",
+    "lat": 42.3655,
+    "lng": -71.2594,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "brandeis.edu"
+    ],
+    "intlStudentsApprox": 2000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://www.brandeis.edu/campus-services/shuttle-services/index.html",
+    "metro": "Boston"
+  },
+  {
+    "id": "tufts",
+    "name": "Tufts University",
+    "shortName": "Tufts",
+    "nameZh": "塔夫茨大学",
+    "city": "Medford",
+    "state": "MA",
+    "lat": 42.4075,
+    "lng": -71.119,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "tufts.edu"
+    ],
+    "intlStudentsApprox": 2500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Boston"
+  },
+  {
+    "id": "ut-arlington",
+    "name": "The University of Texas at Arlington",
+    "shortName": "UT Arlington",
+    "nameZh": "德克萨斯大学阿灵顿分校",
+    "city": "Arlington",
+    "state": "TX",
+    "lat": 32.7316,
+    "lng": -97.1151,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "uta.edu",
+      "mavs.uta.edu"
+    ],
+    "intlStudentsApprox": 7000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Dallas-Fort Worth"
+  },
+  {
+    "id": "cincinnati",
+    "name": "University of Cincinnati",
+    "shortName": "Cincinnati",
+    "nameZh": "辛辛那提大学",
+    "city": "Cincinnati",
+    "state": "OH",
+    "lat": 39.1329,
+    "lng": -84.515,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "uc.edu",
+      "mail.uc.edu"
+    ],
+    "intlStudentsApprox": 5500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Cincinnati"
+  },
+  {
+    "id": "nc-state",
+    "name": "North Carolina State University",
+    "shortName": "NC State",
+    "nameZh": "北卡罗来纳州立大学",
+    "city": "Raleigh",
+    "state": "NC",
+    "lat": 35.7847,
+    "lng": -78.6821,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "ncsu.edu"
+    ],
+    "intlStudentsApprox": 5000,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://transportation.ncsu.edu/wolfline/",
+    "metro": "Raleigh-Durham"
+  },
+  {
+    "id": "uic",
+    "name": "University of Illinois Chicago",
+    "shortName": "UIC",
+    "nameZh": "伊利诺伊大学芝加哥分校",
+    "city": "Chicago",
+    "state": "IL",
+    "lat": 41.8708,
+    "lng": -87.6505,
+    "timezone": "America/Chicago",
+    "eduDomains": [
+      "uic.edu"
+    ],
+    "intlStudentsApprox": 5500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Chicago"
+  },
+  {
+    "id": "umass-amherst",
+    "name": "University of Massachusetts Amherst",
+    "shortName": "UMass Amherst",
+    "nameZh": "马萨诸塞大学阿默斯特分校",
+    "city": "Amherst",
+    "state": "MA",
+    "lat": 42.3868,
+    "lng": -72.5301,
+    "timezone": "America/New_York",
+    "eduDomains": [
+      "umass.edu"
+    ],
+    "intlStudentsApprox": 4500,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": null,
+    "metro": "Amherst"
+  }
+]
