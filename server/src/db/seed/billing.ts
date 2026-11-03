@@ -10,7 +10,7 @@ import { DAY, HOUR, nowIso, nowMs } from '../../lib/time';
 import { sha256 } from '../../lib/ids';
 import { seedUserId } from './core';
 
-export const version = 4;
+export const version = 5;
 
 const PLAN_ID = (n: number) => `b1110000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 function bid(key: string): string {
@@ -392,7 +392,7 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
         q.run('INSERT INTO events (id, user_id, session_id, campus_id, type, entity_type, entity_id, props_json, path, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [bid(`ev:click:${ci}`), clickUsers[ci % clickUsers.length], 'seed-billing', campus, 'affiliate.click', 'partner', p.id, JSON.stringify({ slug: p.slug, placement: 'kit', seed: true }), '/kit', at]);
         ci++;
       }
-      q.run('INSERT INTO events (id, user_id, session_id, campus_id, type, entity_type, entity_id, props_json, path, created_at) VALUES (?, NULL, ?, ?, ?, NULL, NULL, ?, ?, ?)', [bid(`ev:kitview:${d}`), 'seed-billing', campuses[d % campuses.length]!, 'kit.view', JSON.stringify({ preArrival: true, seed: true }), '/kit', iso(d * DAY + 6 * HOUR)]);
+      for (let k = 0; k < 18 + ((d * 5) % 11); k++) q.run('INSERT INTO events (id, user_id, session_id, campus_id, type, entity_type, entity_id, props_json, path, created_at) VALUES (?, NULL, ?, ?, ?, NULL, NULL, ?, ?, ?)', [bid(`ev:kitview:${d}:${k}`), 'seed-billing', campuses[(d + k) % campuses.length]!, 'kit.view', JSON.stringify({ preArrival: k % 3 !== 0, seed: true }), '/kit', iso(d * DAY + (6 + (k % 14)) * HOUR + k * 60_000)]);
     }
     // alice's checklist progress
     for (const slug of ['chase-college-checking', 'mint-mobile', 'amazon-prime-student']) q.run('INSERT OR REPLACE INTO kit_checklist (user_id, slug, done_at) VALUES (?, ?, ?)', [alice, slug, iso(12 * DAY)]);

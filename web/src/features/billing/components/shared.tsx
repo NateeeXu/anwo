@@ -1,5 +1,5 @@
 // Small shared pieces for the billing module: test-mode band, plan naming, status badges, money lines, SVG charts, card form.
-import { useId, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 import { CreditCard, FlaskConical, Check } from 'lucide-react';
 import type { Plan } from '@shared/types';
 import { Badge, Checkbox, Input } from '@/components';
@@ -78,9 +78,22 @@ export function FeatureList({ features, className }: { features: string[]; class
 }
 
 // ---------------------------------------------------------------- SVG charts (brand-neutral, token colors)
+/** Tracks the rendered width so the SVG viewBox matches real pixels (axis text stays 10–11 px at any width). */
+function useChartWidth(fallback = 600) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(fallback);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver((entries) => { const w = Math.round(entries[0]?.contentRect.width ?? 0); if (w > 0) setWidth(w); });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return { ref, width };
+}
 export function LineChart({ series, height = 160, className, formatValue, labels, fill = true }: { series: { key: string; label: string; values: number[]; color: string; width?: number }[]; height?: number; className?: string; formatValue?: (v: number) => string; labels: string[]; fill?: boolean }) {
   const id = useId();
-  const width = 600;
+  const { ref, width } = useChartWidth();
   const padL = 44;
   const padR = 8;
   const padT = 10;
@@ -91,9 +104,10 @@ export function LineChart({ series, height = 160, className, formatValue, labels
   const y = (v: number) => padT + (1 - v / max) * (height - padT - padB);
   const ticks = [0, 0.5, 1].map((f) => Math.round(max * f));
   const fmt = formatValue ?? ((v: number) => String(v));
-  const labelEvery = Math.max(1, Math.ceil(labels.length / 6));
+  const labelEvery = Math.max(1, Math.ceil(labels.length / Math.max(2, Math.floor(width / 90))));
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className={cn('w-full', className)} role="img" aria-labelledby={`${id}-title`}>
+    <div ref={ref} className={cn('w-full', className)}>
+    <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} role="img" aria-labelledby={`${id}-title`}>
       <title id={`${id}-title`}>{series.map((s) => s.label).join(', ')}</title>
       {ticks.map((tv) => (
         <g key={tv}>
@@ -115,12 +129,13 @@ export function LineChart({ series, height = 160, className, formatValue, labels
         );
       })}
     </svg>
+    </div>
   );
 }
 
 export function BarChart({ data, height = 160, className, formatValue, color = 'var(--color-accent)' }: { data: { label: string; value: number; color?: string }[]; height?: number; className?: string; formatValue?: (v: number) => string; color?: string }) {
   const id = useId();
-  const width = 600;
+  const { ref, width } = useChartWidth();
   const padL = 44;
   const padB = 22;
   const padT = 10;
@@ -128,9 +143,10 @@ export function BarChart({ data, height = 160, className, formatValue, color = '
   const slot = (width - padL - 8) / Math.max(1, data.length);
   const bw = Math.max(4, Math.min(28, slot * 0.6));
   const fmt = formatValue ?? ((v: number) => String(v));
-  const labelEvery = Math.max(1, Math.ceil(data.length / 6));
+  const labelEvery = Math.max(1, Math.ceil(data.length / Math.max(2, Math.floor(width / 80))));
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className={cn('w-full', className)} role="img" aria-labelledby={`${id}-title`}>
+    <div ref={ref} className={cn('w-full', className)}>
+    <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} role="img" aria-labelledby={`${id}-title`}>
       <title id={`${id}-title`}>{data.map((d) => `${d.label}: ${fmt(d.value)}`).join(', ')}</title>
       {[0, 0.5, 1].map((f) => {
         const v = Math.round(max * f);
@@ -153,6 +169,7 @@ export function BarChart({ data, height = 160, className, formatValue, color = '
         );
       })}
     </svg>
+    </div>
   );
 }
 

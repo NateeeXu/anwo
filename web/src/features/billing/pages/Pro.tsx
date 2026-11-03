@@ -269,7 +269,7 @@ function Overview({ data }: { data: SubscriptionData }) {
       <div className="grid gap-3 md:grid-cols-2">
         <Card padding="md" className="flex items-start gap-3">
           <Sparkles className="mt-0.5 size-5 shrink-0 text-accent-text" aria-hidden />
-          <div className="text-small text-ink-2"><div className="font-semibold text-ink">{t('billing.pro.perk.boostCredit')}</div>{t('billing.pro.perk.boostCreditBody', { amount: formatMoney(1900) })} <Link to="/billing/boosts" className="text-accent-text underline">{t('billing.boosts.title')}</Link></div>
+          <div className="text-small text-ink-2"><div className="font-semibold text-ink">{t('billing.pro.perk.boostCredit')}</div>{t('billing.pro.perk.boostCreditBody', { amount: formatMoney(data.subscription?.plan.key.startsWith('proplus') ? 5700 : 1900) })} <Link to="/billing/boosts" className="text-accent-text underline">{t('billing.boosts.title')}</Link></div>
         </Card>
         <Card padding="md" className="flex items-start gap-3">
           <Users className="mt-0.5 size-5 shrink-0 text-ink-2" aria-hidden />

@@ -269,7 +269,9 @@ function PartnersTable() {
   const t = useT();
   const { formatMoney, isZh } = useLocale();
   const q = useAdminPartners();
-  const rows = useMemo(() => [...(q.data ?? [])].sort((a, b) => b.clickCount - a.clickCount), [q.data]);
+  const [all, setAll] = useState(false);
+  const sorted = useMemo(() => [...(q.data ?? [])].sort((a, b) => b.clickCount - a.clickCount), [q.data]);
+  const rows = all ? sorted : sorted.slice(0, 10);
   const cols: Column<AdminPartner>[] = [
     { key: 'name', header: t('billing.admin.col.partner'), render: (p) => <span className="block min-w-0"><Link to={`/kit/${p.slug}`} className="block truncate text-small text-ink hover:underline">{isZh ? p.nameZh || p.name : p.name}</Link><span className="text-caption text-ink-3">{t(`billing.kit.category.${p.category}`)}{p.isSponsored ? '' : ` · ${t('billing.kit.nonSponsored')}`}</span></span> },
     { key: 'clicks', header: t('billing.admin.col.clicks'), width: 90, align: 'right', render: (p) => <span className="tnum">{p.clickCount}</span> },
@@ -282,6 +284,7 @@ function PartnersTable() {
     <Card padding="none">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"><h2 className="text-h3 text-ink">{t('billing.admin.partnersTitle')}</h2><span className="text-caption text-ink-3">{t('billing.admin.partnersNote')}</span></div>
       <Table rows={rows} columns={cols} rowKey="id" loading={q.isLoading} empty={<EmptyState size="sm" title={t('billing.admin.noPartners')} />} />
+      {sorted.length > 10 && <div className="px-4 py-3"><Button variant="ghost" size="sm" onClick={() => setAll((v) => !v)}>{all ? t('billing.admin.showTop') : t('billing.admin.showAll', { n: sorted.length })}</Button></div>}
     </Card>
   );
 }
