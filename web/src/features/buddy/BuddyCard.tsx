@@ -56,7 +56,7 @@ export const BuddyCard = forwardRef<HTMLElement, BuddyCardProps>(function BuddyC
       ref={ref}
       data-state={inactive ? 'inactive' : today ? 'today' : 'rest'}
       className={cn(
-        'group relative flex gap-3 rounded-card border border-line bg-surface transition-[border-color,box-shadow] duration-token-base ease-out',
+        'group relative flex w-full min-w-0 gap-3 overflow-hidden rounded-card border border-line bg-surface transition-[border-color,box-shadow] duration-token-base ease-out',
         'hover:border-line-strong hover:shadow-sm focus-within:border-line-strong active:translate-y-px',
         variant === 'row' ? 'p-2.5' : 'min-h-[108px] p-3 lg:p-4',
         inactive && 'opacity-70',
@@ -111,19 +111,19 @@ export const BuddyCard = forwardRef<HTMLElement, BuddyCardProps>(function BuddyC
         <div className={cn('mt-auto flex items-center gap-2 pt-1', variant === 'row' && 'pt-0')}>
           <AvatarStack users={members} max={3} size="xs" className="shrink-0" />
           <span className="tnum shrink-0 whitespace-nowrap text-small text-ink-2">{t('buddy.members', { n: post.memberCount, max: post.maxMembers })}</span>
-          <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden [&>*]:shrink-0">
+          <span className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden [&>*]:shrink-0" style={{ maskImage: 'linear-gradient(to right, black calc(100% - 20px), transparent)' }}>
             {post.verifiedOnly && (
               <Chip size="sm" icon={<Lock size={12} strokeWidth={2} aria-hidden />}>
                 {t('common.verifiedOnly')}
               </Chip>
             )}
-            {post.languages.slice(0, variant === 'row' ? 1 : 3).map((l) => (
+            {post.languages.slice(0, variant === 'row' ? 1 : 2).map((l) => (
               <Chip key={l} size="sm">
                 {t(`buddy.lang.${l}`)}
               </Chip>
             ))}
             {variant !== 'row' && post.costSplitCents != null && post.costSplitCents > 0 && (
-              <span className="shrink-0 text-caption text-ink-3">{t('buddy.card.costSplit', { amount: formatMoney(post.costSplitCents) })}</span>
+              <span className="shrink-0 text-caption text-ink-3 max-xl:hidden">{t('buddy.card.costSplit', { amount: formatMoney(post.costSplitCents) })}</span>
             )}
           </span>
           {variant !== 'row' && !hideJoin && (

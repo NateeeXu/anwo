@@ -161,7 +161,7 @@ export function BuddyCalendar({ campusId, types, className }: BuddyCalendarProps
         ) : (
           <ul className="flex flex-col gap-3">
             {dayEvents.map((ev) => (
-              <li key={ev.id}>
+              <li key={ev.id} className="min-w-0">
                 <BuddyCard post={ev.post} occurrenceAt={ev.startsAt} />
               </li>
             ))}

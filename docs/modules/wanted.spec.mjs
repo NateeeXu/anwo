@@ -131,7 +131,7 @@ await step('create', async () => {
   await page.waitForTimeout(300);
   expect(await page.getByText(/区域 1/).count() > 0, 'map click added an area circle');
   await shot(page, 'post-form', { fullPage: true });
-  await page.getByRole('button', { name: '发布' }).click();
+  await page.locator('form').getByRole('button', { name: '发布' }).click();
   await page.waitForURL(/\/wanted\/[0-9a-f-]{36}$/, { timeout: 20000 });
   createdId = page.url().split('/').pop();
   await page.waitForSelector('h1.text-h1', { timeout: 20000 });

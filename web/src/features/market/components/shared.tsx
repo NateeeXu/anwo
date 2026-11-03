@@ -34,12 +34,13 @@ export function PriceComparison({ priceCents, isFree, suggestion, className }: {
   const { formatMoney } = useLocale();
   if (!suggestion || suggestion.sampleSize === 0 || isFree) return null;
   const diff = suggestion.suggestedCents > 0 ? Math.round(((priceCents - suggestion.suggestedCents) / suggestion.suggestedCents) * 100) : 0;
-  const verdict = Math.abs(diff) < 8 ? t('market.detail.fairPrice') : diff < 0 ? t('market.detail.cheaper', { pct: Math.abs(diff) }) : t('market.detail.pricier', { pct: diff });
+  // only judge when the item is in the same ballpark as its peers; very different items just get the reference line
+  const verdict = Math.abs(diff) > 75 ? null : Math.abs(diff) < 8 ? t('market.detail.fairPrice') : diff < 0 ? t('market.detail.cheaper', { pct: Math.abs(diff) }) : t('market.detail.pricier', { pct: diff });
   return (
     <div className={cn('text-small text-ink-3', className)}>
       <p>
         <span className="text-ink-2">{t('market.detail.suggested', { price: formatMoney(suggestion.suggestedCents) })}</span>
-        <span className={cn('ml-2', Math.abs(diff) >= 8 && diff < 0 ? 'text-success' : 'text-ink-3')}>{verdict}</span>
+        {verdict && <span className={cn('ml-2', Math.abs(diff) >= 8 && diff < 0 ? 'text-success' : 'text-ink-3')}>{verdict}</span>}
       </p>
       <p className="text-caption">
         {t('market.detail.suggestedRange', { low: formatMoney(suggestion.lowCents), high: formatMoney(suggestion.highCents), n: suggestion.sampleSize, basis: t(`market.detail.basis.${suggestion.basis}`) })}

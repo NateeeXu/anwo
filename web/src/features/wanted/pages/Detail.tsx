@@ -158,7 +158,7 @@ export default function WantedDetail() {
         ) : (
           <>
             <ul className="flex flex-col gap-2">
-              {matches.data.items.map((m) => <li key={m.id}><MatchRow match={m} wantedId={w.id} canAct /></li>)}
+              {matches.data.items.map((m) => <li key={m.id}><MatchRow match={m} wantedId={w.id} canAct compact /></li>)}
             </ul>
             <Button asChild variant="secondary" fullWidth><Link to={`/wanted/${w.id}/matches`}>{t('wanted.matchesPanel.viewAll', { n: matches.data.total })}</Link></Button>
           </>
@@ -189,11 +189,11 @@ export default function WantedDetail() {
     <div className="mx-auto w-full max-w-detail px-4 pb-24 lg:px-8 lg:pb-8">
       <Head title={w.title} description={w.description.slice(0, 160)} />
       <nav className="flex items-center gap-1.5 py-3 text-small text-ink-3" aria-label="breadcrumb">
-        <Link to="/wanted" className="hover:text-ink">{t('wanted.title')}</Link>
+        <Link to="/wanted" className="shrink-0 whitespace-nowrap hover:text-ink">{t('wanted.title')}</Link>
         <span aria-hidden>›</span>
-        <span>{w.campus.shortName}</span>
+        <span className="shrink-0 whitespace-nowrap">{w.campus.shortName}</span>
         <span aria-hidden>›</span>
-        <span className="truncate text-ink-2">{w.title}</span>
+        <span className="min-w-0 truncate text-ink-2">{w.title}</span>
         <span className="ml-auto flex shrink-0 items-center gap-1">
           <Button variant="ghost" size="sm" iconLeft={<Share2 />} onClick={share}>{t('common.share')}</Button>
           {!isOwner && <Button variant="ghost" size="sm" iconLeft={<Flag />} onClick={() => (user ? setReportOpen(true) : navigate(`/login?next=${encodeURIComponent(`/wanted/${w.id}`)}`))}>{t('common.report')}</Button>}

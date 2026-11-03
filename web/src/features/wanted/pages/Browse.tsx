@@ -200,7 +200,10 @@ export default function WantedBrowse() {
             value={view}
             onChange={(v) => setView(v)}
             label={t('wanted.browse.view')}
-            options={[{ value: 'list', label: t('wanted.browse.list'), icon: <List /> }, { value: 'map', label: t('wanted.browse.map'), icon: <MapIcon /> }]}
+            options={[
+              { value: 'list', label: isMobile ? null : t('wanted.browse.list'), ariaLabel: t('wanted.browse.list'), icon: <List /> },
+              { value: 'map', label: isMobile ? null : t('wanted.browse.map'), ariaLabel: t('wanted.browse.map'), icon: <MapIcon /> },
+            ]}
           />
         }
       >
@@ -211,8 +214,8 @@ export default function WantedBrowse() {
         )}
       </FilterBar>
 
-      <div className={cn('grid gap-4 py-4', view === 'map' && 'lg:grid-cols-[minmax(0,1fr)_minmax(360px,42%)]')}>
-        <div className="flex flex-col gap-3">
+      <div className={cn('grid grid-cols-1 gap-4 py-4', view === 'map' && 'lg:grid-cols-[minmax(0,1fr)_minmax(360px,42%)]')}>
+        <div className="flex min-w-0 flex-col gap-3">
           {query.isPending ? (
             <div className="flex flex-col gap-3" aria-busy>
               {Array.from({ length: 6 }, (_, i) => <Skeleton key={i} variant="row" height={120} />)}

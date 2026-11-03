@@ -19,10 +19,12 @@ export interface MatchRowProps {
   wantedId?: string;
   canAct?: boolean;
   defaultOpen?: boolean;
+  /** narrow containers (detail rail): score badge moves under the meta line */
+  compact?: boolean;
   className?: string;
 }
 
-export function MatchRow({ match, wantedId, canAct, defaultOpen, className }: MatchRowProps) {
+export function MatchRow({ match, wantedId, canAct, defaultOpen, compact, className }: MatchRowProps) {
   const t = useT();
   const { formatDate, formatRooms, formatDistance } = useLocale();
   const navigate = useNavigate();
@@ -82,7 +84,7 @@ export function MatchRow({ match, wantedId, canAct, defaultOpen, className }: Ma
                 </p>
               )}
             </div>
-            <ScoreBadge score={match.score} className="shrink-0" />
+            {!compact && <ScoreBadge score={match.score} className="shrink-0" />}
           </div>
           {l && (
             <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-small text-ink-3">
@@ -97,6 +99,7 @@ export function MatchRow({ match, wantedId, canAct, defaultOpen, className }: Ma
             </p>
           )}
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {compact && <ScoreBadge score={match.score} size="sm" />}
             {match.status !== 'new' && match.status !== 'seen' && (
               <Badge variant={match.status === 'dismissed' ? 'neutral' : 'info'} size="sm">{t(statusKey)}</Badge>
             )}

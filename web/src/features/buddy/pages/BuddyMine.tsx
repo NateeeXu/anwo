@@ -85,7 +85,7 @@ function MineInner() {
           <>
             <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {query.data.items.map((post) => (
-                <li key={post.id}>
+                <li key={post.id} className="min-w-0">
                   <BuddyCard post={post} />
                 </li>
               ))}

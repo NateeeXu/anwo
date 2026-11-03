@@ -50,7 +50,7 @@ export const WantedCard = forwardRef<HTMLElement, WantedCardProps>(function Want
       interactive
       padding="none"
       variant={highlighted ? 'outline-accent' : 'default'}
-      className={cn('flex gap-3 p-3 lg:gap-4 lg:p-4', closed && 'opacity-70', className)}
+      className={cn('flex min-w-0 gap-3 p-3 lg:gap-4 lg:p-4', closed && 'opacity-70', className)}
       data-status={wanted.status}
     >
       <Link to={`/wanted/${wanted.id}`} className="absolute inset-0 rounded-card" aria-label={wanted.title} />
