@@ -304,7 +304,7 @@ function notifyAlert(alert: ShuttleAlert, routeName: string | null): number {
   const prefix = routeName ? `${routeName}: ` : '';
   return notifyMany(audience, 'shuttle.alert', {
     title: { zh: `校车通知 · ${prefix}${alert.titleZh || alert.title}`, en: `Shuttle alert · ${prefix}${alert.title}` },
-    body: { zh: alert.bodyZh || alert.body || '', en: alert.body || alert.bodyZh || '' },
+    body: alert.body || alert.bodyZh ? { zh: alert.bodyZh || alert.body || '', en: alert.body || alert.bodyZh || '' } : null,
     link: alert.routeId ? `/shuttle/${alert.routeId}` : '/shuttle',
     entityType: 'shuttle_alert',
     entityId: alert.id,

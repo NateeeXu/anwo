@@ -71,8 +71,11 @@ await step('filters + sort + saved search', async () => {
   await page.waitForTimeout(300);
   await shot(page, MODULE, 'browse-price-filter');
   await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
   await page.getByRole('button', { name: '保存搜索' }).click();
-  await page.getByLabel('给这个搜索起个名字').fill('Evanston 带家具');
+  const dialog = page.getByRole('dialog');
+  await dialog.waitFor({ timeout: 5000 });
+  await dialog.getByRole('textbox').first().fill('Evanston 带家具');
   await page.getByRole('button', { name: '保存', exact: true }).click();
   await settle(page);
   const url = new URL(page.url());
@@ -148,9 +151,7 @@ await step('post wizard end-to-end', async () => {
   await page.getByRole('button', { name: '下一步' }).click();
   await page.getByLabel('标题').fill('Ridge Ave 2B1B 暑期转租 · Playwright 测试房源');
   await page.getByRole('button', { name: '下一步' }).click();
-  await page.getByRole('button', { name: '可租时间' }).click();
   await page.getByRole('button', { name: '整个暑假' }).click();
-  await page.keyboard.press('Escape').catch(() => {});
   await page.getByLabel('月租').fill('1450');
   await page.getByLabel('押金').fill('1450');
   await page.getByRole('button', { name: '下一步' }).click();

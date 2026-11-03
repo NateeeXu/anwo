@@ -10,7 +10,7 @@ import { CAMPUSES } from '@shared/campuses';
 import { Amenity, Furnished, GenderPref, LeaseType, ListingType, Parking, PropertyType } from '@shared/enums';
 import type { Listing, ListingCard as ListingCardDto } from '@shared/types';
 import type { ListingInput } from '@shared/schemas/listings';
-import { Button, Checkbox, DateRange, Input, PhotoUploader, SegmentedControl, Select, Switch, Textarea, type UploaderFile } from '@/components';
+import { Button, Checkbox, FilterChip, Input, PhotoUploader, SegmentedControl, Select, Switch, Textarea, type UploaderFile } from '@/components';
 import { MapView, pricePinIcon } from '@/components/map';
 import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
@@ -343,7 +343,19 @@ function Wizard({ editing }: { editing?: Listing }) {
 
           {step === 3 && (
             <>
-              <DateRange label={t('listings.wizard.dates')} hint={t('listings.wizard.datesHint')} value={{ start: d.availableFrom, end: d.openEnded ? null : d.availableTo }} onChange={(v) => set({ availableFrom: v.start, availableTo: v.end, openEnded: v.end ? false : d.openEnded })} presets={presets} months={isMobile ? 1 : 2} error={field('availableFrom') ?? field('availableTo')} />
+              <fieldset className="flex flex-col gap-2">
+                <legend className="text-small font-medium text-ink">{t('listings.wizard.dates')}</legend>
+                <div className="flex flex-wrap gap-2">
+                  {presets.map((p) => (
+                    <FilterChip key={p.key} size="sm" selected={d.availableFrom === p.start && d.availableTo === p.end && !d.openEnded} onClick={() => set({ availableFrom: p.start, availableTo: p.end, openEnded: false })}>{p.label}</FilterChip>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input type="date" label={t('listings.wizard.dateFrom')} value={d.availableFrom ?? ''} onChange={(e) => set({ availableFrom: e.target.value || null })} error={field('availableFrom')} required />
+                  <Input type="date" label={t('listings.wizard.dateTo')} value={d.openEnded ? '' : d.availableTo ?? ''} min={d.availableFrom ?? undefined} disabled={d.openEnded} onChange={(e) => set({ availableTo: e.target.value || null })} error={field('availableTo')} optional />
+                </div>
+                <p className="text-caption text-ink-3">{t('listings.wizard.datesHint')}</p>
+              </fieldset>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Checkbox label={t('listings.wizard.openEnded')} checked={d.openEnded} onChange={(e) => set({ openEnded: e.target.checked, availableTo: e.target.checked ? null : d.availableTo })} />
                 <Switch label={t('listings.wizard.flexible')} checked={d.flexibleDates} onChange={(v) => set({ flexibleDates: v })} size="sm" />

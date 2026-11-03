@@ -281,30 +281,30 @@ export default function Browse() {
 
       <VisuallyHidden><p aria-live="polite">{list.data ? t('listings.browse.resultsAnnounce', { count: total }) : ''}</p></VisuallyHidden>
 
-      {/* mobile */}
-      <div className="mt-4 md:hidden">
-        {view === 'map' ? (
-          <div className="relative -mx-4 h-[calc(100dvh-280px)] min-h-[380px]">
-            {map}
-            {items.length > 0 && (
-              <div className="absolute inset-x-0 bottom-3 z-layer-raised flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 no-scrollbar" ref={listRef}>
-                {items.map((l) => (
-                  <ListingCard key={l.id} listing={l} variant="row" active={l.id === activeId} visited={visited.has(l.id)} onClick={() => markVisited(l.id)} className="w-[300px] shrink-0 snap-center bg-surface shadow-md" />
-                ))}
-              </div>
-            )}
-            {!list.isLoading && items.length === 0 && <div className="absolute inset-x-4 top-4 z-layer-raised rounded-card bg-surface p-3 text-small text-ink-2 shadow-md">{t('listings.browse.emptyFiltered')}</div>}
-          </div>
-        ) : (
-          listBody
-        )}
-      </div>
-
-      {/* desktop split */}
-      <div className="mt-4 hidden gap-6 md:grid md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-        <div className="min-w-0">{listBody}</div>
-        <div className="sticky top-20 h-[calc(100vh-6.5rem)] min-h-[480px] overflow-hidden rounded-card border border-line bg-sunken">{map}</div>
-      </div>
+      {isMobile ? (
+        <div className="mt-4">
+          {view === 'map' ? (
+            <div className="relative -mx-4 h-[calc(100dvh-280px)] min-h-[380px]">
+              {map}
+              {items.length > 0 && (
+                <div className="absolute inset-x-0 bottom-3 z-layer-raised flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 no-scrollbar" ref={listRef}>
+                  {items.map((l) => (
+                    <ListingCard key={l.id} listing={l} variant="row" active={l.id === activeId} visited={visited.has(l.id)} onClick={() => markVisited(l.id)} className="w-[300px] shrink-0 snap-center bg-surface shadow-md" />
+                  ))}
+                </div>
+              )}
+              {!list.isLoading && items.length === 0 && <div className="absolute inset-x-4 top-4 z-layer-raised rounded-card bg-surface p-3 text-small text-ink-2 shadow-md">{t('listings.browse.emptyFiltered')}</div>}
+            </div>
+          ) : (
+            listBody
+          )}
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-6 md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          <div className="min-w-0">{listBody}</div>
+          <div className="sticky top-20 h-[calc(100vh-6.5rem)] min-h-[480px] overflow-hidden rounded-card border border-line bg-sunken">{map}</div>
+        </div>
+      )}
 
       <Sheet
         open={sheetOpen}
