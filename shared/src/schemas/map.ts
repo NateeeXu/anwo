@@ -192,3 +192,54 @@ export type CampusStat = {
 export type CampusStatsResponse = { campuses: CampusStat[]; totals: CampusStat['counts'] };
 
 export type CampusBoundsResponse = { center: { lat: number; lng: number }; bbox: [number, number, number, number]; defaultZoom: number; radiusM: number };
+
+// ---------------------------------------------------------------- POI suggestions (「补充地点」)
+export const PoiSuggestionStatus = ['pending', 'approved', 'rejected'] as const;
+export type PoiSuggestionStatus = (typeof PoiSuggestionStatus)[number];
+
+export const PoiSuggestionInput = z.object({
+  campusId: z.string().min(1).max(64),
+  name: z.string().trim().min(2).max(120),
+  nameZh: z.string().trim().max(120).optional().nullable(),
+  category: z.enum(PoiCategory),
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  address: z.string().trim().max(200).optional().nullable(),
+  url: z.string().trim().url().max(300).optional().nullable().or(z.literal('')),
+  note: z.string().trim().max(500).optional().nullable(),
+});
+export type PoiSuggestionInput = z.infer<typeof PoiSuggestionInput>;
+
+export const AdminSuggestionsQuery = z.object({
+  status: z.enum(PoiSuggestionStatus).optional(),
+  campusId: z.string().max(64).optional(),
+});
+
+/** Approve may tweak the fields before the POI is created. */
+export const SuggestionApproveInput = PoiSuggestionInput.omit({ note: true }).partial().extend({
+  tags: z.array(z.string().trim().min(1).max(30)).max(12).optional(),
+});
+export type SuggestionApproveInput = z.infer<typeof SuggestionApproveInput>;
+export const SuggestionRejectInput = z.object({ reason: z.string().trim().min(2).max(300) });
+export type SuggestionRejectInput = z.infer<typeof SuggestionRejectInput>;
+
+export type PoiSuggestion = {
+  id: string;
+  campusId: string;
+  campus: { id: string; shortName: string; city: string; state: string } | null;
+  userId: string | null;
+  user: { id: string; name: string; avatarUrl: string | null; trustLevel: number } | null;
+  name: string;
+  nameZh: string | null;
+  category: PoiCategory;
+  lat: number;
+  lng: number;
+  address: string | null;
+  url: string | null;
+  note: string | null;
+  status: PoiSuggestionStatus;
+  poiId: string | null;
+  reviewReason: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+};

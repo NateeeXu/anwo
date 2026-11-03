@@ -38,7 +38,7 @@ export default function ShuttleAdminPanel() {
   const { campuses, campusId: myCampus } = useCampus();
   const [params, setParams] = useSearchParams();
   const tab = (['alerts', 'requests', 'import'].includes(params.get('tab') ?? '') ? params.get('tab') : 'alerts') as AdminTab;
-  const [campusId, setCampusId] = useState<string>(params.get('campus') ?? myCampus ?? 'northwestern');
+  const [campusId, setCampusId] = useState<string>(params.get('campus') ?? myCampus ?? campuses[0]?.id ?? '');
   const campusOptions = useMemo(() => campuses.map((c) => ({ value: c.id, label: `${c.shortName} · ${c.city}, ${c.state}`, text: `${c.shortName} ${c.name} ${c.city}` })), [campuses]);
   const setTab = (k: AdminTab) => setParams((p) => { const n = new URLSearchParams(p); n.set('tab', k); return n; }, { replace: true });
   return (
@@ -48,7 +48,7 @@ export default function ShuttleAdminPanel() {
         title={t('shuttle.admin.title')}
         subtitle={t('shuttle.admin.subtitle')}
         tabs={<Tabs items={[{ key: 'alerts', label: t('shuttle.admin.tabs.alerts'), icon: <Megaphone /> }, { key: 'requests', label: t('shuttle.admin.tabs.requests') }, { key: 'import', label: t('shuttle.admin.tabs.import'), icon: <FileJson /> }]} value={tab} onChange={setTab} label={t('shuttle.admin.title')} />}
-        actions={<div className="w-full sm:w-72"><Select label={t('shuttle.admin.campus')} size="sm" searchable options={campusOptions} value={campusId} onChange={(v) => setCampusId(v ?? 'northwestern')} /></div>}
+        actions={<div className="w-full sm:w-72"><Select label={t('shuttle.admin.campus')} size="sm" searchable options={campusOptions} value={campusId} onChange={(v) => { if (v) setCampusId(v); }} /></div>}
       />
       {tab === 'alerts' ? <AlertsTab campusId={campusId} /> : null}
       {tab === 'requests' ? <RequestsTab /> : null}

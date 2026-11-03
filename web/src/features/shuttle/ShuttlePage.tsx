@@ -138,21 +138,7 @@ export default function ShuttlePage() {
   ) : selectedRoute ? (
     <RoutePanel route={selectedRoute} stops={data.stops} onBack={() => openRoute(null)} onStop={openStop} />
   ) : (
-    <>
-      <Tabs
-        items={[
-          { key: 'routes', label: t('shuttle.tabs.routes'), count: data.routes.length },
-          { key: 'stops', label: t('shuttle.tabs.stops'), count: data.stops.length },
-          { key: 'favorites', label: t('shuttle.tabs.favorites'), icon: <Star /> },
-        ]}
-        value={tab}
-        onChange={(k) => setParam({ tab: k === 'routes' ? null : k })}
-        label={t('shuttle.title')}
-      />
-      {tab === 'routes' ? <RouteList routes={data.routes} onSelect={openRoute} /> : null}
-      {tab === 'stops' ? <StopList stops={data.stops} onSelect={openStop} /> : null}
-      {tab === 'favorites' ? <FavoritesTab campusId={data.campus.id} onRoute={openRoute} onStop={openStop} /> : null}
-    </>
+    sidebarListFor(tab, data, setParam, openRoute, openStop, t)
   );
 
   const map = (
@@ -305,7 +291,7 @@ function RouteRow({ route, onSelect, selected }: { route: RouteListItem; onSelec
 
 function RouteList({ routes, onSelect }: { routes: RouteListItem[]; onSelect: (id: string) => void }) {
   return (
-    <ul className="flex flex-col gap-2" aria-label="routes">
+    <ul className="flex flex-col gap-2">
       {routes.map((r) => (
         <li key={r.id}><RouteRow route={r} onSelect={onSelect} /></li>
       ))}

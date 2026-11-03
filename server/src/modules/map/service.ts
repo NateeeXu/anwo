@@ -3,7 +3,7 @@
 // The scaffold geocode()/commuteEstimate() stay the implementation; this file adds caching (commute_cache),
 // the reverse lookup from local data, POI/layer queries and the nationwide campus stats used by the explore page.
 import type { Campus, ListingCard, Poi, ShuttleStop } from '@shared/types';
-import type { CampusStat, CommuteResponse, LayerCounts, LayersQuery, LayersResponse, MapLayer, MapPin, ReverseResponse, ShuttleRouteLite } from '@shared/schemas/map';
+import type { CampusStat, CommuteResponse, LayerCounts, LayersQuery, LayersResponse, MapLayer, PoiSuggestion, PoiSuggestionInput, ReverseResponse, ShuttleRouteLite, SuggestionApproveInput } from '@shared/schemas/map';
 import { LAYER_CARD_CAP, LAYER_PIN_CAP, MAP_LAYERS, MAX_BBOX_DEG } from '@shared/schemas/map';
 import { q, uid, parseJson, placeholders } from '../../db';
 import { allCampuses, getCampus } from '../../lib/campuses';
@@ -11,6 +11,9 @@ import { listingCards, type ListingCardRow } from '../../lib/cards';
 import { ApiError } from '../../lib/errors';
 import { bboxAround, fuzz, geocode as geocodeRaw, haversineM, nearestCampuses, round3, suggestCampus, type GeocodeOptions } from '../../lib/geo';
 import { logger } from '../../lib/logger';
+import { notify, notifyMany } from '../../lib/notify';
+import { avatarUrlFor } from '../../lib/users';
+import { publishRole } from '../../realtime/hub';
 import { commuteEstimate } from '../../lib/shuttle';
 import { nowIso } from '../../lib/time';
 
@@ -391,13 +394,6 @@ export function layersFor(p: LayersQuery, ctx: { viewerId?: string | null; isAdm
 
 // ---------------------------------------------------------------- nationwide campus bubbles
 export function campusStats(opts: { bbox?: Bbox4 } = {}): { campuses: CampusStat[]; totals: CampusStat['counts'] } {
-  const count = (sql: string, params: (string | number)[]) => {
-    try {
-      return q.count(sql, params);
-    } catch {
-      return 0;
-    }
-  };
   const perCampus = (sql: string): Map<string, number> => {
     const m = new Map<string, number>();
     try {
@@ -410,7 +406,6 @@ export function campusStats(opts: { bbox?: Bbox4 } = {}): { campuses: CampusStat
   const buddy = perCampus(`SELECT campus_id, COUNT(*) AS n FROM buddy_posts WHERE status IN ('open','full') AND moderation_status = 'ok' GROUP BY campus_id`);
   const stops = perCampus(`SELECT campus_id, COUNT(*) AS n FROM shuttle_stops WHERE is_active = 1 GROUP BY campus_id`);
   const pois = perCampus(`SELECT campus_id, COUNT(*) AS n FROM pois WHERE is_active = 1 GROUP BY campus_id`);
-  void count;
   const totals = { listings: 0, items: 0, buddy: 0, stops: 0, pois: 0 };
   const campuses = allCampuses({ activeOnly: true })
     .filter((c) => !opts.bbox || (c.lat >= opts.bbox[1] && c.lat <= opts.bbox[3] && c.lng >= opts.bbox[0] && c.lng <= opts.bbox[2]))
@@ -430,4 +425,129 @@ export function campusBounds(campus: Campus): { center: { lat: number; lng: numb
   const metersPerPx = (radiusM * 2) / 600;
   const z = Math.log2((156543.03 * Math.cos((campus.lat * Math.PI) / 180)) / metersPerPx);
   return { center: { lat: campus.lat, lng: campus.lng }, bbox: [b.minLng, b.minLat, b.maxLng, b.maxLat], defaultZoom: Math.max(3, Math.min(18, Math.round(z))), radiusM };
+}
+
+// ---------------------------------------------------------------- POI suggestions (「补充地点」)
+type SuggestionRow = {
+  id: string; campus_id: string; user_id: string | null; name: string; name_zh: string | null; category: string; lat: number; lng: number;
+  address: string | null; url: string | null; note: string | null; status: string; poi_id: string | null; reviewer_id: string | null;
+  review_reason: string | null; reviewed_at: string | null; created_at: string;
+  u_name?: string | null; u_trust?: number | null; u_avatar_upload_id?: string | null; u_avatar_url?: string | null;
+};
+
+const SUGGESTION_SELECT = `SELECT s.*, u.name AS u_name, u.trust_level AS u_trust, u.avatar_upload_id AS u_avatar_upload_id, au.url AS u_avatar_url
+  FROM poi_suggestions s LEFT JOIN users u ON u.id = s.user_id LEFT JOIN uploads au ON au.id = u.avatar_upload_id`;
+
+export function toSuggestionDto(r: SuggestionRow): PoiSuggestion {
+  const c = getCampus(r.campus_id);
+  return {
+    id: r.id, campusId: r.campus_id, campus: c ? { id: c.id, shortName: c.shortName, city: c.city, state: c.state } : null,
+    userId: r.user_id,
+    user: r.user_id && r.u_name ? { id: r.user_id, name: r.u_name, trustLevel: r.u_trust ?? 0, avatarUrl: avatarUrlFor({ avatar_upload_id: r.u_avatar_upload_id, avatar_url: r.u_avatar_url }) } : null,
+    name: r.name, nameZh: r.name_zh, category: r.category as PoiSuggestion['category'], lat: r.lat, lng: r.lng, address: r.address, url: r.url, note: r.note,
+    status: r.status as PoiSuggestion['status'], poiId: r.poi_id, reviewReason: r.review_reason, reviewedAt: r.reviewed_at, createdAt: r.created_at,
+  };
+}
+
+export function getSuggestion(id: string): PoiSuggestion | null {
+  const r = q.get<SuggestionRow>(`${SUGGESTION_SELECT} WHERE s.id = ?`, [id]);
+  return r ? toSuggestionDto(r) : null;
+}
+
+export function listSuggestions(opts: { status?: string; campusId?: string; userId?: string; limit?: number }): PoiSuggestion[] {
+  const where: string[] = [];
+  const params: (string | number)[] = [];
+  if (opts.status) { where.push('s.status = ?'); params.push(opts.status); }
+  if (opts.campusId) { where.push('s.campus_id = ?'); params.push(opts.campusId); }
+  if (opts.userId) { where.push('s.user_id = ?'); params.push(opts.userId); }
+  const rows = q.all<SuggestionRow>(
+    `${SUGGESTION_SELECT}${where.length ? ' WHERE ' + where.join(' AND ') : ''} ORDER BY (s.status = 'pending') DESC, s.created_at DESC LIMIT ?`,
+    [...params, Math.min(opts.limit ?? 200, 200)],
+  );
+  return rows.map(toSuggestionDto);
+}
+
+export function pendingSuggestionCount(): number {
+  return q.count(`SELECT COUNT(*) FROM poi_suggestions WHERE status = 'pending'`);
+}
+
+/** Within 40 km of the campus (a suggestion must belong to the campus it is filed under). */
+export function suggestionInCampusRange(campus: Campus, lat: number, lng: number): boolean {
+  return haversineM({ lat, lng }, campus) <= 40_000;
+}
+
+/** Duplicate guard: an active POI or pending suggestion with the same name within 120 m. */
+export function findDuplicatePlace(campusId: string, name: string, lat: number, lng: number): { kind: 'poi' | 'suggestion'; id: string } | null {
+  const box = bboxAround(lat, lng, 120);
+  const norm = name.trim().toLowerCase();
+  const poi = q.all<{ id: string; name: string; name_zh: string | null }>(
+    'SELECT id, name, name_zh FROM pois WHERE campus_id = ? AND is_active = 1 AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?',
+    [campusId, box.minLat, box.maxLat, box.minLng, box.maxLng],
+  ).find((p) => p.name.toLowerCase() === norm || (p.name_zh ?? '').toLowerCase() === norm);
+  if (poi) return { kind: 'poi', id: poi.id };
+  const sug = q.all<{ id: string; name: string; name_zh: string | null }>(
+    `SELECT id, name, name_zh FROM poi_suggestions WHERE campus_id = ? AND status = 'pending' AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ?`,
+    [campusId, box.minLat, box.maxLat, box.minLng, box.maxLng],
+  ).find((p) => p.name.toLowerCase() === norm || (p.name_zh ?? '').toLowerCase() === norm);
+  return sug ? { kind: 'suggestion', id: sug.id } : null;
+}
+
+export function createSuggestion(userId: string, body: PoiSuggestionInput): PoiSuggestion {
+  const id = uid();
+  q.insert('poi_suggestions', {
+    id, campus_id: body.campusId, user_id: userId, name: body.name, name_zh: body.nameZh || null, category: body.category, lat: body.lat, lng: body.lng,
+    address: body.address || null, url: body.url || null, note: body.note || null, status: 'pending', created_at: nowIso(),
+  });
+  const s = getSuggestion(id)!;
+  // ping the admins: bell + live queue counter
+  const admins = q.all<{ id: string }>(`SELECT id FROM users WHERE role = 'admin' AND deleted_at IS NULL AND banned = 0`).map((r) => r.id);
+  notifyMany(admins, 'system', {
+    title: { zh: `新地点待审核：${body.nameZh || body.name}`, en: `New place to review: ${body.name}` },
+    body: { zh: `${s.campus?.shortName ?? ''} · ${s.user?.name ?? ''} 提交了一个校园地点。`, en: `${s.user?.name ?? 'A student'} suggested a place near ${s.campus?.shortName ?? 'campus'}.` },
+    link: '/admin/map?tab=suggestions', entityType: 'poi_suggestion', entityId: id, data: { campusId: body.campusId },
+  });
+  try {
+    publishRole('admin', { type: 'admin.queue', data: { queue: 'poi_suggestions', delta: 1, count: pendingSuggestionCount() } });
+  } catch { /* hub not running (seed / tests) */ }
+  return s;
+}
+
+export function approveSuggestion(id: string, reviewerId: string, patch: SuggestionApproveInput): { suggestion: PoiSuggestion; poi: Poi } {
+  const s = getSuggestion(id);
+  if (!s) throw new ApiError('NOT_FOUND', 'Suggestion not found');
+  if (s.status !== 'pending') throw new ApiError('INVALID_STATE', `Suggestion is ${s.status}`, { data: { from: s.status, to: 'approved' } });
+  const poiId = uid();
+  const now = nowIso();
+  q.tx(() => {
+    q.insert('pois', {
+      id: poiId, campus_id: patch.campusId ?? s.campusId, name: patch.name ?? s.name, name_zh: (patch.nameZh ?? s.nameZh) || null, category: patch.category ?? s.category,
+      lat: patch.lat ?? s.lat, lng: patch.lng ?? s.lng, address: (patch.address ?? s.address) || null, url: (patch.url ?? s.url) || null, icon: null,
+      tags_json: JSON.stringify(patch.tags ?? ['community']), is_active: 1, sort_order: 50, created_at: now,
+    });
+    q.update('poi_suggestions', { status: 'approved', poi_id: poiId, reviewer_id: reviewerId, reviewed_at: now, review_reason: null }, 'id = ?', [id]);
+  });
+  const poi = toPoiDto(getPoiRow(poiId)!);
+  if (s.userId) {
+    notify(s.userId, 'system', {
+      title: { zh: `你补充的地点已上线：${s.nameZh || s.name}`, en: `Your place is on the map: ${s.name}` },
+      body: { zh: '谢谢你，其他同学现在也能在地图上看到它了。', en: 'Thanks — other students can now find it on the map.' },
+      link: `/map?c=${poi.lat.toFixed(5)},${poi.lng.toFixed(5)}&z=17&layers=pois&sel=poi:${poi.id}`, entityType: 'poi', entityId: poi.id,
+    });
+  }
+  return { suggestion: getSuggestion(id)!, poi };
+}
+
+export function rejectSuggestion(id: string, reviewerId: string, reason: string): PoiSuggestion {
+  const s = getSuggestion(id);
+  if (!s) throw new ApiError('NOT_FOUND', 'Suggestion not found');
+  if (s.status !== 'pending') throw new ApiError('INVALID_STATE', `Suggestion is ${s.status}`, { data: { from: s.status, to: 'rejected' } });
+  q.update('poi_suggestions', { status: 'rejected', reviewer_id: reviewerId, reviewed_at: nowIso(), review_reason: reason }, 'id = ?', [id]);
+  if (s.userId) {
+    notify(s.userId, 'system', {
+      title: { zh: `地点未通过审核：${s.nameZh || s.name}`, en: `Place not added: ${s.name}` },
+      body: { zh: `原因：${reason}`, en: `Reason: ${reason}` },
+      link: '/map?suggestions=mine', entityType: 'poi_suggestion', entityId: id,
+    });
+  }
+  return getSuggestion(id)!;
 }

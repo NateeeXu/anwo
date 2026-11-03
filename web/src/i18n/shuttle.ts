@@ -275,6 +275,8 @@ export default {
     'shuttle.favoritesLogin': 'Log in to save stops and routes',
     'shuttle.favoritesLoginHint': 'Saved stops show their next departure here, and you get alerts for saved routes.',
     'shuttle.login': 'Log in',
+    'shuttle.favoriteRoutes': 'Saved routes',
+    'shuttle.favoriteStops': 'Saved stops',
     'shuttle.searchStops': 'Search stops',
     'shuttle.noStopsMatch': 'No stops match',
     'shuttle.nearMe': 'Near me',
