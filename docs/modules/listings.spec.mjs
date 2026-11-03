@@ -78,7 +78,7 @@ await step('filters + sort + saved search', async () => {
   await shot(page, MODULE, 'browse-price-filter');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
-  await page.getByRole('button', { name: '保存搜索' }).click();
+  await page.getByRole('button', { name: '保存搜索', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await dialog.waitFor({ timeout: 5000 });
   await dialog.getByRole('textbox').first().fill('Evanston 带家具');
@@ -93,6 +93,7 @@ await step('filters + sort + saved search', async () => {
 
 await step('detail desktop', async () => {
   await page.goto(`/listings/${firstId}`);
+  await page.locator('h1').first().waitFor({ timeout: 15000 });
   await settle(page, 1200);
   if (!(await page.locator('h1').first().textContent())) throw new Error('no title');
   await shot(page, MODULE, 'detail-desktop');
@@ -168,7 +169,7 @@ await step('post wizard end-to-end', async () => {
   await page.locator('input[type=file]').first().setInputFiles({ name: 'room.png', mimeType: 'image/png', buffer: png });
   await page.waitForTimeout(1500);
   await shot(page, MODULE, 'wizard-step5');
-  await page.getByRole('button', { name: /^发布$/ }).click();
+  await page.locator('form').getByRole('button', { name: /^发布$/ }).click();
   await page.waitForURL(/\/listings\/[0-9a-f-]+\/success/, { timeout: 15000 });
   await settle(page, 800);
   await shot(page, MODULE, 'post-success');

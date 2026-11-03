@@ -125,6 +125,7 @@ await step('create', async () => {
   await page.getByRole('button', { name: '带家具', exact: true }).first().click();
   const map = page.locator('.leaflet-container').first();
   await map.waitFor({ timeout: 15000 });
+  await map.scrollIntoViewIfNeeded();
   await page.waitForTimeout(800);
   const box = await map.boundingBox();
   await page.mouse.click(box.x + box.width * 0.45, box.y + box.height * 0.55);
@@ -134,7 +135,7 @@ await step('create', async () => {
   await page.locator('form').getByRole('button', { name: '发布' }).click();
   await page.waitForURL(/\/wanted\/[0-9a-f-]{36}$/, { timeout: 20000 });
   createdId = page.url().split('/').pop();
-  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1:has-text("Playwright")', { timeout: 20000 });
   expect((await page.locator('h1.text-h1').textContent() || '').includes('Playwright'), 'created post opens its detail page');
   await page.waitForTimeout(800);
   await shot(page, 'post-created');
@@ -146,10 +147,11 @@ await step('offer', async () => {
   const { context, page } = await newPage(browser);
   await login(page, 'chloe.deng@u.northwestern.edu');
   await page.goto('/wanted/wseed-w-19');
-  await page.waitForSelector('h1.text-h1', { timeout: 20000 });
+  await page.waitForSelector('h1.text-h1:has-text("合租")', { timeout: 20000 });
   await page.getByRole('button', { name: '我有房源，推荐给 TA' }).click();
-  await page.waitForSelector('[role="radio"]', { timeout: 20000 });
-  await page.locator('[role="radio"]').first().click();
+  const dialog = page.getByRole('dialog');
+  await dialog.locator('[role="radiogroup"] [role="radio"]').first().waitFor({ timeout: 20000 });
+  await dialog.locator('[role="radiogroup"] [role="radio"]').first().click();
   await page.getByLabel('打个招呼').fill('你好！我的 1B1B 1 月初可入住，带家具，离 Davis 站 5 分钟，欢迎约看。');
   await shot(page, 'offer-modal');
   await page.getByRole('button', { name: '发送推荐' }).click();
