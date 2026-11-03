@@ -19,7 +19,7 @@ export function SecurePaymentCta({ listingId, counterpartyId, className, compact
     return (
       <p className={cn('flex items-start gap-2 text-caption text-ink-3', className)}>
         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
-        <span>{t('billing.secure.ctaAnon')} <Link to={`/login?next=${encodeURIComponent(`/listings/${listingId}`)}`} className="text-accent-text underline">{t('nav.login')}</Link></span>
+        <span>{t('billing.secure.ctaAnon')} <Link to={`/login?next=${encodeURIComponent(`/listings/${listingId}`)}`} className="text-accent-text underline">{t('auth.login')}</Link></span>
       </p>
     );
   }

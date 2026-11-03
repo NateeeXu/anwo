@@ -290,6 +290,7 @@ export default function MapExplorePage() {
   };
   const searchAround = (point: LatLng, radiusM = 800) => {
     const r = { center: point, radiusM };
+    select(null); // the circle and its results take over from the single selection
     setDrawMode(true);
     setRadius(r);
     setSource('draw');
