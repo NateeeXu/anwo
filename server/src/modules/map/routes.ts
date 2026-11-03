@@ -8,16 +8,19 @@
 //   GET  /campus-suggest     public         nearest campuses for a point (≤ 40 km → suggested)
 //   GET  /campus-stats       public         one bubble per campus with counts (nationwide mode)
 //   GET  /campus/:id/bounds  public
-//   admin: /admin/pois (GET, POST, PATCH /:id, DELETE /:id), DELETE /admin/geocode-cache, GET /admin/stats
+//   POST /suggestions        user (L1+)     suggest a missing campus place → admin review queue (bell to admins)
+//   GET  /suggestions/mine   user           my suggestions with review status
+//   admin: /admin/pois (GET, POST, PATCH /:id, DELETE /:id), DELETE /admin/geocode-cache, GET /admin/stats,
+//          GET /admin/suggestions, POST /admin/suggestions/:id/approve | /reject (suggester is notified)
 import { Router } from 'express';
 import { z } from 'zod';
 import { idParam } from '@shared/schemas/common';
-import { AdminPoisQuery, CampusStatsQuery, CampusSuggestQuery, CommuteQuery, GeocodeCacheClearInput, GeocodeQuery, LayersQuery, PoiInput, PoiUpdateInput, PoisQuery, ReverseQuery } from '@shared/schemas/map';
+import { AdminPoisQuery, AdminSuggestionsQuery, CampusStatsQuery, CampusSuggestQuery, CommuteQuery, GeocodeCacheClearInput, GeocodeQuery, LayersQuery, PoiInput, PoiSuggestionInput, PoiUpdateInput, PoisQuery, ReverseQuery, SuggestionApproveInput, SuggestionRejectInput } from '@shared/schemas/map';
 import type { GeocodeHit } from '@shared/schemas/map';
 import { config } from '../../config';
 import { q, uid, type SqlParam } from '../../db';
 import { audit } from '../../lib/audit';
-import { isAdmin, requireAdmin, requireAuth } from '../../lib/auth';
+import { isAdmin, requireAdmin, requireAuth, requireTrust } from '../../lib/auth';
 import { getCampus } from '../../lib/campuses';
 import { ApiError, asyncHandler } from '../../lib/errors';
 import { logEvent } from '../../lib/events';
@@ -25,7 +28,7 @@ import { suggestCampus } from '../../lib/geo';
 import { ok, parseBody, parseParams, parseQuery } from '../../lib/http';
 import { rateLimit } from '../../lib/ratelimit';
 import { nowIso } from '../../lib/time';
-import { campusBounds, campusStats, commuteCached, geocode, getPoiRow, layersFor, listPois, parseLayerBbox, reverseLocal, toPoiDto } from './service';
+import { approveSuggestion, campusBounds, campusStats, commuteCached, createSuggestion, findDuplicatePlace, geocode, getPoiRow, layersFor, listPois, listSuggestions, parseLayerBbox, pendingSuggestionCount, rejectSuggestion, reverseLocal, suggestionInCampusRange, toPoiDto } from './service';
 
 const router = Router();
 
@@ -102,7 +105,45 @@ router.get('/campus/:id/bounds', (req, res) => {
   ok(res, campusBounds(campus));
 });
 
+// ---------------------------------------------------------------- suggestions (students → admin queue)
+router.post('/suggestions', requireAuth, requireTrust(1), rateLimit({ name: 'map-suggest', limit: 10, windowMs: 60 * 60_000 }), (req, res) => {
+  const body = parseBody(req, PoiSuggestionInput);
+  const campus = getCampus(body.campusId);
+  if (!campus) throw new ApiError('VALIDATION', 'Unknown campus', { fields: { campusId: 'unknown campus' } });
+  if (!suggestionInCampusRange(campus, body.lat, body.lng)) throw new ApiError('VALIDATION', 'Place is too far from this campus', { fields: { lat: 'too far from campus' } });
+  const dup = findDuplicatePlace(campus.id, body.name, body.lat, body.lng);
+  if (dup) throw new ApiError('CONFLICT', dup.kind === 'poi' ? 'This place is already on the map' : 'Someone already suggested this place', { data: dup });
+  const s = createSuggestion(req.user!.id, body);
+  logEvent(req, 'map.poi_suggest', { entityType: 'poi_suggestion', entityId: s.id, campusId: campus.id, props: { category: body.category } });
+  ok(res, s, 201);
+});
+
+router.get('/suggestions/mine', requireAuth, (req, res) => {
+  ok(res, listSuggestions({ userId: req.user!.id, limit: 50 }));
+});
+
 // ---------------------------------------------------------------- admin
+router.get('/admin/suggestions', requireAdmin, (req, res) => {
+  const p = parseQuery(req, AdminSuggestionsQuery);
+  ok(res, { items: listSuggestions({ status: p.status, campusId: p.campusId }), pending: pendingSuggestionCount() });
+});
+
+router.post('/admin/suggestions/:id/approve', requireAdmin, (req, res) => {
+  const { id } = parseParams(req, idParam);
+  const body = parseBody(req, SuggestionApproveInput);
+  const out = approveSuggestion(id, req.user!.id, body);
+  audit(req, { action: 'poi_suggestion.approve', entityType: 'poi_suggestion', entityId: id, after: { poiId: out.poi.id, name: out.poi.name } });
+  ok(res, out);
+});
+
+router.post('/admin/suggestions/:id/reject', requireAdmin, (req, res) => {
+  const { id } = parseParams(req, idParam);
+  const body = parseBody(req, SuggestionRejectInput);
+  const s = rejectSuggestion(id, req.user!.id, body.reason);
+  audit(req, { action: 'poi_suggestion.reject', entityType: 'poi_suggestion', entityId: id, reason: body.reason });
+  ok(res, s);
+});
+
 router.get('/admin/pois', requireAdmin, (req, res) => {
   const p = parseQuery(req, AdminPoisQuery);
   const rows = listPois({ campusId: p.campusId, categories: p.category ? [p.category] : undefined, q: p.q, includeInactive: p.includeInactive ?? true, limit: 500 });
@@ -121,6 +162,7 @@ router.get('/admin/stats', requireAdmin, (_req, res) => {
     },
     commuteCache: q.count('SELECT COUNT(*) FROM commute_cache'),
     pois: { total: q.count('SELECT COUNT(*) FROM pois'), active: q.count('SELECT COUNT(*) FROM pois WHERE is_active = 1') },
+    suggestions: { pending: pendingSuggestionCount() },
     byCampus: q.all<{ campusId: string; n: number }>('SELECT campus_id AS campusId, COUNT(*) AS n FROM pois WHERE is_active = 1 GROUP BY campus_id ORDER BY n DESC'),
     offline: config.geocodeOffline,
   });

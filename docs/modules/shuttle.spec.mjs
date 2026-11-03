@@ -11,16 +11,12 @@
 // dark mode · English route detail. Exit 1 on any `pageerror`, 2 when the app is unreachable.
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
+import { openApp, login as apiLogin, shot as takeShot, finish, DESKTOP, MOBILE } from '../tools/shot.mjs';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(HERE, '..', '..');
+const ROOT = '/home/user/campus-sublet';
 const WEB_PORT = Number(process.env.WEB_PORT || 5106);
 const OUT = path.join(ROOT, 'docs', 'screenshots', 'shuttle');
 const BASE = `http://127.0.0.1:${WEB_PORT}`;
-const DESKTOP = { width: 1280, height: 800 };
-const MOBILE = { width: 390, height: 844 };
 const H = { 'X-Requested-With': 'fetch' };
 const RUN = Date.now().toString(36);
 
@@ -29,39 +25,29 @@ const ROUTE_IC = 'seed-shuttle-route-northwestern-intercampus-shuttle-evanston-c
 const STOP_NOYES = 'seed-shuttle-stop-northwestern-noyes';
 const STOP_TECH = 'seed-shuttle-stop-northwestern-tech';
 
-async function loadPlaywright() {
-  try {
-    return (await import('playwright')).chromium;
-  } catch {
-    return createRequire(import.meta.url)('playwright').chromium;
-  }
-}
-
 const errors = [];
+const consoleErrors = [];
+// network noise in the sandbox: OSM tiles are unreachable, favicon probes
+const NOISE = /favicon|net::ERR|Failed to load resource|tile\.openstreetmap/;
 function watch(page, label) {
   page.on('pageerror', (e) => { errors.push(`[${label}] ${e.message}`); console.error('[pageerror]', label, e.message); });
-  page.on('console', (m) => { if (m.type() === 'error' && !/favicon|net::ERR|Failed to load resource|tile\.openstreetmap/.test(m.text())) console.error('[console.error]', label, m.text()); });
+  page.on('console', (m) => { if (m.type() === 'error' && !NOISE.test(m.text())) { consoleErrors.push(`[${label}] ${m.text()}`); console.error('[console.error]', label, m.text()); } });
 }
-async function shot(page, name, opts = {}) {
-  fs.mkdirSync(OUT, { recursive: true });
-  await page.waitForLoadState('networkidle').catch(() => {});
-  await page.waitForTimeout(400);
-  const file = path.join(OUT, `${name}.png`);
-  await page.screenshot({ path: file, ...opts });
-  console.log('[shot]', path.relative(ROOT, file));
-}
+const shot = (page, name, opts) => takeShot(page, 'shuttle', name, opts);
+
+/** Logs in through shot.mjs (real POST /api/auth/login; contexts carry the CSRF header) and pins the profile campus. */
 async function login(page, email, campusId = 'northwestern') {
-  const r = await page.request.post(`${BASE}/api/dev/login-as`, { data: { email }, headers: H });
-  if (!r.ok()) throw new Error(`login-as ${email} failed: ${r.status()}`);
-  const me = (await r.json()).data;
+  await apiLogin(page, email);
+  const me = (await (await page.request.get('/api/auth/me')).json()).data;
+  if (!me?.id) throw new Error(`login ${email} failed`);
   // the shell prefers the profile campus over the cookie once logged in; the admin seed account has none
-  if (campusId && me.campusId !== campusId) await page.request.patch(`${BASE}/api/users/me`, { data: { campusId }, headers: H }).catch(() => {});
+  if (campusId && me.campusId !== campusId) await page.request.patch('/api/users/me', { data: { campusId }, headers: H }).catch(() => {});
   return me;
 }
 const assert = (cond, msg) => { if (!cond) throw new Error(`assertion failed: ${msg}`); };
 
-async function newContext(browser, { viewport = DESKTOP, campus = 'northwestern', lang = 'zh-CN', dark = false } = {}) {
-  const context = await browser.newContext({ baseURL: BASE, viewport, deviceScaleFactor: 1, locale: lang, colorScheme: dark ? 'dark' : 'light' });
+async function prepareContext(context, { campus = 'northwestern', lang = 'zh-CN', dark = false } = {}) {
+  await context.setExtraHTTPHeaders(H);
   await context.addCookies([
     { name: 'campus', value: campus, url: BASE },
     { name: 'lang', value: lang, url: BASE },
@@ -69,19 +55,23 @@ async function newContext(browser, { viewport = DESKTOP, campus = 'northwestern'
   await context.addInitScript((theme) => { try { localStorage.setItem('theme', theme); localStorage.setItem('anwo.scope', JSON.stringify('campus')); } catch {} }, dark ? 'dark' : 'light');
   return context;
 }
+async function newContext(browser, { viewport = DESKTOP, campus, lang = 'zh-CN', dark = false } = {}) {
+  const context = await browser.newContext({ baseURL: BASE, viewport, deviceScaleFactor: 1, locale: lang, colorScheme: dark ? 'dark' : 'light' });
+  return prepareContext(context, { campus, lang, dark });
+}
 
 async function main() {
-  const chromium = await loadPlaywright();
   const health = await fetch(`${BASE}/api/meta/health`).then((r) => r.ok).catch(() => false);
   if (!health) { console.error('app not reachable on', BASE); process.exit(2); }
-  const browser = await chromium.launch();
+  const app = await openApp({ webPort: WEB_PORT, viewport: DESKTOP, lang: 'zh' });
+  const browser = app.browser;
   let createdAlertId = null;
 
   try {
     // ------------------------------------------------------------ 1. anonymous browse (desktop)
     {
-      const ctx = await newContext(browser);
-      const page = await ctx.newPage();
+      const ctx = await prepareContext(app.context);
+      const page = app.page;
       watch(page, 'browse-anon');
       await page.goto('/shuttle');
       await page.locator('#main').getByRole('heading', { level: 1 }).waitFor();
@@ -89,6 +79,16 @@ async function main() {
       assert(await page.locator('[role="region"][aria-label]').count() >= 1, 'alerts banner rendered');
       assert(await page.locator('.leaflet-container').count() === 1, 'map rendered');
       await shot(page, 'browse-desktop');
+
+      // API contract checks that the UI relies on (public, no auth)
+      const nearby = (await (await page.request.get('/api/shuttle/nearby?campusId=northwestern&lat=42.0571&lng=-87.6768&limit=3')).json()).data;
+      assert(nearby.stops.length >= 1 && nearby.stops[0].distanceM < 300, `nearby stops (${nearby.stops.length})`);
+      // NYU Route F runs until 01:40 on weekends: at Sun 00:30 New York time the Saturday service day's 24:40 trip shows as 00:40
+      const lateNight = (await (await page.request.get('/api/shuttle/stops/seed-shuttle-stop-nyu-lafayette-hall/next?at=2026-11-08T05:30:00Z&limit=3')).json()).data;
+      assert(lateNight.departures.some((d) => d.time === '00:40' && d.inMinutes === 10), `after-midnight departures ${JSON.stringify(lateNight.departures)}`);
+      // headway route synthesised from first + k * headway at the campus-local clock (Campus Loop every 20 min from 07:00, Tech +3)
+      const headway = (await (await page.request.get(`/api/shuttle/stops/${STOP_TECH}/next?at=2026-11-04T14:00:00Z&limit=10`)).json()).data;
+      assert(headway.departures.some((d) => d.routeId === ROUTE_LOOP && d.time === '08:03'), `headway departures ${JSON.stringify(headway.departures.map((d) => d.time))}`);
       await ctx.close();
     }
 
@@ -233,6 +233,17 @@ async function main() {
       const after = await (await page.request.get(`${BASE}/api/shuttle/admin/alerts?campusId=northwestern&pageSize=50`)).json();
       const deactivated = after.data.items.find((a) => a.id === createdAlertId);
       assert(deactivated && !deactivated.isActive, 'alert deactivated');
+      // admin import round-trip: export UIUC into the editor and import it again (idempotent — ids and counts unchanged)
+      const before = (await (await page.request.get('/api/shuttle/routes?campusId=uiuc&activeOnly=false')).json()).data;
+      await page.goto('/shuttle/admin?tab=import&campus=uiuc');
+      await page.getByRole('button', { name: /导出当前校区/ }).click();
+      await page.waitForFunction(() => (document.querySelector('textarea')?.value ?? '').includes('22 Illini'));
+      await page.getByRole('button', { name: /^导入$/ }).click();
+      await page.getByText(/导入完成/).first().waitFor();
+      await shot(page, 'admin-import-desktop');
+      const afterImport = (await (await page.request.get('/api/shuttle/routes?campusId=uiuc&activeOnly=false')).json()).data;
+      assert(afterImport.length === before.length && afterImport.every((r) => before.some((b) => b.id === r.id && b.stopCount === r.stopCount)), 'import round-trip keeps route ids');
+
       // requests tab (mobile stacks the table)
       await page.goto('/shuttle/admin?tab=requests');
       await page.getByText(/Purdue/).first().waitFor();
@@ -267,19 +278,19 @@ async function main() {
   } finally {
     // clean up the spec alert so repeated runs do not pile up
     if (createdAlertId) {
-      const ctx = await browser.newContext({ baseURL: BASE });
+      const ctx = await newContext(browser);
       const page = await ctx.newPage();
       await login(page, 'admin@example.edu').catch(() => {});
       await page.request.delete(`${BASE}/api/shuttle/admin/alerts/${createdAlertId}`, { headers: H }).catch(() => {});
       await ctx.close();
     }
-    await browser.close();
+    await finish(browser);
   }
 
-  const summary = { ok: errors.length === 0, errors, run: RUN, at: new Date().toISOString() };
+  const summary = { ok: errors.length === 0 && consoleErrors.length === 0, errors, consoleErrors, run: RUN, at: new Date().toISOString() };
   fs.writeFileSync(path.join(OUT, 'summary.json'), JSON.stringify(summary, null, 2));
-  if (errors.length) {
-    console.error('page errors:', errors);
+  if (errors.length || consoleErrors.length) {
+    console.error('page errors:', errors, 'console errors:', consoleErrors);
     process.exit(1);
   }
   console.log('shuttle spec OK');

@@ -1,5 +1,6 @@
 // server/src/db/seed/map.ts — OWNED BY THE `map` MODULE AGENT.
 // Campus POIs (Northwestern ≈ 44, UIUC / NYU / USC ≈ 12–14 each) with bilingual names and real-street coordinates,
+// student place suggestions (pending / approved / rejected) for the admin queue,
 // a warmed forward-geocode cache for the Evanston / Champaign / Manhattan / LA addresses the demo listings use
 // (so the geocode search answers with rooftop precision even with GEOCODE_OFFLINE=1), and a few map analytics events.
 //
@@ -10,7 +11,7 @@ import { q } from '../index';
 import { logEvent } from '../../lib/events';
 import { nowIso, isoPlus, HOUR, DAY } from '../../lib/time';
 
-export const version = 2;
+export const version = 3;
 
 const PREFIX = 'seed-poi-';
 const GEO_PREFIX = 'seed-geo-';
@@ -221,5 +222,32 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
       logEvent(null, e.type, { userId: e.userId, campusId: e.campusId, entityType: 'campus', entityId: e.campusId, props: e.props, ts: isoPlus(-e.ago), path: '/map' });
     }
     void n;
+
+    // student suggestions (「补充地点」): two pending for the admin queue, one approved, one rejected
+    q.run(`DELETE FROM poi_suggestions WHERE id LIKE 'seed-sug-%'`);
+    const admin = q.get<{ id: string }>('SELECT id FROM users WHERE email = ?', ['admin@example.edu'])?.id ?? null;
+    const uiucUser = q.get<{ id: string }>(`SELECT id FROM users WHERE campus_id = 'uiuc' AND role = 'student' ORDER BY email LIMIT 1`)?.id ?? null;
+    const sug: { id: string; campus: string; user: string | null; name: string; nameZh: string; category: PoiCategory; lat: number; lng: number; address: string; note: string; status: 'pending' | 'approved' | 'rejected'; reason?: string; ago: number }[] = [
+      { id: 'seed-sug-01', campus: 'northwestern', user: bob, name: 'Clarke\'s Off Campus', nameZh: 'Clarke\'s 24 小时餐厅', category: 'dining', lat: 42.0466, lng: -87.6817, address: '720 Clark St, Evanston, IL 60201', note: '凌晨也开门，考试周复习完可以来吃。Open late during finals.', status: 'pending', ago: 6 * HOUR },
+      { id: 'seed-sug-02', campus: 'northwestern', user: alice, name: 'Evanston Farmers Market', nameZh: 'Evanston 农夫市集', category: 'grocery', lat: 42.0455, lng: -87.6845, address: 'University Pl & Oak Ave, Evanston, IL 60201', note: '5–11 月每周六上午，蔬果比超市便宜。Saturdays May–Nov.', status: 'pending', ago: 2 * DAY },
+      { id: 'seed-sug-03', campus: 'northwestern', user: alice, name: 'Northwestern Bookstore', nameZh: '西北大学书店', category: 'building', lat: 42.0533, lng: -87.6729, address: '1999 Campus Dr, Evanston, IL 60208', note: 'Norris 一楼，买教材和文具。', status: 'rejected', reason: 'Already covered by Norris University Center.', ago: 9 * DAY },
+      { id: 'seed-sug-04', campus: 'uiuc', user: uiucUser, name: 'Green Street Bubble Tea', nameZh: 'Green 街奶茶店', category: 'dining', lat: 40.1102, lng: -88.2318, address: '611 E Green St, Champaign, IL 61820', note: 'Popular after-class spot.', status: 'pending', ago: 30 * HOUR },
+    ];
+    for (const g of sug) {
+      if (!campusIds.has(g.campus)) continue;
+      q.insert('poi_suggestions', {
+        id: g.id, campus_id: g.campus, user_id: g.user, name: g.name, name_zh: g.nameZh, category: g.category, lat: g.lat, lng: g.lng, address: g.address, url: null,
+        note: g.note, status: g.status, poi_id: null, reviewer_id: g.status === 'pending' ? null : admin, review_reason: g.reason ?? null,
+        reviewed_at: g.status === 'pending' ? null : isoPlus(-g.ago + DAY), created_at: isoPlus(-g.ago),
+      });
+    }
+    // approved example → points at the seeded Kung Fu Tea POI
+    if (campusIds.has('northwestern')) {
+      q.insert('poi_suggestions', {
+        id: 'seed-sug-05', campus_id: 'northwestern', user_id: bob, name: 'Kung Fu Tea', name_zh: '功夫茶', category: 'dining', lat: 42.0479, lng: -87.6821,
+        address: '1609 Sherman Ave, Evanston, IL 60201', url: null, note: '珍奶第二杯半价（周二）。', status: 'approved', poi_id: `${PREFIX}northwestern-kung-fu-tea`,
+        reviewer_id: admin, review_reason: null, reviewed_at: isoPlus(-12 * DAY), created_at: isoPlus(-14 * DAY),
+      });
+    }
   });
 }
