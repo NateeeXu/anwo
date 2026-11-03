@@ -191,13 +191,24 @@ export default function MapExplorePage() {
     if (!isDesktop) setDrawerOpen(false);
   }, [isDesktop, write]);
 
+  // Keep the selected pin in the part of the map the selection panel does not cover
+  // (desktop: left of the bottom-right panel · mobile: between the search card and the panel).
   useEffect(() => {
     if (!selection || !mapRef.current) return;
-    const p = selectionPoint(selection);
     const map = mapRef.current;
-    if (!map.getBounds().pad(-0.15).contains([p.lat, p.lng])) flyTo(p.lat, p.lng, Math.max(map.getZoom(), 15));
+    const p = selectionPoint(selection);
+    const size = map.getSize();
+    const target = isDesktop ? { x: Math.max(160, (size.x - 72 - 380) / 2 + 24), y: size.y / 2 } : { x: size.x / 2, y: Math.max(170, (size.y - 250) / 2 + 70) };
+    const cp = map.latLngToContainerPoint([p.lat, p.lng]);
+    const free = isDesktop
+      ? cp.x > 40 && cp.x < size.x - 72 - 380 - 24 && cp.y > 40 && cp.y < size.y - 40
+      : cp.y > 150 && cp.y < size.y - 72 - 190 && cp.x > 24 && cp.x < size.x - 64;
+    if (free) return;
+    const z = map.getBounds().pad(-0.1).contains([p.lat, p.lng]) ? map.getZoom() : Math.max(map.getZoom(), 15);
+    const c = map.unproject(map.project([p.lat, p.lng], z).subtract([target.x, target.y]).add([size.x / 2, size.y / 2]), z);
+    flyTo(c.lat, c.lng, z, { search: !radius });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedKey]);
+  }, [selectedKey, selection ? 1 : 0]);
 
   const markVisited = (s: Selection) => {
     if (s.type !== 'listing') return;

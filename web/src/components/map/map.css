@@ -367,6 +367,6 @@
 }
 .anwo-bubble:hover .anwo-bubble__count, .anwo-bubble[data-hovered="true"] .anwo-bubble__count { background: var(--inverse); color: var(--ink-inverse); border-color: var(--inverse); transform: scale(1.06); }
 .anwo-bubble[data-selected="true"] .anwo-bubble__count { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.anwo-bubble[data-empty="true"] .anwo-bubble__count { background: var(--sunken); color: var(--ink-3); border-color: var(--line-strong); border-style: dashed; font-weight: 600; }
+.anwo-bubble[data-empty="true"] .anwo-bubble__count { background: var(--surface); color: var(--ink-3); border: 2px solid var(--ink-3); box-shadow: none; font-weight: 600; }
 .anwo-marker:focus-visible .anwo-bubble__count { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .anwo-bubble__count { transition: none; } }
