@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Archive, ArchiveRestore, Bell, BellOff, Flag, LogOut, MoreHorizontal, Search, ShieldBan, ShieldCheck, User, Users } from 'lucide-react';
 import type { ConversationDto } from '@shared/schemas/chat';
-import { Avatar, Button, Checkbox, DropdownMenu, Input, Modal, Select, Textarea, TrustBadge, type MenuEntry } from '@/components';
+import { Avatar, Button, Checkbox, Input, Modal, Select, Textarea, TrustBadge, type MenuEntry } from '@/components';
+import { ChatMenu } from './ChatMenu';
 import { useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { track } from '@/lib/track';
@@ -79,7 +80,7 @@ export function ThreadActions({ conv, meId, onSearch }: { conv: ConversationDto;
 
   return (
     <>
-      <DropdownMenu
+      <ChatMenu
         label={t('chat.actions.menu')}
         align="end"
         trigger={<Button variant="ghost" iconOnly aria-label={t('chat.actions.menu')}><MoreHorizontal /></Button>}

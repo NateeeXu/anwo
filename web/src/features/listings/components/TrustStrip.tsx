@@ -10,7 +10,7 @@ export function TrustStrip({ user, onReport, className }: { user: UserPublic; on
   const t = useT();
   const { formatDate, formatPercent } = useLocale();
   const low = user.trustLevel <= 1;
-  const facts: string[] = [t('listings.detail.trust.joined', { date: formatDate(user.memberSince, 'month') })];
+  const facts: string[] = [t('listings.detail.trust.joined', { date: formatDate(user.memberSince, 'month', { year: true }) })];
   if (user.responseRate != null) facts.push(t('listings.detail.trust.responseRate', { rate: formatPercent(user.responseRate) }));
   if (user.responseMedianMin != null) {
     const m = user.responseMedianMin;

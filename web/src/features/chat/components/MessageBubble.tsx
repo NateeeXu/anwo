@@ -5,7 +5,8 @@ import { Link } from 'react-router';
 import { Check, CheckCheck, Clock, Copy, Flag, MoreHorizontal, RotateCw, Trash2, TriangleAlert } from 'lucide-react';
 import type { ContextCard } from '@shared/types';
 import type { ConversationDto } from '@shared/schemas/chat';
-import { Avatar, Button, DropdownMenu, Price } from '@/components';
+import { Avatar, Button, Price } from '@/components';
+import { ChatMenu } from './ChatMenu';
 import { cn } from '@/lib/cn';
 import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
@@ -157,7 +158,7 @@ export const MessageBubble = memo(function MessageBubble({ message: m, conv, meI
       </div>
       {menuItems.length > 0 && !failed && (
         <div className={cn('mb-1 shrink-0 opacity-0 transition-opacity duration-token-fast group-hover/msg:opacity-100 focus-within:opacity-100', tapped && 'opacity-100')}>
-          <DropdownMenu
+          <ChatMenu
             label={t('chat.actions.messageMenu')}
             align={mine ? 'end' : 'start'}
             trigger={<Button variant="ghost" size="sm" iconOnly aria-label={t('chat.actions.messageMenu')} className="size-7"><MoreHorizontal /></Button>}

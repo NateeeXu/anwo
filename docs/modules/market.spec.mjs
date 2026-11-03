@@ -49,6 +49,12 @@ const { browser, context, page, base } = await openApp({ webPort: WEB_PORT, view
 watch(page, 'desktop');
 await setCampus(context, base);
 
+// deterministic state: re-run the market seed on the test DB (allowed for test-*.db files)
+await step('reseed market', async () => {
+  const r = await page.request.post('/api/dev/seed', { data: { modules: ['market'], force: true }, headers: { 'X-Requested-With': 'fetch' } });
+  if (!r.ok()) throw new Error(`seed failed: ${r.status()} ${await r.text()}`);
+});
+
 await step('browse grid', async () => {
   await page.goto('/market');
   await page.waitForSelector('article', { timeout: 20000 });
@@ -109,8 +115,8 @@ await step('wishlist + buy via chat', async () => {
   await page.goto('/market/mkt-item-08');
   await page.waitForSelector('#main h1', { timeout: 20000 });
   await settle(page);
-  const wish = page.getByRole('button', { name: /加入心愿单|Add to wishlist/ }).first();
-  await wish.click();
+  const wish = page.getByRole('button', { name: /加入心愿单|Add to wishlist|已在心愿单|In your wishlist/ }).first();
+  if (!/已在心愿单|In your wishlist/.test((await wish.textContent()) || '')) await wish.click();
   await page.waitForSelector('text=/已在心愿单|In your wishlist/', { timeout: 10000 });
   await page.getByRole('button', { name: /私信购买|Buy via chat/ }).first().click();
   await page.waitForSelector('textarea', { timeout: 10000 });
@@ -161,7 +167,7 @@ await step('dashboard + mark sold', async () => {
   await page.waitForSelector('li', { timeout: 20000 });
   await settle(page);
   await shot(page, MODULE, 'mine-desktop');
-  const row = page.locator('li', { hasText: /CLRS/ }).first();
+  const row = page.locator('li', { hasText: /小熊|Bear mini kettle/ }).first();
   await row.getByRole('button', { name: /标记售出|Mark sold/ }).click();
   await page.waitForSelector('[role=dialog]', { timeout: 10000 });
   await settle(page, 600);
