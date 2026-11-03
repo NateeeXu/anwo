@@ -19,15 +19,18 @@ const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const cache = new Map<string, L.DivIcon>();
 
 function bubbleIcon(count: number, label: string, selected: boolean, hovered: boolean): L.DivIcon {
-  const size = count === 0 ? 30 : Math.round(Math.min(64, 34 + Math.sqrt(count) * 3.2));
+  // empty campuses: a 12 px dashed dot without a label (hover/focus title names it) so the country still reads
+  // without 50 overlapping "0" bubbles; the label returns when the campus is selected or hovered.
+  const size = count === 0 ? 12 : Math.round(Math.min(64, 34 + Math.sqrt(count) * 3.2));
+  const showLabel = count > 0 || selected || hovered;
   const key = `${size}|${count}|${label}|${selected ? 1 : 0}${hovered ? 1 : 0}`;
   let icon = cache.get(key);
   if (!icon) {
     icon = L.divIcon({
       html:
         `<span class="anwo-bubble" data-selected="${selected}" data-hovered="${hovered}" data-empty="${count === 0}" style="--bubble-size:${size}px">` +
-        `<span class="anwo-bubble__count">${count > 999 ? '999+' : count}</span>` +
-        `<span class="anwo-bubble__label">${escapeHtml(label)}</span></span>`,
+        `<span class="anwo-bubble__count">${count === 0 ? '' : count > 999 ? '999+' : count}</span>` +
+        (showLabel ? `<span class="anwo-bubble__label">${escapeHtml(label)}</span>` : '') + `</span>`,
       className: 'anwo-marker',
       iconSize: undefined,
       iconAnchor: [0, 0],
@@ -46,7 +49,7 @@ export function CampusBubbleLayer({ campuses, selectedId, hoveredId, onSelect, o
           key={c.id}
           position={[c.lat, c.lng]}
           icon={bubbleIcon(c.total, labelOf ? labelOf(c) : c.shortName, c.id === selectedId, c.id === hoveredId)}
-          zIndexOffset={c.id === selectedId ? 1000 : Math.min(900, c.total)}
+          zIndexOffset={c.id === selectedId ? 1000 : c.total ? Math.min(900, 100 + c.total) : 0}
           keyboard
           title={`${c.name} · ${c.total}`}
           alt={c.name}

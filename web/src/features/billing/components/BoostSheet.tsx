@@ -29,7 +29,7 @@ export function BoostSheet({ open, onClose, entityType, entityId, surface = 'own
   const t = useT();
   const navigate = useNavigate();
   const { status } = useAuth();
-  const { formatMoney } = useLocale();
+  const { formatMoney, formatDate } = useLocale();
   const planName = usePlanName();
   const q = useBoostOptions(open && status === 'authed' ? entityType : null, open ? entityId : null, surface);
   const [planKey, setPlanKey] = useState<string | null>(null);
@@ -127,7 +127,7 @@ export function BoostSheet({ open, onClose, entityType, entityId, surface = 'own
         <div className="flex flex-col gap-5">
           {q.data.currentBoost && (
             <p className="rounded-sm bg-sunken px-3 py-2 text-small text-ink-2">
-              {t('billing.boost.extendNote', { date: q.data.currentBoost.endsAt.slice(0, 10) })}
+              {t('billing.boost.extendNote', { date: formatDate(q.data.currentBoost.endsAt) })}
             </p>
           )}
           {tiers.map(([tier, list]) => (

@@ -34,10 +34,12 @@ export type SelectionPanelProps = {
   onClose: () => void;
   onSearchAround: (point: { lat: number; lng: number }) => void;
   onOpen?: (s: Selection) => void;
+  /** mobile: no tags / alt name, commute as one chip row so the map stays visible */
+  compact?: boolean;
   className?: string;
 };
 
-export function SelectionPanel({ selection: s, campusId, timeZone, onClose, onSearchAround, onOpen, className }: SelectionPanelProps) {
+export function SelectionPanel({ selection: s, campusId, timeZone, onClose, onSearchAround, onOpen, compact, className }: SelectionPanelProps) {
   const t = useT();
   const { isZh, formatDate, formatMoney, formatDistance } = useLocale();
   const point = selectionPoint(s);
@@ -105,9 +107,9 @@ export function SelectionPanel({ selection: s, campusId, timeZone, onClose, onSe
       icon = <Icon className="size-5" aria-hidden strokeWidth={1.5} />;
       sub = (
         <span className="flex flex-col gap-1">
-          {isZh && s.poi.nameZh && <span className="truncate text-small text-ink-2" lang="en">{s.poi.name}</span>}
+          {isZh && s.poi.nameZh && !compact && <span className="truncate text-small text-ink-2" lang="en">{s.poi.name}</span>}
           {s.poi.address && <span className="truncate text-small text-ink-2">{s.poi.address}</span>}
-          {s.poi.tags.length > 0 && (
+          {s.poi.tags.length > 0 && !compact && (
             <span className="flex flex-wrap gap-1">
               {s.poi.tags.slice(0, 4).map((tag) => <span key={tag} className="rounded-pill bg-sunken px-2 py-0.5 text-caption text-ink-2">{tag}</span>)}
             </span>
@@ -140,15 +142,15 @@ export function SelectionPanel({ selection: s, campusId, timeZone, onClose, onSe
 
   return (
     <section
-      className={cn('pointer-events-auto flex w-full flex-col gap-3 rounded-card border border-line bg-surface p-3 shadow-lg animate-rise-in', className)}
+      className={cn('pointer-events-auto flex w-full flex-col rounded-card border border-line bg-surface p-3 shadow-lg animate-rise-in', compact ? 'gap-2.5' : 'gap-3', className)}
       aria-label={title}
       data-testid="map-selection"
     >
       <header className="flex items-start gap-3">
         {image ? (
-          <img src={image} alt="" className="size-14 shrink-0 rounded-sm bg-sunken object-cover dark:brightness-[.92]" />
+          <img src={image} alt="" className={cn('shrink-0 rounded-sm bg-sunken object-cover dark:brightness-[.92]', compact ? 'size-12' : 'size-14')} />
         ) : (
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-sm bg-sunken text-ink-2">{icon}</span>
+          <span className={cn('flex shrink-0 items-center justify-center rounded-sm bg-sunken text-ink-2', compact ? 'size-12' : 'size-14')}>{icon}</span>
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <p className="text-caption text-ink-3">{kicker}{approx && <> · {t('map.pin.approx')}</>}</p>
@@ -159,7 +161,14 @@ export function SelectionPanel({ selection: s, campusId, timeZone, onClose, onSe
           <X className="size-4" aria-hidden />
         </button>
       </header>
-      {showCommute && campusId && <CommuteCard lat={point.lat} lng={point.lng} campusId={campusId} className="border-t border-line pt-3" />}
+      {showCommute && campusId && (compact ? (
+        <div className="flex flex-wrap items-center gap-2 border-t border-line pt-2.5">
+          <span className="text-caption text-ink-2">{t('map.commute.title')}</span>
+          <CommuteCard lat={point.lat} lng={point.lng} campusId={campusId} variant="inline" />
+        </div>
+      ) : (
+        <CommuteCard lat={point.lat} lng={point.lng} campusId={campusId} className="border-t border-line pt-3" />
+      ))}
       <footer className="flex flex-wrap items-center justify-end gap-2">
         <Button size="sm" variant="ghost" iconLeft={<CircleDot className="size-4" aria-hidden />} onClick={() => onSearchAround(point)}>
           {t('map.poi.searchAround')}

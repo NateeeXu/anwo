@@ -202,6 +202,7 @@ async function main() {
     await page.mouse.click(mb.x + mb.width * 0.62, mb.y + mb.height * 0.4);
     await modal.getByLabel('地址').fill('1999 Campus Dr, Evanston, IL 60208');
     await modal.getByLabel('补充说明').fill('Norris 一楼的咖啡店，期末周开到很晚。');
+    await modal.getByLabel('英文名称').scrollIntoViewIfNeeded();
     await shot(page, 'suggest-modal-desktop');
     const [created] = await Promise.all([
       page.waitForResponse((r) => r.url().endsWith('/api/map/suggestions') && r.request().method() === 'POST', { timeout: 15000 }),

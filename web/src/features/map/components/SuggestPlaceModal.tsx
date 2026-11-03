@@ -66,6 +66,7 @@ export function SuggestPlaceModal({ open, onClose, initialPoint, initialTab = 'n
     },
     onError: (e) => {
       if (e instanceof ApiError && e.code === 'CONFLICT') toast.error(t('map.suggest.duplicate'));
+      else if (e instanceof ApiError && e.fields?.lat) toast.error(t('map.suggest.err.far'));
       else toast.error(errorMessage(t, e));
     },
   });
@@ -91,7 +92,8 @@ export function SuggestPlaceModal({ open, onClose, initialPoint, initialTab = 'n
   };
 
   const markers: MapMarker[] = point ? [{ id: 'suggest', kind: 'poi', lat: point.lat, lng: point.lng, label: form.nameZh || form.name || t('map.suggest.pin'), selected: true }] : [];
-  const showErr = (k: keyof typeof errors) => (touched ? errors[k] : undefined) ?? fieldError(t, submit.error, k);
+  const farError = submit.error instanceof ApiError && submit.error.fields?.lat ? t('map.suggest.err.far') : undefined;
+  const showErr = (k: keyof typeof errors) => (touched ? errors[k] : undefined) ?? (k === 'point' ? farError : fieldError(t, submit.error, k));
 
   let body: React.ReactNode;
   if (status === 'anon') {

@@ -331,7 +331,10 @@ export default function MapExplorePage() {
 
   const openSuggest = (point?: LatLng | null, address?: string | null) => {
     const c = mapRef.current?.getCenter();
-    setSuggest({ open: true, tab: 'new', point: point ?? (selection ? selectionPoint(selection) : c ? { lat: c.lat, lng: c.lng } : null), address: address ?? (selection?.type === 'search' ? selection.hit.displayName : null) });
+    let p = point ?? (selection ? selectionPoint(selection) : c ? { lat: c.lat, lng: c.lng } : null);
+    // a suggestion belongs to the current campus (server: ≤ 40 km) — start at the campus when the view is elsewhere
+    if (campus && (!p || haversineM(p, campus) > 30_000)) p = { lat: campus.lat, lng: campus.lng };
+    setSuggest({ open: true, tab: 'new', point: p, address: address ?? (selection?.type === 'search' ? selection.hit.displayName : null) });
   };
 
   // ------------------------------------------------------------ markers / shapes
@@ -401,7 +404,7 @@ export default function MapExplorePage() {
         onChange={(v) => v !== 'custom' && changeRadius({ center: radius.center, radiusM: Number(v) })}
         options={[...RADIUS_PRESETS_M.map((r) => ({ value: String(r), label: formatDistance(r) })), ...(RADIUS_PRESETS_M.some((r) => Math.abs(r - radius.radiusM) < 5) ? [] : [{ value: 'custom', label: formatDistance(radius.radiusM) }])]}
       />
-      <span className="hidden text-caption text-ink-3 xl:inline">{t('map.draw.hint')}</span>
+      <span className="hidden text-caption text-ink-3 2xl:inline">{t('map.draw.hint')}</span>
       <Button size="sm" variant="ghost" iconLeft={<X className="size-4" aria-hidden />} onClick={clearDraw}>{t('map.draw.clear')}</Button>
     </div>
   );
@@ -579,7 +582,7 @@ export default function MapExplorePage() {
         )}
 
         {/* centre-top: search this area / zoom in / nationwide hint / draw bar (desktop) */}
-        <div className={cn('pointer-events-none absolute inset-x-0 z-[11] flex flex-col items-center gap-2 px-3', isDesktop ? 'top-4 lg:pl-[376px]' : 'top-[124px]', drawBar && !isDesktop && 'top-[180px]')}>
+        <div className={cn('pointer-events-none absolute inset-x-0 z-[11] flex flex-col items-center gap-2 px-3', isDesktop ? 'top-4 pl-[376px] pr-[72px]' : 'top-[124px]', drawBar && !isDesktop && 'top-[180px]')}>
           {isDesktop && drawBar}
           {showSearchArea && (
             <Button size="sm" className="pointer-events-auto shadow-md" iconLeft={<RefreshCw className="size-4" aria-hidden />} onClick={searchThisArea} data-testid="search-area">
@@ -618,6 +621,7 @@ export default function MapExplorePage() {
               onClose={() => select(null)}
               onSearchAround={(p) => searchAround(p)}
               onOpen={markVisited}
+              compact={!isDesktop}
             />
           </div>
         )}

@@ -22,7 +22,7 @@ export function MapLegend({ className, compact }: { className?: string; compact?
       <ul className={cn('grid gap-x-4 gap-y-1.5', compact ? 'grid-cols-2' : 'grid-cols-1')}>
         {rows.map((r) => (
           <li key={r.key} className="flex h-7 items-center gap-2 text-caption text-ink-2">
-            <span className="flex w-14 shrink-0 items-center">{r.swatch}</span>
+            <span className="flex w-[72px] shrink-0 items-center">{r.swatch}</span>
             <span className="truncate">{r.label}</span>
           </li>
         ))}
