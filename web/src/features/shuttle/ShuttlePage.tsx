@@ -5,7 +5,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Bus, ChevronRight, CircleAlert, ExternalLink, LocateFixed, Map as MapIcon, Search, Star } from 'lucide-react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
-import type { ServiceDay } from '@shared/enums';
 import { Badge, Button, Card, EmptyState, Input, PageHeader, Sheet, Skeleton, Tabs, Tooltip } from '@/components';
 import { NoShuttle } from '@/components/illustrations';
 import { MapView, type MapMarker, type MapPolyline } from '@/components/map';
@@ -410,7 +409,6 @@ function StopList({ stops, onSelect }: { stops: StopItem[]; onSelect: (id: strin
 // ---------------------------------------------------------------- favorites
 function FavoritesTab({ campusId, onRoute, onStop }: { campusId: string; onRoute: (id: string) => void; onStop: (id: string) => void }) {
   const t = useT();
-  const { locale } = useLocale();
   const { status } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
