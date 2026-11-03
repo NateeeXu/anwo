@@ -12,7 +12,7 @@ import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { track } from '@/lib/track';
 import { usePartner, useReportPartner } from '../api';
-import { PartnerCard, useKitChecklist } from './Kit';
+import { PartnerCard, PartnerMark, useKitChecklist } from './Kit';
 
 export default function PartnerDetailPage() {
   const t = useT();
@@ -45,7 +45,7 @@ export default function PartnerDetailPage() {
         <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
           <Card padding="lg" className="flex flex-col gap-4">
             <div className="flex items-start gap-4">
-              {p.logoUrl && <img src={p.logoUrl} alt="" className="size-16 shrink-0 rounded-sm bg-sunken object-cover dark:brightness-[.92]" />}
+              <PartnerMark name={p.name} size="lg" />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-h1 text-ink">{name}</h1>

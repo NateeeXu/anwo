@@ -20,6 +20,13 @@ export const KIT_CATEGORY_ORDER = ['bank', 'sim', 'insurance', 'other', 'movers'
 const STAGES = ['pre_arrival', 'arrival', 'settled'] as const;
 type Stage = (typeof STAGES)[number];
 
+/** Text monogram instead of a logo: the seed SVGs are fictional wordmarks, and showing them next to a real partner name
+ *  would misrepresent the brand (DESIGN §7.14: "partner name h3, text, no logos required"). */
+export function PartnerMark({ name, size = 'md' }: { name: string; size?: 'md' | 'lg' }) {
+  const letters = name.replace(/[^A-Za-z0-9 ]/g, '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join('') || name.slice(0, 1);
+  return <span aria-hidden className={cn('flex shrink-0 items-center justify-center rounded-sm border border-line bg-sunken font-semibold text-ink-2', size === 'lg' ? 'size-16 text-h3' : 'size-10 text-small')}>{letters}</span>;
+}
+
 /** Checklist state: members persist on the server (POST /kit/done); visitors use localStorage (per device). */
 export function useKitChecklist(serverDone: string[] | undefined) {
   const { status } = useAuth();
@@ -47,7 +54,7 @@ export function PartnerCard({ p, done, onToggle, placement = 'kit', compact, cam
   return (
     <Card as="article" padding="md" className={cn('flex flex-col gap-2', done && 'opacity-80')} data-partner={p.slug}>
       <div className="flex items-start gap-3">
-        {p.logoUrl && <img src={p.logoUrl} alt="" className="size-10 shrink-0 rounded-sm bg-sunken object-cover dark:brightness-[.92]" />}
+        <PartnerMark name={p.name} />
         <div className="min-w-0 flex-1">
           <h3 className="text-body font-semibold text-ink"><Link to={`/kit/${p.slug}`} className="hover:underline">{name}</Link></h3>
           {!isZh && p.nameZh && <span className="block text-caption text-ink-3" lang="zh-CN">{p.nameZh}</span>}

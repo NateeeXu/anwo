@@ -34,6 +34,7 @@ export function EscrowListPage() {
 function EscrowList() {
   const t = useT();
   const { formatMoney, formatDate } = useLocale();
+  const { user } = useAuth();
   const [role, setRole] = useState<'all' | 'payer' | 'payee'>('all');
   const q = useEscrows({ role: role === 'all' ? undefined : role });
   return (
@@ -58,7 +59,7 @@ function EscrowList() {
                 {e.listing?.coverUrl ? <img src={e.listing.coverUrl} alt="" className="size-14 shrink-0 rounded-sm object-cover dark:brightness-[.92]" /> : <span className="flex size-14 shrink-0 items-center justify-center rounded-sm bg-sunken"><Home className="size-5 text-ink-3" aria-hidden /></span>}
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-body font-semibold text-ink">{e.listing?.title ?? t('billing.secure.title')}</div>
-                  <div className="text-caption text-ink-3">{t('billing.secure.moveIn')} {e.moveInDate ? formatDate(e.moveInDate) : '—'} · {t('billing.secure.with', { name: e.payer.id === e.createdBy ? e.payee.name : e.payer.name })}</div>
+                  <div className="text-caption text-ink-3">{t('billing.secure.moveIn')} {e.moveInDate ? formatDate(e.moveInDate) : '—'} · {t('billing.secure.with', { name: e.payer.id === user?.id ? e.payee.name : e.payer.name })}</div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="text-price tnum text-ink">{formatMoney(e.amountCents)}</span>
