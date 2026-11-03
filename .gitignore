@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.vite/
+server/data/
+server/uploads/*
+!server/uploads/seed/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+playwright-report/
+test-results/
