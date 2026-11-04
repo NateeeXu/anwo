@@ -440,7 +440,9 @@ export function attach(server: HttpServer): WebSocketServer {
     const cookies = parseCookies(req.headers.cookie);
     verifySession(cookies.sid)
       .then((session) => {
-        const user = session ? loadUser(session.sub) : undefined;
+        const found = session ? loadUser(session.sub) : undefined;
+        // revoked sessions (password change / logout everywhere) cannot open a socket either
+        const user = found && (found.session_version ?? 0) === session!.sv ? found : undefined;
         if (!user) { rejectUpgrade(socket, 401, 'Unauthorized'); return; }
         wss!.handleUpgrade(req, socket, head, (ws) => onConnection(ws as Socket, user));
       })
