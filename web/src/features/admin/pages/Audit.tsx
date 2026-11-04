@@ -103,7 +103,7 @@ function AuditLog() {
                   <span className="text-ink-3">{t('admin.common.system')}</span>
                 ),
             },
-            { key: 'action', header: t('admin.audit.action'), render: (a) => <code className="font-mono text-caption text-ink">{a.action}</code> },
+            { key: 'action', header: t('admin.audit.action'), render: (a) => <span className="flex flex-col"><span className="text-small text-ink">{t(`admin.audit.action.${a.action}`) !== `admin.audit.action.${a.action}` ? t(`admin.audit.action.${a.action}`) : a.action}</span><code className="font-mono text-caption text-ink-3">{a.action}</code></span> },
             { key: 'entity', header: t('admin.col.entity'), hideOnMobile: true, render: (a) => <span className="text-caption text-ink-2">{a.entityType ? `${a.entityType} · ${(a.entityId ?? '').slice(0, 14)}` : '—'}</span> },
             { key: 'reason', header: t('admin.col.reason'), render: (a) => <span className="line-clamp-2 text-small text-ink-2">{a.reason ?? '—'}</span> },
           ]}

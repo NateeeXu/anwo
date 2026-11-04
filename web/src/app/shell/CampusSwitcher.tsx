@@ -215,6 +215,9 @@ export function CampusSwitcher({ className, compact }: { className?: string; com
   const [isMobile, setIsMobile] = useState(() => typeof matchMedia === 'function' && matchMedia('(max-width: 767px)').matches);
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  /** Esc / selection close: focus goes back to the pill trigger (same as Dialog), not to <body> */
+  const closeToTrigger = () => { setOpen(false); requestAnimationFrame(() => triggerRef.current?.focus()); };
   const listId = useId();
   const allowNationwide = true;
   const nationwideDisabled = !nationwideAllowed(pathname);
@@ -252,7 +255,7 @@ export function CampusSwitcher({ className, compact }: { className?: string; com
       if (r?.kind === 'campus') select(r.campus);
       else if (r?.kind === 'nationwide') select(null);
     },
-    () => setOpen(false),
+    closeToTrigger,
   );
 
   // Close on outside click / Esc (desktop popover).
@@ -261,7 +264,7 @@ export function CampusSwitcher({ className, compact }: { className?: string; com
     const onDown = (e: MouseEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
-    const onKey = (e: globalThis.KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    const onKey = (e: globalThis.KeyboardEvent) => { if (e.key === 'Escape') closeToTrigger(); };
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -324,6 +327,7 @@ export function CampusSwitcher({ className, compact }: { className?: string; com
   return (
     <div ref={rootRef} className={cn('relative', className)}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
@@ -340,7 +344,7 @@ export function CampusSwitcher({ className, compact }: { className?: string; com
       </button>
 
       {isMobile ? (
-        <Sheet open={open} onClose={() => setOpen(false)} title={t('campus.title')} snap="full">
+        <Sheet open={open} onClose={closeToTrigger} title={t('campus.title')} snap="full">
           {panel}
         </Sheet>
       ) : (

@@ -209,5 +209,26 @@ step = 'admin'
   console.log('[ok] admin')
 }
 
+// 5 ---------------------------------------------------------------- sponsored click accounting: card link ?boost=<id> → boosts.clicks + 1
+step = 'boost-click'
+{
+  const a = await session({ email: 'admin@example.edu' })
+  const list = await a.api('/api/listings?campusId=northwestern&pageSize=20')
+  const sp = (list.data?.items ?? []).find((l) => l.sponsored && l.boostId)
+  ok(sp, 'a sponsored listing card carries its boostId')
+  if (sp) {
+    const before = (await a.api(`/api/billing/boosts/${sp.boostId}/stats`)).data?.boost?.clicks ?? 0
+    const v = await session({ email: 'bob@u.northwestern.edu' })
+    await v.page.goto(`/listings/${sp.id}?src=sponsored&boost=${sp.boostId}`); await settle(v.page)
+    await finish(v.browser)
+    const after = (await a.api(`/api/billing/boosts/${sp.boostId}/stats`)).data?.boost?.clicks ?? 0
+    ok(after >= before + 1, `boosts.clicks increments on a sponsored click (${before} → ${after})`)
+  }
+  const home = await a.api('/api/billing/sponsorships?campusId=northwestern&surface=home_feed')
+  ok((home.data?.items ?? []).length >= 1 && (home.data?.items ?? []).length <= 3, 'home feed sponsors: 1–3 labelled cards')
+  await finish(a.browser)
+  console.log('[ok] boost click accounting + sponsored placements')
+}
+
 if (errors.length) { console.error(errors.join('\n')); process.exit(1) }
 console.log('billing spec passed')

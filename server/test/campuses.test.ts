@@ -72,5 +72,6 @@ test('POST /api/campuses/requests works anonymously; /api/meta exposes enums, br
   assert.deepEqual(meta.json.data!.enums.role, ['student', 'landlord', 'admin']);
   assert.equal(meta.json.data!.brand.nameZh, '安窝');
   assert.equal(meta.json.data!.campusesCount, CAMPUSES.length);
-  assert.equal(meta.json.data!.flags['escrow.enabled'], true);
+  // Secure Payment is off by default and enabled per campus (one cleared state at a time) — review fix
+  assert.equal(meta.json.data!.flags['escrow.enabled'], false);
 });

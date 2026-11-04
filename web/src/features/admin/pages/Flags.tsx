@@ -71,10 +71,11 @@ export default function Flags() {
               header: t('admin.flags.key'),
               render: (f) => (
                 <div className="min-w-0">
-                  <p className="flex items-center gap-1.5 font-mono text-small text-ink">
-                    {f.key}
+                  <p className="flex items-center gap-1.5 text-small text-ink">
+                    {t(`admin.flag.${f.key}`) !== `admin.flag.${f.key}` ? t(`admin.flag.${f.key}`) : f.key}
                     {f.locked && <Lock size={12} className="text-ink-3" aria-label={t('admin.flags.locked')} />}
                   </p>
+                  <p className="font-mono text-caption text-ink-3">{f.key}</p>
                   <p className="truncate text-caption text-ink-3">{f.description}</p>
                 </div>
               ),
