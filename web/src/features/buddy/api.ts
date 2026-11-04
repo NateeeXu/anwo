@@ -69,11 +69,12 @@ export function useBuddyList(params: BuddyListParams, enabled = true): UseQueryR
   });
 }
 
-export function useBuddyDetail(id: string | undefined): UseQueryResult<BuddyDetail> {
+/** `boost`: the sponsored boost id from the card link (`?boost=`), recorded server-side as a boost click */
+export function useBuddyDetail(id: string | undefined, boost?: string | null): UseQueryResult<BuddyDetail> {
   return useQuery({
     queryKey: buddyKeys.detail(id ?? ''),
     enabled: !!id,
-    queryFn: () => api<BuddyDetail>(`/api/buddy/posts/${id}`),
+    queryFn: () => api<BuddyDetail>(`/api/buddy/posts/${id}`, { query: { boost: boost || undefined } }),
   });
 }
 

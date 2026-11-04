@@ -82,7 +82,7 @@ export default function BuddyDetail() {
   const { formatMoney, formatRelative, formatNumber } = useLocale();
   const { campus: currentCampus } = useCampus();
   const [params, setParams] = useSearchParams();
-  const detail = useBuddyDetail(id);
+  const detail = useBuddyDetail(id, params.get('boost'));
   const m = useBuddyMutations(id);
   const post = detail.data;
   const time = useBuddyTime(post?.campusId);

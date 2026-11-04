@@ -38,6 +38,7 @@ export const BuddyCard = forwardRef<HTMLElement, BuddyCardProps>(function BuddyC
   const full = post.status === 'full' || post.memberCount >= post.maxMembers;
   const members = post.memberPreview?.length ? post.memberPreview : [post.author];
   const href = `/buddy/${post.id}`;
+  const linkHref = post.sponsored && post.boostId ? `${href}?boost=${encodeURIComponent(post.boostId)}` : href;
   const timeText = startsAt ? (post.isAllDay ? `${time.dayLabel(startsAt, { withWeekday: true })} · ${t('buddy.card.allDay')}` : `${parts!.weekday} ${parts!.time}`) : t('buddy.card.noTime');
   const place = [post.locationName, post.destinationName ? t('buddy.card.to', { dest: post.destinationName }) : null].filter(Boolean).join(' ');
 
@@ -89,7 +90,7 @@ export const BuddyCard = forwardRef<HTMLElement, BuddyCardProps>(function BuddyC
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-start gap-2">
           <h3 className={cn('min-w-0 flex-1 truncate text-body font-semibold text-ink', variant === 'row' && 'text-small')}>
-            <Link to={href} className="rounded-sm outline-none after:absolute after:inset-0 after:rounded-card focus-visible:after:ring-2 focus-visible:after:ring-accent">
+            <Link to={linkHref} className="rounded-sm outline-none after:absolute after:inset-0 after:rounded-card focus-visible:after:ring-2 focus-visible:after:ring-accent">
               {post.sponsored && (
                 <Badge variant="boosted" size="sm" className="mr-1.5 align-middle" />
               )}

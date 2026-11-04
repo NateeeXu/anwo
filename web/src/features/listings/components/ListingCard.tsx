@@ -47,7 +47,7 @@ export const ListingCard = forwardRef<HTMLElement, ListingCardProps>(function Li
   const { scope } = useCampus();
   const inactive = l.status !== 'active';
   const stateLabel = l.status === 'rented' ? t('listings.card.rented') : l.status === 'paused' ? t('listings.card.paused') : l.status === 'draft' ? t('listings.card.draft') : l.status === 'expired' ? t('listings.card.expired') : null;
-  const to = `/listings/${l.id}${l.sponsored && l.boostTier ? '?src=sponsored' : ''}`;
+  const to = `/listings/${l.id}${l.sponsored && l.boostTier ? `?src=sponsored${l.boostId ? `&boost=${encodeURIComponent(l.boostId)}` : ''}` : ''}`;
   const dates = `${formatDate(l.availableFrom, 'monthDay')}${l.availableTo ? ` – ${formatDate(l.availableTo, 'monthDay')}` : ` ${t('listings.card.openEnded')}`}`;
   const furnished = l.furnished === 'full' ? t('listings.card.furnishedFull') : l.furnished === 'partial' ? t('listings.card.furnishedPartial') : null;
   const meta1 = [roomsLabel(l, t, formatRooms), furnished, dates].filter(Boolean).join(' · ');

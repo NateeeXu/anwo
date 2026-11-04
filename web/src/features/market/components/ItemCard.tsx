@@ -38,7 +38,7 @@ export const ItemCard = forwardRef<HTMLElement, ItemCardProps>(function ItemCard
   const sold = item.status === 'sold';
   const muted = sold || item.status === 'expired' || item.status === 'draft';
   const statusKey = statusLabelKey(item.status);
-  const href = to ?? `/market/${item.id}${item.sponsored ? '?src=sponsored' : ''}`;
+  const href = to ?? `/market/${item.id}${item.sponsored ? `?src=sponsored${item.boostId ? `&boost=${encodeURIComponent(item.boostId)}` : ''}` : ''}`;
   const alt = t('market.card.photoAlt', { title: item.title, index: 1 });
 
   const onHeart = (e: MouseEvent) => {

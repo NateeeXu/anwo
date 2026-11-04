@@ -2,7 +2,7 @@
 // StaticMapPreview (approximate circle), seller TrustStrip, rail (私信购买 / 加入心愿单 / 举报), bundle card, similar items.
 import { useState } from 'react';
 import { CircleAlert, Eye, Heart, Home, Link2, MessageCircle, PackageOpen, Pencil, Tag, Truck } from 'lucide-react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { Item } from '@shared/types';
 import { Badge, Button, Chip, DropdownMenu, EmptyState, Modal, PhotoGallery, Select, Skeleton, Textarea, Input } from '@/components';
 import { NoItems } from '@/components/illustrations';
@@ -98,7 +98,8 @@ export default function ItemDetail() {
   const navigate = useNavigate();
   const { user, status: authStatus } = useAuth();
   const { formatMoney, formatPrice, formatRelative, formatDistance } = useLocale();
-  const item = useItem(id);
+  const [searchParams] = useSearchParams();
+  const item = useItem(id, {}, searchParams.get('boost'));
   const toggle = useWishlistToggle();
   const action = useItemAction();
   const del = useDeleteItem();

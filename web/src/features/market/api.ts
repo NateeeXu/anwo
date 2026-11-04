@@ -60,8 +60,9 @@ export function useItems(params: ItemListParams, enabled = true) {
 export function useItemPins(params: ItemListParams, enabled = true) {
   return useQuery({ queryKey: marketKeys.pins(params), queryFn: () => api<PinList>('/api/market/items', { query: { ...params, view: 'pins', page: undefined, pageSize: undefined } }), enabled, placeholderData: (prev) => prev });
 }
-export function useItem(id: string | undefined, opts: Partial<UseQueryOptions<Item>> = {}) {
-  return useQuery<Item>({ queryKey: marketKeys.item(id ?? ''), queryFn: () => api<Item>(`/api/market/items/${id}`), enabled: !!id, ...opts });
+/** `boost`: the sponsored boost id from the card link (`?boost=`), recorded server-side as a boost click */
+export function useItem(id: string | undefined, opts: Partial<UseQueryOptions<Item>> = {}, boost?: string | null) {
+  return useQuery<Item>({ queryKey: marketKeys.item(id ?? ''), queryFn: () => api<Item>(`/api/market/items/${id}`, { query: { boost: boost || undefined } }), enabled: !!id, ...opts });
 }
 export function useCategories(campusId?: string | null) {
   return useQuery({ queryKey: marketKeys.categories(campusId), queryFn: () => api<{ campusId: string | null; categories: CategoryCount[] }>('/api/market/categories', { query: { campusId: campusId ?? undefined } }), staleTime: 60_000 });

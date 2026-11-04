@@ -21,7 +21,7 @@ import { ok, pageWindow, paginated, parseBody, parseParams, parseQuery } from '.
 import { notify, notifyMany } from '../../lib/notify';
 import { rateLimit } from '../../lib/ratelimit';
 import { createReport } from '../../lib/reports';
-import { mergeSponsored, pickSponsored, recordImpressions, sponsoredSlotCount } from '../../lib/sponsored';
+import { mergeSponsored, pickSponsored, recordClick, recordImpressions, sponsoredSlotCount } from '../../lib/sponsored';
 import { HOUR, daysFromNow, nowIso } from '../../lib/time';
 import { loadUserPublic } from '../../lib/users';
 import { openConversation as openChatConversation } from '../chat/service';
@@ -128,7 +128,7 @@ router.get('/items', (req, res) => {
       const byId = new Map(srows.map((r) => [r.id, r]));
       const ordered = picks.filter((x) => byId.has(x.id));
       if (ordered.length) {
-        const scards = cardsOf(ordered.map((x) => byId.get(x.id)!), req).map((c, i) => ({ ...c, sponsored: true, boostTier: ordered[i]!.tier }));
+        const scards = cardsOf(ordered.map((x) => byId.get(x.id)!), req).map((c, i) => ({ ...c, sponsored: true, boostTier: ordered[i]!.tier, boostId: ordered[i]!.boostId }));
         items = mergeSponsored(items, scards, p.pageSize);
         recordImpressions(ordered.map((x) => x.boostId), req);
       }
@@ -390,8 +390,11 @@ router.get('/items/:id', (req, res) => {
       q.run('UPDATE market_items SET view_count = view_count + 1 WHERE id = ?', [r.id]);
       r.view_count += 1;
     }
-    logEvent(req, 'item.view', { entityType: 'market_item', entityId: r.id, campusId: r.campus_id, props: { category: r.category, sponsored: req.query.src === 'sponsored' } });
+    logEvent(req, 'item.view', { entityType: 'market_item', entityId: r.id, campusId: r.campus_id, props: { category: r.category, sponsored: req.query.src === 'sponsored' || typeof req.query.boost === 'string' } });
   }
+  // sponsored click accounting (same contract as GET /api/listings/:id?boost=<boostId>)
+  const boostId = typeof req.query.boost === 'string' ? req.query.boost : null;
+  if (boostId && viewerId !== r.seller_id && q.get('SELECT 1 FROM v_active_boosts WHERE id = ? AND entity_id = ?', [boostId, r.id])) recordClick(boostId, req);
   ok(res, itemDto(r, req, { withSimilar: true, withSuggestion: true }));
 });
 

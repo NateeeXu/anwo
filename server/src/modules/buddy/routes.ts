@@ -18,7 +18,7 @@ import { getCampus, campusesInCity, requireCampus } from '../../lib/campuses';
 import { buddyCards, type BuddyCardRow } from '../../lib/cards';
 import { logEvent, recentlyLogged } from '../../lib/events';
 import { createReport } from '../../lib/reports';
-import { pickSponsored, mergeSponsored, sponsoredSlotCount, recordImpressions } from '../../lib/sponsored';
+import { pickSponsored, mergeSponsored, sponsoredSlotCount, recordClick, recordImpressions } from '../../lib/sponsored';
 import { audit } from '../../lib/audit';
 import { nowIso, nowMs, HOUR } from '../../lib/time';
 import { postSystemMessage, loadConversation } from '../../lib/conversations';
@@ -196,7 +196,7 @@ router.get('/posts', rateLimit('reads'), (req, res) => {
       const ids = picks.map((x) => x.id);
       const sRows = q.all<BuddyCardRow>(`SELECT b.* FROM buddy_posts b WHERE b.id IN (${placeholders(ids.length)}) AND ${where}`, [...ids, ...params]);
       const tierOf = new Map(picks.map((x) => [x.id, x]));
-      const sCards = buddyCards(sRows, { viewerId: req.user?.id }).map((c) => ({ ...c, sponsored: true, boostTier: tierOf.get(c.id)!.tier }));
+      const sCards = buddyCards(sRows, { viewerId: req.user?.id }).map((c) => ({ ...c, sponsored: true, boostTier: tierOf.get(c.id)!.tier, boostId: tierOf.get(c.id)!.boostId }));
       if (sCards.length) {
         items = mergeSponsored(items, sCards, p.pageSize);
         recordImpressions(sCards.map((c) => tierOf.get(c.id)!.boostId), req);
@@ -375,6 +375,9 @@ router.get('/posts/:id', rateLimit('reads'), (req, res) => {
     post.view_count += 1;
   }
   logEvent(req, 'buddy.view', { entityType: 'buddy_post', entityId: id, props: { type: post.type, status: post.status }, campusId: post.campus_id });
+  // sponsored click accounting (same contract as GET /api/listings/:id?boost=<boostId>)
+  const boostId = typeof req.query.boost === 'string' ? req.query.boost : null;
+  if (boostId && !isHost(post, req.user) && q.get('SELECT 1 FROM v_active_boosts WHERE id = ? AND entity_id = ?', [boostId, id])) recordClick(boostId, req);
   ok(res, toBuddyDetail(post, req.user));
 });
 

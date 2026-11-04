@@ -157,6 +157,8 @@ export type ListingCard = {
   publishedAt: string | null;
   sponsored: boolean;
   boostTier?: BoostTier;
+  /** sponsored slots only: the boost that placed the card (detail links carry ?boost=<id> for click accounting) */
+  boostId?: string;
   saved?: boolean;
   distanceM?: number;
 };
@@ -393,6 +395,8 @@ export type ItemCard = {
   seller: UserPublic;
   sponsored: boolean;
   boostTier?: BoostTier;
+  /** sponsored slots only: the boost that placed the card (detail links carry ?boost=<id> for click accounting) */
+  boostId?: string;
   wishlisted?: boolean;
   bundleId: string | null;
   distanceM?: number;
@@ -458,6 +462,8 @@ export type BuddyCard = {
   author: UserPublic;
   sponsored: boolean;
   boostTier?: BoostTier;
+  /** sponsored slots only: the boost that placed the card (detail links carry ?boost=<id> for click accounting) */
+  boostId?: string;
   myMembership?: { status: BuddyMemberStatus; role: BuddyMemberRole } | null;
   distanceM?: number;
 };

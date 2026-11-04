@@ -259,13 +259,13 @@ const FHA_PATTERNS = [/\b(no|only)\s+(students?|families|kids|children|christian
 export function fhaViolation(text: string): boolean {
   return FHA_PATTERNS.some((re) => re.test(text));
 }
-export function entityCard(type: BoostEntity, id: string, ctx: { viewerId?: string | null; sponsored?: boolean; tier?: Boost['tier'] } = {}): ListingCard | ItemCard | BuddyCard | null {
+export function entityCard(type: BoostEntity, id: string, ctx: { viewerId?: string | null; sponsored?: boolean; tier?: Boost['tier']; boostId?: string } = {}): ListingCard | ItemCard | BuddyCard | null {
   let card: ListingCard | ItemCard | BuddyCard | undefined;
   if (type === 'listing') card = listingCards(q.all<ListingCardRow>('SELECT l.* FROM listings l WHERE l.id = ?', [id]), { viewerId: ctx.viewerId })[0];
   else if (type === 'market_item') card = itemCards(q.all<ItemCardRow>('SELECT m.* FROM market_items m WHERE m.id = ?', [id]), { viewerId: ctx.viewerId })[0];
   else card = buddyCards(q.all<BuddyCardRow>('SELECT b.* FROM buddy_posts b WHERE b.id = ?', [id]), { viewerId: ctx.viewerId })[0];
   if (!card) return null;
-  if (ctx.sponsored) return { ...card, sponsored: true, boostTier: ctx.tier } as typeof card;
+  if (ctx.sponsored) return { ...card, sponsored: true, boostTier: ctx.tier, boostId: ctx.boostId } as typeof card;
   return card;
 }
 export function entityLink(type: BoostEntity, id: string): string {
@@ -450,7 +450,7 @@ export function sponsoredCards(input: PickSponsoredInput & { nationwide?: boolea
   const picks = pickSponsored(input);
   const out: (ListingCard | ItemCard | BuddyCard)[] = [];
   for (const p of picks) {
-    const c = entityCard(input.entityType, p.id, { viewerId: input.viewerId, sponsored: true, tier: p.tier });
+    const c = entityCard(input.entityType, p.id, { viewerId: input.viewerId, sponsored: true, tier: p.tier, boostId: p.boostId });
     if (c) out.push(c);
   }
   recordImpressions(picks.map((p) => p.boostId), req);

@@ -169,7 +169,7 @@ router.get('/', (req, res) => {
       const eligible = q.all<{ id: string }>(`SELECT l.id FROM listings l WHERE ${b.where} AND l.id IN (${placeholders(picks.length)})`, [...b.params, ...picks.map((x) => x.id)]).map((r) => r.id);
       const chosen = picks.filter((x) => eligible.includes(x.id));
       if (chosen.length) {
-        const sponsoredCards = listingCards(loadCardRows(chosen.map((x) => x.id)), { viewerId: req.user?.id ?? null }).map((c) => ({ ...c, sponsored: true, boostTier: chosen.find((x) => x.id === c.id)!.tier }));
+        const sponsoredCards = listingCards(loadCardRows(chosen.map((x) => x.id)), { viewerId: req.user?.id ?? null }).map((c) => ({ ...c, sponsored: true, boostTier: chosen.find((x) => x.id === c.id)!.tier, boostId: chosen.find((x) => x.id === c.id)!.boostId }));
         items = mergeSponsored(items, sponsoredCards, p.pageSize);
         recordImpressions(chosen.map((x) => x.boostId), req);
       }
