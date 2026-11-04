@@ -68,7 +68,7 @@ JWT_SECRET=<long random> NODE_ENV=production PORT=4500 GEOCODE_OFFLINE=1 npm sta
 node server/scripts/gen-placeholders.mjs     # regenerate the placeholder SVGs (deterministic)
 ```
 
-`npm run e2e` refuses to start when :4000 / :5173 are busy (stop `npm run dev` first, or set `PORT` / `VITE_PORT`). It runs the server with `RATE_LIMIT_DISABLED=1` and `ALLOW_SEED_API=1` because the market and admin specs re-seed their module through `POST /api/dev/seed`.
+`npm run e2e` refuses to start when :4000 / :5173 are busy (stop `npm run dev` first, or set `PORT` / `VITE_PORT`). It runs the server with `RATE_LIMIT_DISABLED=1`, `ENABLE_DEV_API=1` and `ALLOW_SEED_API=1` because the market and admin specs re-seed their module through `POST /api/dev/seed`.
 
 ### 端口与环境变量 Ports & env
 
@@ -77,7 +77,8 @@ node server/scripts/gen-placeholders.mjs     # regenerate the placeholder SVGs (
 | server | `PORT` | `4000` | HTTP + WebSocket |
 | server | `DB_PATH` | `server/data/app.db` | module agents use `server/data/test-<key>.db` |
 | server | `UPLOAD_DIR` | `server/uploads` | served at `/uploads` (1-day cache); seed images live in `server/uploads/seed/` |
-| server | `JWT_SECRET`, `NODE_ENV`, `WEB_ORIGIN` | dev values | `JWT_SECRET` is mandatory when `NODE_ENV=production`; `/api/dev/*` and the dev mailbox exist only outside production |
+| server | `JWT_SECRET`, `NODE_ENV`, `WEB_ORIGIN` | dev values | `JWT_SECRET` (≥ 32 bytes) is mandatory when `NODE_ENV=production` |
+| server | `ENABLE_DEV_API`, `HOST`, `TRUST_PROXY` | –, `127.0.0.1`, `1` | `/api/dev/*` + the dev mailbox are opt-in (`ENABLE_DEV_API=1`, set by `npm run dev` / `npm run e2e`), loopback only, never in production; the dev server binds to loopback unless `HOST=0.0.0.0` |
 | server | `GEOCODE_OFFLINE`, `RATE_LIMIT_DISABLED`, `ALLOW_SEED_API` | – | `1` = no Nominatim / no rate limits (tests) / allow `POST /api/dev/seed` on non-test DBs |
 | web | `VITE_PORT` | `5173` | |
 | web | `VITE_API_TARGET` | `http://127.0.0.1:4000` | proxy target for `/api`, `/uploads`, `/ws` |

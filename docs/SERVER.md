@@ -96,7 +96,9 @@ loadUser(id) → AuthUser (users row minus password_hash) ; loadUserByEmail(emai
 SESSION_COOKIE='sid', CAMPUS_COOKIE='campus', LANG_COOKIE='lang', ANON_COOKIE='aid'
 ```
 `req.user` type is `AuthUser` (`lib/types.ts`); `req.sessionId` is the anonymous `aid`.
-CSRF: writes need `X-Requested-With: fetch`; exempt: `/api/events`, mock-stripe webhook, partner `converted`, `/api/dev/*`.
+CSRF: writes need `X-Requested-With: fetch`; exempt: `/api/events` (beacon; server-owned event types are dropped, client `ts` clamped to ±5 min) and the two HMAC-signed server-to-server hooks — mock-stripe webhook (`Mock-Stripe-Signature`) and partner `converted` (`X-Anwo-Signature`). `/api/dev/*` is **not** exempt.
+
+Sessions carry `sv` (users.session_version): `bumpSessionVersion(userId)` revokes every session (password change / reset, `POST /api/auth/logout-all`, account deletion). Client IPs come from `req.ip` (Express `trust proxy` = `TRUST_PROXY`), never from a hand-parsed `X-Forwarded-For`.
 
 ### ratelimit.ts
 ```ts
@@ -294,7 +296,7 @@ npm run typecheck                                # shared + server + web (tsc --
 npm test -w server                               # node --test (temp DB per file, rate limits + jobs disabled)
 NODE_ENV=production npm start                    # serves web/dist with SPA fallback (run `npm run build` first)
 ```
-Dev helpers (non-production only): `GET /api/dev/mailbox?email=`, `DELETE /api/dev/mailbox`, `POST /api/dev/login-as { email }`, `POST /api/dev/seed { modules?, force? }` (test DBs only), `POST /api/dev/time { offsetSec }`, `GET /api/dev/jobs`, `POST /api/dev/jobs/:name/run`, `POST /api/dev/rate-limits/reset`.
+Dev helpers (opt-in with `ENABLE_DEV_API=1`, non-production, loopback only, CSRF header required): `GET /api/dev/mailbox?email=`, `DELETE /api/dev/mailbox`, `POST /api/dev/login-as { email }`, `POST /api/dev/seed { modules?, force? }` (test DBs only), `POST /api/dev/time { offsetSec }`, `GET /api/dev/jobs`, `POST /api/dev/jobs/:name/run`, `POST /api/dev/rate-limits/reset`.
 
 Seed accounts (password `Passw0rd!`): `admin@example.edu` (admin, L3), `alice@u.northwestern.edu` (L2), `bob@u.northwestern.edu` (L1), `landlord@evanstonhomes.com` (landlord, L3), `newbie@u.northwestern.edu` (L0), plus ~42 users across northwestern / uiuc / nyu / usc / umich (see `seed/core.ts`, `SEED_USERS`). User ids are deterministic (`seedUserId(email)`), but look them up by email in your seed.
 
@@ -305,12 +307,16 @@ Writing a test: copy `test/campuses.test.ts` — `boot(name)` starts the real ap
 | Var | Default | Notes |
 |---|---|---|
 | `PORT` | `4000` | HTTP + ws port |
-| `HOST` | `0.0.0.0` | |
+| `HOST` | `127.0.0.1` (`0.0.0.0` in production) | set `HOST=0.0.0.0` explicitly to expose a dev server |
+| `TRUST_PROXY` | `1` | Express `trust proxy` hop count used for `req.ip` (rate limits, ip hashes); `0` when nothing sits in front |
+| `ENABLE_DEV_API` | – | `1` mounts `/api/dev/*` (opt-in, never in production, loopback callers only). `npm run dev` and `npm run e2e` set it; tests always have it |
+| `BILLING_MOCK` | – | the mock Stripe webhook is mounted outside production, or in production only with `BILLING_MOCK=1` |
+| `MOCK_STRIPE_WEBHOOK_SECRET` | derived from `JWT_SECRET` | HMAC key for `Mock-Stripe-Signature` (hex HMAC-SHA256 over `${type}.${intentId}`) |
 | `NODE_ENV` | `development` | `production` enables secure cookies, strict origins, SPA serving, hides `/api/dev` and `devCode` |
 | `DB_PATH` | `server/data/app.db` | relative to repo root; created with WAL |
 | `UPLOAD_DIR` | `server/uploads` | served at `/uploads` (1 day cache) |
 | `UPLOAD_PRIVATE_DIR` | `server/data/private-uploads` | verification docs, streamed via `/api/uploads/:id/file` |
-| `JWT_SECRET` | dev default | required in production |
+| `JWT_SECRET` | – | production: required, ≥ 32 bytes, never the dev default. Outside production the well-known dev default is used only with `ENABLE_DEV_API=1` / `NODE_ENV=test` / `ALLOW_DEV_SECRET=1`; otherwise a random per-process secret |
 | `WEB_ORIGIN` | `http://localhost:5173,http://127.0.0.1:5173` | CORS + ws Origin allow-list (csv); any `localhost:*` allowed outside prod |
 | `NOMINATIM_URL` | `https://nominatim.openstreetmap.org` | geocoder (1 req/s, 4 s timeout, User-Agent set) |
 | `GEOCODE_OFFLINE` | – | `1` = skip network, campus-centroid fallback (`approx: true`) |

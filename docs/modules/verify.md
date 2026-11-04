@@ -65,7 +65,7 @@ Owner: verify module agent. Scope: BRIEF §3 #4, API.md §6, DATA_MODEL §3.4 / 
 ## Known gaps
 
 - PDF uploads are accepted by the server (`application/pdf`, purpose verification) and rendered in the admin viewer, but the center's `PhotoUploader` only accepts JPG / PNG / WebP (the kit uploader is image-only).
-- The 30-day auto-deletion of decided documents (admin-requirements §4) is not implemented — a `jobs.ts` job can delete `uploads` rows + files for requests decided > 30 days ago once the retention policy is confirmed.
+- Document retention (review fix): `verify/jobs.ts` `purgeReviewedDocuments` (every 6 h) deletes the image files of requests decided more than 30 days ago (`verification_requests.files_purged_at`; the uploads row keeps only its sha256 for duplicate detection); account deletion purges immediately. Selfies need an explicit consent checkbox (`selfieConsent`, recorded in `internal_note`); no face template is ever derived. Admins can no longer stream verification uploads through the generic `/api/uploads/:id/file` — only the audited review endpoint. `landlord_proof` is presented as 「租约或产权证明 / Lease or ownership proof」 so sublet posters can upload a lease page (deep link `/verify?step=id&type=landlord_proof`); a separate `lease_proof` type still needs a table rebuild of the `type` CHECK.
 - `lease_proof` verification type (billing's supply badge) does not exist in `schema.sql` (CHECK constraint); `hasSupplyProof` currently means an approved `landlord_proof`.
 - Phone numbers are stored in E.164 without carrier validation; the "+1 default" normalisation is done in the web form.
 - The trust-override endpoint returns the target's `UserMe` to the admin (API.md says "UserMe-ish"); it includes private fields by design for the admin view.
