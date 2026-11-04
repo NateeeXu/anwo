@@ -151,6 +151,13 @@ export function ExportLink({ table, query, label }: { table: string; query?: Rec
 }
 
 // ------------------------------------------------------------------ status badges
+const STATUS_KEYS = new Set(['draft', 'active', 'paused', 'rented', 'expired', 'removed', 'open', 'full', 'closed', 'cancelled', 'reserved', 'sold', 'fulfilled', 'banned', 'visible', 'deleted', 'locked', 'inactive']);
+/** Localized label for an entity lifecycle status (falls back to the raw code). */
+export function useStatusLabel() {
+  const t = useT();
+  return (s: string | null | undefined) => (s && STATUS_KEYS.has(s) ? t(`admin.entityStatus.${s}`) : s ?? '');
+}
+
 export function ReportStatusBadge({ status }: { status: ReportStatus }) {
   const t = useT();
   const v = status === 'open' ? 'warning' : status === 'in_review' ? 'info' : status === 'actioned' ? 'success' : 'neutral';

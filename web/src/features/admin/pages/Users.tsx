@@ -192,7 +192,7 @@ export function UserDrawer({ id, onClose }: { id: string | null; onClose: () => 
   };
 
   return (
-    <Modal open={!!id} onClose={onClose} size="lg" title={u?.name ?? t('admin.users.detail')} description={u?.email} bodyClassName="pt-0">
+    <Modal open={!!id} onClose={onClose} size="lg" title={u?.name ?? t('admin.users.detail')} description={u?.email}>
       {user.isError ? (
         <ErrorState error={user.error} onRetry={() => void user.refetch()} />
       ) : !u ? (

@@ -11,7 +11,7 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/cn';
 import { Head } from '@/app/Head';
 import { adminApi, useAdminMutation, useAdminReport, useAdminReports } from '../api';
-import { BulkBar, CampusFilter, ErrorState, ExportLink, KeyHints, ModerationBadge, PageTitle, ReasonDialog, ReportStatusBadge, useAdminFilters, useAge, useRowKeys } from '../ui';
+import { BulkBar, CampusFilter, ErrorState, ExportLink, KeyHints, ModerationBadge, PageTitle, ReasonDialog, ReportStatusBadge, useAdminFilters, useAge, useRowKeys, useStatusLabel } from '../ui';
 
 type StatusTab = 'pending' | 'open' | 'in_review' | 'actioned' | 'dismissed' | 'all';
 const TABS: StatusTab[] = ['pending', 'in_review', 'actioned', 'dismissed', 'all'];
@@ -27,6 +27,7 @@ function actionsFor(type: string): (typeof ReportActionType)[number][] {
 
 export function EntityCard({ e }: { e: EntitySummary | null }) {
   const t = useT();
+  const statusLabel = useStatusLabel();
   const { formatRelative } = useLocale();
   if (!e) return null;
   if (e.missing) return <p className="rounded-ctl bg-sunken px-3 py-2 text-small text-ink-2">{t('admin.reports.entityMissing')}</p>;
@@ -36,7 +37,7 @@ export function EntityCard({ e }: { e: EntitySummary | null }) {
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge size="sm">{t(`admin.entity.${e.type}`)}</Badge>
-          {e.status && <span className="text-caption text-ink-3">{t('admin.reports.entityStatus', { status: e.status })}</span>}
+          {e.status && <span className="text-caption text-ink-3">{t('admin.reports.entityStatus', { status: statusLabel(e.status) })}</span>}
           <ModerationBadge status={e.moderationStatus} />
         </div>
         <p className="truncate font-medium text-ink">{e.title}</p>

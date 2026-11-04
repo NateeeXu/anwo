@@ -11,7 +11,7 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/cn';
 import { Head } from '@/app/Head';
 import { adminApi, useAdminMutation, useModeration } from '../api';
-import { BulkBar, CampusFilter, ErrorState, ExportLink, KeyHints, ModerationBadge, PageTitle, ReasonDialog, useAdminFilters, useRowKeys } from '../ui';
+import { BulkBar, CampusFilter, ErrorState, ExportLink, KeyHints, ModerationBadge, PageTitle, ReasonDialog, useAdminFilters, useRowKeys, useStatusLabel } from '../ui';
 
 type ModTab = 'all' | 'flagged' | 'hidden' | 'ok';
 type Target = 'ok' | 'flagged' | 'hidden';
@@ -19,6 +19,7 @@ type Target = 'ok' | 'flagged' | 'hidden';
 export function ModerationTable({ entityType, titleKey, embedded }: { entityType: ModeratedEntityType; titleKey: string; embedded?: boolean }) {
   const t = useT();
   const { formatMoney, formatRelative, formatNumber } = useLocale();
+  const statusLabel = useStatusLabel();
   const f = useAdminFilters();
   const tab = (f.param('mod') as ModTab | null) ?? 'all';
   const [q, setQ] = useState('');
@@ -108,7 +109,7 @@ export function ModerationTable({ entityType, titleKey, embedded }: { entityType
             { key: 'price', header: t('admin.mod.price'), align: 'right', hideOnMobile: true, render: (r) => (r.priceCents !== null ? formatMoney(r.priceCents) : '—') },
             { key: 'views', header: t('admin.mod.views'), align: 'right', hideOnMobile: true, render: (r) => formatNumber(r.viewCount) },
             { key: 'reports', header: t('admin.users.reports'), align: 'right', render: (r) => (r.openReports ? <Badge size="sm" variant="warning">{r.openReports}</Badge> : <span className="text-ink-3">{r.reportCount}</span>) },
-            { key: 'status', header: t('admin.mod.status'), render: (r) => <div className="flex flex-wrap items-center gap-1"><ModerationBadge status={r.moderationStatus} /><span className="text-caption text-ink-3">{r.status}</span></div> },
+            { key: 'status', header: t('admin.mod.status'), render: (r) => <div className="flex flex-wrap items-center gap-1"><ModerationBadge status={r.moderationStatus} /><span className="text-caption text-ink-3">{statusLabel(r.status)}</span></div> },
             { key: 'created', header: t('admin.mod.created'), hideOnMobile: true, render: (r) => <span className="text-ink-2">{formatRelative(r.createdAt)}</span> },
           ]}
           rowActions={(r) => (
