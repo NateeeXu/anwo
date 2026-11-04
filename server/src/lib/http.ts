@@ -48,10 +48,10 @@ export function pageWindow(p: { page: number; pageSize: number }): { limit: numb
   return { limit: p.pageSize, offset: (p.page - 1) * p.pageSize };
 }
 
+/** Client IP as resolved by Express from `trust proxy` (config.trustProxy hops). Never read X-Forwarded-For by hand:
+ *  its first entry is client-controlled, so every IP-keyed limiter could be bypassed. */
 export function clientIp(req: Request): string {
-  const xf = req.headers['x-forwarded-for'];
-  const first = Array.isArray(xf) ? xf[0] : xf?.split(',')[0];
-  return (first?.trim() || req.ip || req.socket.remoteAddress || '0.0.0.0').replace(/^::ffff:/, '');
+  return (req.ip || req.socket.remoteAddress || '0.0.0.0').replace(/^::ffff:/, '');
 }
 
 export function wantsJson(req: Request): boolean {

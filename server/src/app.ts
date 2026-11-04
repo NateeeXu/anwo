@@ -70,6 +70,25 @@ const requestLog: RequestHandler = (req, res, next) => {
   next();
 };
 
+/** /api/dev answers loopback callers only (the Vite proxy and local scripts), never the network. */
+const loopbackOnly: RequestHandler = (req, res, next) => {
+  const ip = (req.socket.remoteAddress ?? '').replace(/^::ffff:/, '');
+  if (ip === '127.0.0.1' || ip === '::1') return next();
+  res.status(404).json({ ok: false, error: { code: 'NOT_FOUND', message: 'Not found' } });
+};
+
+/** Baseline security headers (API, uploads, SPA). The SPA CSP is only set where Express serves the built app. */
+const securityHeaders: RequestHandler = (req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Frame-Options', 'DENY');
+  if (config.isProd) res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  if (req.path.startsWith('/uploads/')) res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
+  else if (req.path.startsWith('/api/')) res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
+  else res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+  next();
+};
+
 /** Anonymous session cookie `aid` (analytics). */
 const anonSession: RequestHandler = (req, res, next) => {
   let aid = cookieOf(req, ANON_COOKIE);
@@ -84,9 +103,10 @@ const anonSession: RequestHandler = (req, res, next) => {
 export function createApp(): express.Express {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', config.trustProxy);
   app.set('etag', false);
 
+  app.use(securityHeaders);
   app.use(cors);
   app.use(cookieParser());
   app.use(requestLog);
@@ -109,7 +129,7 @@ export function createApp(): express.Express {
   app.use('/api/search', searchRoutes);
   app.use('/api/meta', metaRoutes);
   app.use('/api/events', eventsRoutes);
-  if (!config.isProd) app.use('/api/dev', devRoutes);
+  if (config.devApi) app.use('/api/dev', loopbackOnly, devRoutes);
 
   app.use('/api/listings', listingsRoutes);
   app.use('/api/wanted', wantedRoutes);

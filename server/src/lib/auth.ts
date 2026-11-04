@@ -177,7 +177,8 @@ export function isAdmin(req: Request): boolean {
 }
 
 /** CSRF guard: state-changing requests must carry `X-Requested-With: fetch` (API.md §1.2). Beacons/webhooks are exempt. */
-const CSRF_EXEMPT: RegExp[] = [/^\/api\/events\/?$/, /^\/api\/billing\/mock-stripe\/webhook/, /^\/api\/billing\/partners\/[^/]+\/converted/, /^\/api\/dev\//];
+// The webhook and the partner postback are server-to-server and authenticated by an HMAC signature instead.
+const CSRF_EXEMPT: RegExp[] = [/^\/api\/events\/?$/, /^\/api\/billing\/mock-stripe\/webhook/, /^\/api\/billing\/partners\/[^/]+\/converted/];
 export const csrf: RequestHandler = (req: Request, _res: Response, next: NextFunction) => {
   if (!isWrite(req)) return next();
   const path = req.originalUrl.split('?')[0] ?? '';

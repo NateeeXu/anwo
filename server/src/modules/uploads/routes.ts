@@ -10,7 +10,6 @@ import { ApiError } from '../../lib/errors';
 import { ok, parseParams } from '../../lib/http';
 import { rateLimit } from '../../lib/ratelimit';
 import { deleteUploadFile, getUpload, storeUpload, toUploadDto, uploadFilePath, uploadIsReferenced, uploadMiddleware } from '../../lib/uploads';
-import { config } from '../../config';
 
 const router = Router();
 
@@ -24,7 +23,7 @@ router.post('/', requireAuth, rateLimit({ name: 'uploads', limit: 60, windowMs: 
       if (purpose === 'seed' && req.user!.role !== 'admin') throw new ApiError('FORBIDDEN', 'seed purpose is reserved');
       const isPrivate = req.body?.private === '1' || req.body?.private === 'true' || purpose === 'verification';
       const out = files.map((f) =>
-        storeUpload({ buffer: f.buffer, originalName: f.originalname, mime: f.mimetype, ownerId: req.user!.id, purpose, isPrivate, allowSvg: purpose === 'seed' || !config.isProd && purpose === 'other' }),
+        storeUpload({ buffer: f.buffer, originalName: f.originalname, mime: f.mimetype, ownerId: req.user!.id, purpose, isPrivate, allowSvg: purpose === 'seed' }),
       );
       ok(res, out, 201);
     } catch (e) {
@@ -48,9 +47,12 @@ router.get('/:id/file', requireAuth, (req, res) => {
   const u = req.user!;
   const allowed = u.role === 'admin' || u.id === up.owner_id || up.is_private === 0;
   if (!allowed) throw new ApiError('FORBIDDEN', 'Not your file');
+  // ID documents: admins read them only through the audited /api/verify/admin/requests/:id/files/:side endpoint
+  if (up.purpose === 'verification' && u.id !== up.owner_id) throw new ApiError('FORBIDDEN', 'Open verification documents from the review queue');
   const abs = uploadFilePath(up);
   if (!fs.existsSync(abs)) throw new ApiError('NOT_FOUND', 'File missing on disk');
   res.setHeader('Content-Type', up.mime);
+  res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
   res.setHeader('Cache-Control', 'private, max-age=300');
   res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(up.filename)}"`);
   fs.createReadStream(abs).pipe(res);
