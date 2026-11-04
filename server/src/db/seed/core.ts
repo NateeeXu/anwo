@@ -6,7 +6,7 @@ import type { DatabaseSync } from 'node:sqlite';
 import { q } from '../index';
 import { hashPassword } from '../../lib/auth';
 import { syncCampuses } from '../../lib/campuses';
-import { ensureDefaultFlags } from '../../lib/flags';
+import { ensureDefaultFlags, invalidateFlags } from '../../lib/flags';
 import { insertSeedUpload } from '../../lib/uploads';
 import { referralCode, sha256 } from '../../lib/ids';
 import { nowIso, nowMs, DAY } from '../../lib/time';
@@ -90,6 +90,10 @@ const AVATAR_PATH = (n: number) => `seed/avatars/a${String(n).padStart(2, '0')}.
 export default async function seed(_db: DatabaseSync): Promise<void> {
   syncCampuses({ overwrite: true });
   ensureDefaultFlags();
+  // demo: Secure Payment is live in the first cleared state only (Illinois); everywhere else shows "coming to <state>"
+  const ilCampuses = q.all<{ id: string }>("SELECT id FROM campuses WHERE state = 'IL' ORDER BY sort_order").map((c) => c.id);
+  q.run("UPDATE feature_flags SET enabled = 1, campus_ids_json = ? WHERE key = 'escrow.enabled' AND campus_ids_json = '[]'", [JSON.stringify(ilCampuses)]);
+  invalidateFlags();
   const hash = await hashPassword(SEED_PASSWORD);
   const t = nowIso();
 

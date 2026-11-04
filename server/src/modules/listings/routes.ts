@@ -49,7 +49,7 @@ function buildListWhere(req: Parameters<typeof scopeFromQuery>[0], p: ListingLis
     params.push(p.ownerId);
   } else {
     scope = scopeFromQuery(req, p, { requireCampus: opts.requireCampus ?? true });
-    w = whereScope(scope, { alias: 'l' });
+    w = whereScope(scope, { alias: 'l', fuzz: 'listing' });
   }
   if (w.sql) {
     parts.push(w.sql.replace(/^ AND /, ''));
@@ -198,7 +198,7 @@ router.get('/stats', (req, res) => {
 router.get('/stats/campus', (req, res) => {
   const p = parseQuery(req, CampusStatsQuery);
   const scope = scopeFromQuery(req, p, { requireCampus: false });
-  const w = whereScope(scope, { alias: 'l' });
+  const w = whereScope(scope, { alias: 'l', fuzz: 'listing' });
   const where = `${PUBLIC_WHERE}${w.sql}`;
   const prices = q.all<{ price_cents: number; bedrooms: number }>(`SELECT l.price_cents, l.bedrooms FROM listings l WHERE ${where} ORDER BY l.price_cents`, w.params);
   const pct = (arr: number[], f: number) => (arr.length ? arr[Math.min(arr.length - 1, Math.floor(arr.length * f))]! : 0);

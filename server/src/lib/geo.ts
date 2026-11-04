@@ -17,7 +17,7 @@ import { allCampuses, campusesInCity, getCampus } from './campuses';
 import { CAMPUS_COOKIE, cookieOf } from './auth';
 import { ApiError } from './errors';
 import { isEnabled } from './flags';
-import { hash32 } from './ids';
+import { fuzz as fuzzPoint } from './fuzz';
 import { logger } from './logger';
 import { nowIso, isoPlus } from './time';
 
@@ -43,8 +43,10 @@ export const bbox = bboxAround;
 
 /** SQL haversine in metres for table alias `a` (lat/lng columns). Binds 2 positional params: lat, lng (see distanceParams). */
 export function haversineSql(alias = 'l', latCol = 'lat', lngCol = 'lng'): string {
-  const la = `${alias}.${latCol}`;
-  const ln = `${alias}.${lngCol}`;
+  return haversineExpr(`${alias}.${latCol}`, `${alias}.${lngCol}`);
+}
+/** Same as haversineSql over arbitrary lat / lng SQL expressions. */
+export function haversineExpr(la: string, ln: string): string {
   return `(2 * 6371000 * asin(sqrt(pow(sin(radians(${la} - ?) / 2), 2) + cos(radians(?)) * cos(radians(${la})) * pow(sin(radians(${ln} - ?) / 2), 2))))`;
 }
 /** Params matching haversineSql: [lat, lat, lng]. */
@@ -54,12 +56,7 @@ export function distanceParams(center: LatLng): number[] {
 
 /** Deterministic fuzz ≤ 150 m for listings with hide_exact_address (DATA_MODEL §3.1). */
 export function fuzz(id: string, lat: number, lng: number, maxM = 150): LatLng {
-  const h = hash32(id);
-  const angle = ((h & 0xffff) / 0xffff) * Math.PI * 2;
-  const dist = 40 + (((h >>> 16) & 0xffff) / 0xffff) * (maxM - 40);
-  const dLat = (dist * Math.cos(angle)) / 111_320;
-  const dLng = (dist * Math.sin(angle)) / (111_320 * Math.max(0.05, Math.cos(toRad(lat))));
-  return { lat: +(lat + dLat).toFixed(6), lng: +(lng + dLng).toFixed(6) };
+  return fuzzPoint(id, lat, lng, maxM);
 }
 export function round3(n: number | null): number | null {
   return n === null ? null : Math.round(n * 1000) / 1000;
@@ -138,6 +135,8 @@ export type WhereScopeOptions = {
   campusCol?: string;
   /** when false (buddy/shuttle), scope is always campus */
   allowNationwide?: boolean;
+  /** 'listing': hidden addresses use the fuzzed point (SQL anwo_fuzz); 'round3': coordinates rounded to 3 decimals (market pickup) */
+  fuzz?: 'listing' | 'round3';
 };
 export type WhereScope = {
   /** starts with ' AND ' (or '' when nothing applies) */
@@ -159,19 +158,24 @@ export function whereScope(s: ResolvedScope, o: WhereScopeOptions = {}): WhereSc
   const parts: string[] = [];
   const params: (string | number)[] = [];
   const nationwide = s.scope === 'nationwide' && (o.allowNationwide ?? true);
+  // public coordinates: filters, sort and distance use the same fuzzed / rounded point the cards show
+  const latX = o.fuzz === 'listing' ? `(CASE WHEN ${a}.hide_exact_address = 1 THEN anwo_fuzz(${a}.id, ${a}.${latCol}, ${a}.${lngCol}, 0) ELSE ${a}.${latCol} END)`
+    : o.fuzz === 'round3' ? `round(${a}.${latCol}, 3)` : `${a}.${latCol}`;
+  const lngX = o.fuzz === 'listing' ? `(CASE WHEN ${a}.hide_exact_address = 1 THEN anwo_fuzz(${a}.id, ${a}.${latCol}, ${a}.${lngCol}, 1) ELSE ${a}.${lngCol} END)`
+    : o.fuzz === 'round3' ? `round(${a}.${lngCol}, 3)` : `${a}.${lngCol}`;
   let distanceSql: string | null = null;
   let distanceParams: number[] = [];
 
   if (s.bbox) {
     const [minLng, minLat, maxLng, maxLat] = s.bbox;
-    parts.push(`${a}.${latCol} BETWEEN ? AND ? AND ${a}.${lngCol} BETWEEN ? AND ?`);
+    parts.push(`${latX} BETWEEN ? AND ? AND ${lngX} BETWEEN ? AND ?`);
     params.push(minLat, maxLat, minLng, maxLng);
     // bbox explicitly shows location → no campus filter even in campus scope
   } else if (s.center && s.radiusM) {
     const b = bboxAround(s.center.lat, s.center.lng, s.radiusM);
-    parts.push(`${a}.${latCol} BETWEEN ? AND ? AND ${a}.${lngCol} BETWEEN ? AND ?`);
+    parts.push(`${latX} BETWEEN ? AND ? AND ${lngX} BETWEEN ? AND ?`);
     params.push(b.minLat, b.maxLat, b.minLng, b.maxLng);
-    parts.push(`${haversineSql(a, latCol, lngCol)} <= ?`);
+    parts.push(`${haversineExpr(latX, lngX)} <= ?`);
     params.push(s.center.lat, s.center.lat, s.center.lng, s.radiusM);
     if (!nationwide && s.campusId) {
       parts.push(`${a}.${campusCol} = ?`);
@@ -191,10 +195,10 @@ export function whereScope(s: ResolvedScope, o: WhereScopeOptions = {}): WhereSc
     params.push(s.campusId);
   }
   if (s.center) {
-    distanceSql = haversineSql(a, latCol, lngCol);
+    distanceSql = haversineExpr(latX, lngX);
     distanceParams = [s.center.lat, s.center.lat, s.center.lng];
   } else if (!nationwide && s.campus) {
-    distanceSql = haversineSql(a, latCol, lngCol);
+    distanceSql = haversineExpr(latX, lngX);
     distanceParams = [s.campus.lat, s.campus.lat, s.campus.lng];
   }
   return { sql: parts.length ? ' AND ' + parts.join(' AND ') : '', params, distanceSql, distanceParams };

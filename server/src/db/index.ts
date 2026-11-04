@@ -16,6 +16,7 @@ import { config } from '../config';
 import { logger } from '../lib/logger';
 import { nowIso } from '../lib/time';
 import { uid as makeUid } from '../lib/ids';
+import { fuzz } from '../lib/fuzz';
 
 export type SqlParam = string | number | null | boolean | undefined | Date | Buffer | Record<string, unknown> | unknown[];
 export type SqlParams = SqlParam[] | Record<string, SqlParam>;
@@ -55,6 +56,12 @@ export function openDb(dbPath: string = config.dbPath): DatabaseSync {
   db.exec('PRAGMA foreign_keys = ON');
   db.exec('PRAGMA busy_timeout = 5000');
   db.exec('PRAGMA synchronous = NORMAL');
+  // anwo_fuzz(id, lat, lng, which): the public (fuzzed) coordinate of a hidden address — see lib/fuzz.ts
+  db.function('anwo_fuzz', { deterministic: true }, (id, lat, lng, which) => {
+    if (typeof lat !== 'number' || typeof lng !== 'number') return null;
+    const p = fuzz(String(id), lat, lng);
+    return Number(which) === 1 ? p.lng : p.lat;
+  });
   _db = db;
   _path = dbPath;
   applySchema(db);

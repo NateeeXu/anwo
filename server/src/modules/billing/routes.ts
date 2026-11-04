@@ -500,7 +500,7 @@ router.get('/escrows', requireAuth, (req, res) => {
   const rows = q.all<EscrowRow>(`SELECT * FROM escrows WHERE ${where.join(' AND ')} ORDER BY updated_at DESC LIMIT ? OFFSET ?`, [...params, limit, offset]);
   paginated(res, { items: rows.map((e) => toEscrowDto(e, user)), total, page: p.page, pageSize: p.pageSize });
 });
-router.post('/escrows', requireAuth, requireTrust(2), requireFlag('escrow.enabled'), writes, (req, res) => {
+router.post('/escrows', requireAuth, requireTrust(2), writes, (req, res) => {
   const body = parseBody(req, EscrowInput);
   const user = me(req);
   if (body.role === 'payer' && user.trust_level < 3 && user.role !== 'admin') {

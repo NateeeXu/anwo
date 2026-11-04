@@ -35,7 +35,7 @@ router.get('/', (req, res) => {
   const out = { listings: [] as unknown[], wanted: [] as unknown[], items: [] as unknown[], buddy: [] as unknown[], campuses: [] as unknown[], users: [] as unknown[], counts: {} as Record<string, number>, scope: scopeInfo(scope) };
 
   if (types.includes('listing')) {
-    const w = whereScope(scope, { alias: 'l' });
+    const w = whereScope(scope, { alias: 'l', fuzz: 'listing' });
     const base = `FROM listings l WHERE l.status = 'active' AND l.moderation_status = 'ok' AND (l.title LIKE ? ESCAPE '\\' OR l.description LIKE ? ESCAPE '\\' OR l.neighborhood LIKE ? ESCAPE '\\' OR l.city LIKE ? ESCAPE '\\')${w.sql}`;
     const params = [needle, needle, needle, needle, ...w.params];
     out.counts.listing = q.count(`SELECT COUNT(*) ${base}`, params);
@@ -54,7 +54,7 @@ router.get('/', (req, res) => {
     out.wanted = wantedCards(q.all<WantedCardRow>(`SELECT w.* ${base} ORDER BY w.created_at DESC LIMIT ?`, [...params, p.limit]));
   }
   if (types.includes('item')) {
-    const w = whereScope(scope, { alias: 'm', latCol: 'pickup_lat', lngCol: 'pickup_lng' });
+    const w = whereScope(scope, { alias: 'm', latCol: 'pickup_lat', lngCol: 'pickup_lng', fuzz: 'round3' });
     const base = `FROM market_items m WHERE m.status IN ('active','reserved') AND m.moderation_status = 'ok' AND (m.title LIKE ? ESCAPE '\\' OR m.description LIKE ? ESCAPE '\\' OR m.category LIKE ? ESCAPE '\\')${w.sql}`;
     const params = [needle, needle, needle, ...w.params];
     out.counts.item = q.count(`SELECT COUNT(*) ${base}`, params);

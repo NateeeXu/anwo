@@ -9,6 +9,7 @@ import type { BuddyMemberRole, BuddyMemberStatus } from '@shared/enums';
 import { q, parseJson, placeholders } from '../db';
 import { toCampusLite } from './campuses';
 import { fuzz, round3, haversineM } from './geo';
+import { bucketDistance } from './fuzz';
 import { loadUsersPublic, toUserPublic } from './users';
 import { getCampus } from './campuses';
 
@@ -41,6 +42,9 @@ export type CardCtx = {
 export function toListingCard(r: ListingCardRow, ctx: CardCtx = {}): ListingCard {
   const exact = ctx.exact || r.hide_exact_address === 0;
   const pos = exact ? { lat: r.lat, lng: r.lng } : fuzz(r.id, r.lat, r.lng);
+  // hidden address: every distance is measured from the fuzzed point and bucketed (no trilateration)
+  const campusPos = exact ? null : getCampus(r.campus_id);
+  const toCampus = exact ? r.distance_to_campus_m : campusPos ? bucketDistance(haversineM(pos, campusPos)) : bucketDistance(r.distance_to_campus_m);
   const card: ListingCard = {
     id: r.id, title: r.title, priceCents: r.price_cents, depositCents: r.deposit_cents, bedrooms: r.bedrooms, bathrooms: r.bathrooms,
     propertyType: r.property_type as ListingCard['propertyType'], listingType: r.listing_type as ListingCard['listingType'],
@@ -48,14 +52,14 @@ export function toListingCard(r: ListingCardRow, ctx: CardCtx = {}): ListingCard
     neighborhood: r.neighborhood, lat: pos.lat, lng: pos.lng, coverUrl: ctx.coverUrl ?? r.cover_url ?? null, photoCount: r.photo_count,
     status: r.status as ListingCard['status'], campusId: r.campus_id, campus: ctx.campus ?? toCampusLite(r.campus_id) ?? { id: r.campus_id, shortName: r.campus_id, city: r.city, state: r.state },
     isVerifiedListing: r.is_verified_listing === 1, nearShuttle: r.nearest_stop_m !== null && r.nearest_stop_m <= 400,
-    distanceToCampusM: r.distance_to_campus_m, commuteWalkMin: r.commute_walk_min, commuteShuttleMin: r.commute_shuttle_min,
+    distanceToCampusM: toCampus, commuteWalkMin: r.commute_walk_min, commuteShuttleMin: r.commute_shuttle_min,
     saveCount: r.save_count, viewCount: r.view_count, ownerTrustLevel: ctx.owner?.trustLevel ?? r.owner_trust_level ?? 0, publishedAt: r.published_at,
     sponsored: ctx.sponsored ?? false,
   };
   if (ctx.boostTier) card.boostTier = ctx.boostTier;
   if (ctx.saved !== undefined) card.saved = ctx.saved;
-  if (ctx.nearestStop !== undefined) card.nearestStop = ctx.nearestStop;
-  if (r.distance_m !== undefined && r.distance_m !== null) card.distanceM = Math.round(r.distance_m);
+  if (ctx.nearestStop !== undefined) card.nearestStop = ctx.nearestStop && !exact ? { ...ctx.nearestStop, distanceM: bucketDistance(ctx.nearestStop.distanceM) ?? ctx.nearestStop.distanceM } : ctx.nearestStop;
+  if (r.distance_m !== undefined && r.distance_m !== null) card.distanceM = exact ? Math.round(r.distance_m) : bucketDistance(r.distance_m)!;
   return card;
 }
 function coverUrls(ids: (string | null)[]): Map<string, string> {
@@ -131,7 +135,11 @@ export type ItemCardRow = {
 };
 export function toItemCard(r: ItemCardRow, ctx: CardCtx = {}): ItemCard {
   const campus = getCampus(r.campus_id);
-  const dist = campus && r.pickup_lat !== null && r.pickup_lng !== null ? haversineM({ lat: r.pickup_lat, lng: r.pickup_lng }, { lat: campus.lat, lng: campus.lng }) : null;
+  // non-owners: pickup is rounded to 3 decimals and distances are measured from that point, bucketed
+  const pLat = ctx.exact ? r.pickup_lat : round3(r.pickup_lat);
+  const pLng = ctx.exact ? r.pickup_lng : round3(r.pickup_lng);
+  const rawDist = campus && pLat !== null && pLng !== null ? haversineM({ lat: pLat, lng: pLng }, { lat: campus.lat, lng: campus.lng }) : null;
+  const dist = ctx.exact ? rawDist : bucketDistance(rawDist);
   const card: ItemCard = {
     id: r.id, title: r.title, category: r.category as ItemCard['category'], condition: r.condition as ItemCard['condition'], priceCents: r.price_cents, isFree: r.is_free === 1,
     obo: r.obo === 1, coverUrl: ctx.coverUrl ?? r.cover_url ?? null, photoCount: r.photo_count, status: r.status as ItemCard['status'], campusId: r.campus_id,
@@ -142,7 +150,7 @@ export function toItemCard(r: ItemCardRow, ctx: CardCtx = {}): ItemCard {
   };
   if (ctx.boostTier) card.boostTier = ctx.boostTier;
   if (ctx.wishlisted !== undefined) card.wishlisted = ctx.wishlisted;
-  if (r.distance_m !== undefined && r.distance_m !== null) card.distanceM = Math.round(r.distance_m);
+  if (r.distance_m !== undefined && r.distance_m !== null) card.distanceM = ctx.exact ? Math.round(r.distance_m) : bucketDistance(r.distance_m)!;
   return card;
 }
 export function itemCards(rows: ItemCardRow[], opts: { viewerId?: string | null; isAdmin?: boolean } = {}): ItemCard[] {

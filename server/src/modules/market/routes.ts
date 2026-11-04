@@ -44,7 +44,7 @@ function itemTitleLocalized(title: string): { zh: string; en: string } {
 router.get('/items', (req, res) => {
   const p = parseQuery(req, ItemListQuery);
   const scope = scopeFromQuery(req, p, { requireCampus: !p.sellerId && !p.bundleId });
-  const w = whereScope(scope, { alias: 'm', latCol: 'pickup_lat', lngCol: 'pickup_lng' });
+  const w = whereScope(scope, { alias: 'm', latCol: 'pickup_lat', lngCol: 'pickup_lng', fuzz: 'round3' });
   const viewerId = req.user?.id ?? null;
   const admin = isAdmin(req);
 

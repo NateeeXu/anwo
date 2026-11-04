@@ -1,4 +1,5 @@
-// Feature flags (table feature_flags; admin module writes, everyone reads). A missing row counts as ENABLED.
+// Feature flags (table feature_flags; admin module writes, everyone reads). A missing row counts as ENABLED, except the
+// money-custody flags (escrow.*, protection.*) which FAIL CLOSED: a missing row, an empty campus list or no campus = off.
 //
 //   if (!isEnabled('escrow.enabled', campusId)) fail('FEATURE_DISABLED');
 //   router.post('/escrows', requireFlag('escrow.enabled'), ...)   // in lib/auth.ts
@@ -41,12 +42,17 @@ export function toFlagDto(r: FlagRow): FeatureFlag {
   };
 }
 
-/** Enabled when no row exists, or row.enabled=1 and (campus_ids empty or contains campusId). */
+/** Secure Payment / Deposit Protection launch one cleared state at a time (BUSINESS_PLAN §3.7): explicit campus lists only. */
+const FAIL_CLOSED = /^(escrow|protection)\./;
+/** Enabled when no row exists, or row.enabled=1 and (campus_ids empty or contains campusId). escrow.* / protection.*: only
+ *  when the row is enabled AND lists the campus. */
 export function isEnabled(key: string, campusId?: string | null): boolean {
   const r = load().get(key);
-  if (!r) return true;
+  const closed = FAIL_CLOSED.test(key);
+  if (!r) return !closed;
   if (r.enabled !== 1) return false;
   const ids = parseJson<string[]>(r.campus_ids_json, []);
+  if (closed) return !!campusId && ids.includes(campusId);
   if (ids.length === 0 || !campusId) return true;
   return ids.includes(campusId);
 }
@@ -76,7 +82,7 @@ export function publicFlags(): Record<string, boolean | unknown> {
 export const DEFAULT_FLAGS: { key: string; enabled: boolean; value?: unknown; description: string }[] = [
   { key: 'boosts.enabled', enabled: true, description: 'Boost purchases (featured placement)' },
   { key: 'pro.enabled', enabled: true, description: 'Landlord Pro subscriptions' },
-  { key: 'escrow.enabled', enabled: true, description: 'Deposit escrow / secure payment' },
+  { key: 'escrow.enabled', enabled: false, description: 'Secure Payment (安心付) — off by default; enable per campus, one cleared state at a time (empty campus list = off)' },
   { key: 'affiliate.enabled', enabled: true, description: 'Newcomer Kit affiliate partners' },
   { key: 'nationwide.enabled', enabled: true, description: 'Nationwide scope on browse pages' },
   { key: 'scam_banner.enabled', enabled: true, description: 'Scam warning banner on new conversations' },

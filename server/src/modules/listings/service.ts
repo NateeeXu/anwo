@@ -2,6 +2,7 @@
 // Stable cross-module exports (DATA_MODEL §1): recordLead(), listingContextCard().
 // Everything else here is the listings domain layer used by routes.ts / jobs.ts (DTO mapping, geocoding + campus suggestion,
 // commute caches, state machine, quota, leads, share text).
+import { bucketDistance } from '../../lib/fuzz';
 import type { Request } from 'express';
 import type { Availability, Boost, ContextCard, Listing, Photo, UserPublic } from '@shared/types';
 import type { ListingInput, ListingUpdateInput } from '@shared/schemas/listings';
@@ -111,7 +112,7 @@ export function toListingDto(r: ListingRow, opts: DtoOptions = {}): Listing {
           walkMin: r.commute_walk_min,
           bikeMin: r.commute_bike_min ?? Math.ceil((r.distance_to_campus_m ?? 0) / 250),
           shuttleMin: r.commute_shuttle_min,
-          nearestStop: r.nearest_stop_id && r.nearest_stop_m !== null ? nearestStopDto(r.nearest_stop_id, r.nearest_stop_m) : null,
+          nearestStop: r.nearest_stop_id && r.nearest_stop_m !== null ? nearestStopDto(r.nearest_stop_id, showExact ? r.nearest_stop_m : bucketDistance(r.nearest_stop_m)!) : null,
         }
       : null;
   const bundle = q.get<{ id: string; title: string; item_count: number }>("SELECT id, title, item_count FROM market_bundles WHERE listing_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1", [r.id]);
