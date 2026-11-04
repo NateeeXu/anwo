@@ -51,7 +51,8 @@ function MineInner() {
     items.push('separator');
     items.push({ key: 'leads', label: t('listings.mine.action.leads'), icon: <MessageCircle className="size-4" />, onSelect: () => setLeadsFor(l) });
     items.push({ key: 'stats', label: t('listings.mine.action.stats'), icon: <ChartColumn className="size-4" />, onSelect: () => setStatsFor(l) });
-    if (l.status === 'active' && !l.activeBoost) items.push({ key: 'boost', label: t('listings.mine.action.boost'), icon: <Rocket className="size-4" />, onSelect: () => setBoostFor(l) });
+    // buying again extends a running boost from its end date (billing-req §2), so the action stays visible
+    if (l.status === 'active') items.push({ key: 'boost', label: t(l.activeBoost ? 'listings.mine.action.extendBoost' : 'listings.mine.action.boost'), icon: <Rocket className="size-4" />, onSelect: () => setBoostFor(l) });
     items.push('separator');
     items.push({ key: 'delete', label: t('listings.mine.action.delete'), icon: <Trash2 className="size-4" />, danger: true, onSelect: () => actions.askDelete(l) });
     return items;

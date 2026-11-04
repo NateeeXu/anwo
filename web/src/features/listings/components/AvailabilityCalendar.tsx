@@ -44,7 +44,7 @@ export function AvailabilityCalendar({ from, to, ranges, months = 3, className }
 
   return (
     <div className={cn('flex flex-col gap-3', className)}>
-      <p className="text-body text-ink">{formatDateRange(from, to, { months: true })}{!to && ` · ${t('listings.card.openEnded')}`}</p>
+      <p className="text-body text-ink">{formatDateRange(from, to, { months: true })}{!to && ` · ${t('listings.detail.calendar.openEnded')}`}</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {grid.map((m) => (
           <div key={m.label} className="flex flex-col gap-1">
@@ -58,7 +58,7 @@ export function AvailabilityCalendar({ from, to, ranges, months = 3, className }
                   className={cn(
                     'flex h-6 items-center justify-center rounded-xs text-caption tabular-nums',
                     !d.inMonth && 'invisible',
-                    d.state === 'outside' && 'text-ink-4',
+                    d.state === 'outside' && 'text-ink-3',
                     d.state === 'available' && 'bg-accent-soft text-accent-text-strong',
                     d.state === 'booked' && 'bg-sunken text-ink-3 line-through',
                     d.state === 'blocked' && 'bg-line text-ink-3',

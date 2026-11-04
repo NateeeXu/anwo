@@ -122,7 +122,7 @@ export default function Detail() {
   chips.push({ key: 'type', label: t(`listings.type.${l.listingType}`), icon: Home });
 
   const facts: { label: string; value: string; icon: LucideIcon }[] = [
-    { label: t('listings.wizard.propertyType'), value: `${t(`listings.prop.${l.propertyType}`)} · ${roomsLabel(l, t, formatRooms)}`, icon: Home },
+    { label: t('listings.wizard.propertyType'), value: [...new Set([t(`listings.prop.${l.propertyType}`), roomsLabel(l, t, formatRooms)])].join(' · '), icon: Home },
     ...(l.sqft ? [{ label: t('listings.wizard.sqft'), value: formatArea(l.sqft), icon: Ruler }] : []),
     { label: t('listings.wizard.leaseType'), value: t(`listings.lease.${l.leaseType}`), icon: BookOpen },
     { label: t('listings.wizard.minTerm'), value: t('listings.filter.months', { n: l.minTermMonths }), icon: ArrowUpDown },

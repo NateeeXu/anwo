@@ -39,11 +39,10 @@ export function OwnerPanel({ listing: l, onStats }: { listing: Listing; onStats:
           <div key={k}><dt className="text-caption text-ink-3">{t(`listings.detail.owner.${k}`)}</dt><dd className="text-price tabular-nums text-ink">{formatNumber(v)}</dd></div>
         ))}
       </dl>
-      {l.activeBoost ? (
+      {l.activeBoost && (
         <p className="flex items-center gap-2 text-small text-ink-2"><Badge variant="boosted" size="sm" />{t('listings.detail.owner.boosted', { tier: t(`listings.boostTier.${l.activeBoost.tier}`), date: formatDate(l.activeBoost.endsAt, 'short') })}</p>
-      ) : (
-        live && <Button variant="secondary" iconLeft={<Rocket className="size-4" />} onClick={() => setBoostOpen(true)}>{t('listings.detail.owner.boost')}</Button>
       )}
+      {live && <Button variant="secondary" iconLeft={<Rocket className="size-4" />} onClick={() => setBoostOpen(true)}>{t(l.activeBoost ? 'listings.detail.owner.extendBoost' : 'listings.detail.owner.boost')}</Button>}
       <div className="grid grid-cols-2 gap-2">
         <Button asChild variant="secondary" size="sm" iconLeft={<Pencil className="size-4" />}><Link to={`/listings/${l.id}/edit`}>{t('listings.detail.owner.edit')}</Link></Button>
         <Button variant="secondary" size="sm" iconLeft={<ChartColumn className="size-4" />} onClick={onStats}>{t('listings.detail.owner.stats')}</Button>

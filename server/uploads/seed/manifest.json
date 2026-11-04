@@ -328,8 +328,8 @@
    {
     "file": "r01.svg",
     "url": "/uploads/seed/rooms/r01.svg",
-    "bytes": 5281,
-    "label": "Bedroom · Seattle",
+    "bytes": 5259,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -337,8 +337,8 @@
    {
     "file": "r02.svg",
     "url": "/uploads/seed/rooms/r02.svg",
-    "bytes": 6614,
-    "label": "Study · Atlanta",
+    "bytes": 6592,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -346,8 +346,8 @@
    {
     "file": "r03.svg",
     "url": "/uploads/seed/rooms/r03.svg",
-    "bytes": 6509,
-    "label": "Living room · Los Angeles",
+    "bytes": 6481,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -355,8 +355,8 @@
    {
     "file": "r04.svg",
     "url": "/uploads/seed/rooms/r04.svg",
-    "bytes": 6296,
-    "label": "Kitchen · Pittsburgh",
+    "bytes": 6268,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -364,8 +364,8 @@
    {
     "file": "r05.svg",
     "url": "/uploads/seed/rooms/r05.svg",
-    "bytes": 5775,
-    "label": "Studio · Brooklyn",
+    "bytes": 5753,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -373,8 +373,8 @@
    {
     "file": "r06.svg",
     "url": "/uploads/seed/rooms/r06.svg",
-    "bytes": 5436,
-    "label": "Building · Seattle",
+    "bytes": 5414,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -382,8 +382,8 @@
    {
     "file": "r07.svg",
     "url": "/uploads/seed/rooms/r07.svg",
-    "bytes": 5481,
-    "label": "Bedroom · Evanston",
+    "bytes": 5457,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -391,8 +391,8 @@
    {
     "file": "r08.svg",
     "url": "/uploads/seed/rooms/r08.svg",
-    "bytes": 7223,
-    "label": "Study · Seattle",
+    "bytes": 7201,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -400,8 +400,8 @@
    {
     "file": "r09.svg",
     "url": "/uploads/seed/rooms/r09.svg",
-    "bytes": 6211,
-    "label": "Living room · Evanston",
+    "bytes": 6189,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -409,8 +409,8 @@
    {
     "file": "r10.svg",
     "url": "/uploads/seed/rooms/r10.svg",
-    "bytes": 6302,
-    "label": "Kitchen · Boston",
+    "bytes": 6280,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -418,8 +418,8 @@
    {
     "file": "r11.svg",
     "url": "/uploads/seed/rooms/r11.svg",
-    "bytes": 5604,
-    "label": "Studio · Austin",
+    "bytes": 5586,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -427,8 +427,8 @@
    {
     "file": "r12.svg",
     "url": "/uploads/seed/rooms/r12.svg",
-    "bytes": 5916,
-    "label": "Building · Los Angeles",
+    "bytes": 5886,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -436,8 +436,8 @@
    {
     "file": "r13.svg",
     "url": "/uploads/seed/rooms/r13.svg",
-    "bytes": 5568,
-    "label": "Bedroom · Berkeley",
+    "bytes": 5544,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -445,8 +445,8 @@
    {
     "file": "r14.svg",
     "url": "/uploads/seed/rooms/r14.svg",
-    "bytes": 6764,
-    "label": "Study · New York",
+    "bytes": 6738,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -454,8 +454,8 @@
    {
     "file": "r15.svg",
     "url": "/uploads/seed/rooms/r15.svg",
-    "bytes": 6151,
-    "label": "Living room · Seattle",
+    "bytes": 6129,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -463,8 +463,8 @@
    {
     "file": "r16.svg",
     "url": "/uploads/seed/rooms/r16.svg",
-    "bytes": 6940,
-    "label": "Kitchen · Evanston",
+    "bytes": 6916,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -472,8 +472,8 @@
    {
     "file": "r17.svg",
     "url": "/uploads/seed/rooms/r17.svg",
-    "bytes": 5536,
-    "label": "Studio · Seattle",
+    "bytes": 5514,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -481,8 +481,8 @@
    {
     "file": "r18.svg",
     "url": "/uploads/seed/rooms/r18.svg",
-    "bytes": 5908,
-    "label": "Building · Atlanta",
+    "bytes": 5886,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -490,8 +490,8 @@
    {
     "file": "r19.svg",
     "url": "/uploads/seed/rooms/r19.svg",
-    "bytes": 4818,
-    "label": "Bedroom · Los Angeles",
+    "bytes": 4786,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -499,8 +499,8 @@
    {
     "file": "r20.svg",
     "url": "/uploads/seed/rooms/r20.svg",
-    "bytes": 7710,
-    "label": "Study · Berkeley",
+    "bytes": 7684,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -508,8 +508,8 @@
    {
     "file": "r21.svg",
     "url": "/uploads/seed/rooms/r21.svg",
-    "bytes": 6241,
-    "label": "Living room · Chicago",
+    "bytes": 6219,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -517,8 +517,8 @@
    {
     "file": "r22.svg",
     "url": "/uploads/seed/rooms/r22.svg",
-    "bytes": 6560,
-    "label": "Kitchen · Seattle",
+    "bytes": 6538,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -526,8 +526,8 @@
    {
     "file": "r23.svg",
     "url": "/uploads/seed/rooms/r23.svg",
-    "bytes": 6081,
-    "label": "Studio · Chicago",
+    "bytes": 6059,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -535,8 +535,8 @@
    {
     "file": "r24.svg",
     "url": "/uploads/seed/rooms/r24.svg",
-    "bytes": 6380,
-    "label": "Building · Cambridge",
+    "bytes": 6354,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -544,8 +544,8 @@
    {
     "file": "r25.svg",
     "url": "/uploads/seed/rooms/r25.svg",
-    "bytes": 5744,
-    "label": "Bedroom · Evanston",
+    "bytes": 5720,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -553,8 +553,8 @@
    {
     "file": "r26.svg",
     "url": "/uploads/seed/rooms/r26.svg",
-    "bytes": 6884,
-    "label": "Study · Brooklyn",
+    "bytes": 6858,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -562,8 +562,8 @@
    {
     "file": "r27.svg",
     "url": "/uploads/seed/rooms/r27.svg",
-    "bytes": 6237,
-    "label": "Living room · Evanston",
+    "bytes": 6215,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -571,8 +571,8 @@
    {
     "file": "r28.svg",
     "url": "/uploads/seed/rooms/r28.svg",
-    "bytes": 6311,
-    "label": "Kitchen · Brooklyn",
+    "bytes": 6287,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -580,8 +580,8 @@
    {
     "file": "r29.svg",
     "url": "/uploads/seed/rooms/r29.svg",
-    "bytes": 6358,
-    "label": "Studio · Berkeley",
+    "bytes": 6336,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -589,8 +589,8 @@
    {
     "file": "r30.svg",
     "url": "/uploads/seed/rooms/r30.svg",
-    "bytes": 4396,
-    "label": "Building · Chicago",
+    "bytes": 4374,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -598,8 +598,8 @@
    {
     "file": "r31.svg",
     "url": "/uploads/seed/rooms/r31.svg",
-    "bytes": 5893,
-    "label": "Bedroom · Berkeley",
+    "bytes": 5869,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -607,8 +607,8 @@
    {
     "file": "r32.svg",
     "url": "/uploads/seed/rooms/r32.svg",
-    "bytes": 7608,
-    "label": "Study · Evanston",
+    "bytes": 7582,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -616,8 +616,8 @@
    {
     "file": "r33.svg",
     "url": "/uploads/seed/rooms/r33.svg",
-    "bytes": 5690,
-    "label": "Living room · Seattle",
+    "bytes": 5668,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -625,8 +625,8 @@
    {
     "file": "r34.svg",
     "url": "/uploads/seed/rooms/r34.svg",
-    "bytes": 6479,
-    "label": "Kitchen · Evanston",
+    "bytes": 6455,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -634,8 +634,8 @@
    {
     "file": "r35.svg",
     "url": "/uploads/seed/rooms/r35.svg",
-    "bytes": 6008,
-    "label": "Studio · Los Angeles",
+    "bytes": 5980,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -643,8 +643,8 @@
    {
     "file": "r36.svg",
     "url": "/uploads/seed/rooms/r36.svg",
-    "bytes": 4400,
-    "label": "Building · Berkeley",
+    "bytes": 4374,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -652,8 +652,8 @@
    {
     "file": "r37.svg",
     "url": "/uploads/seed/rooms/r37.svg",
-    "bytes": 5486,
-    "label": "Bedroom · Urbana",
+    "bytes": 5464,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -661,8 +661,8 @@
    {
     "file": "r38.svg",
     "url": "/uploads/seed/rooms/r38.svg",
-    "bytes": 7789,
-    "label": "Study · Berkeley",
+    "bytes": 7763,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -670,8 +670,8 @@
    {
     "file": "r39.svg",
     "url": "/uploads/seed/rooms/r39.svg",
-    "bytes": 6279,
-    "label": "Living room · Evanston",
+    "bytes": 6257,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -679,8 +679,8 @@
    {
     "file": "r40.svg",
     "url": "/uploads/seed/rooms/r40.svg",
-    "bytes": 6622,
-    "label": "Kitchen · Cambridge",
+    "bytes": 6594,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -688,8 +688,8 @@
    {
     "file": "r41.svg",
     "url": "/uploads/seed/rooms/r41.svg",
-    "bytes": 6012,
-    "label": "Studio · Evanston",
+    "bytes": 5990,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -697,8 +697,8 @@
    {
     "file": "r42.svg",
     "url": "/uploads/seed/rooms/r42.svg",
-    "bytes": 4404,
-    "label": "Building · Los Angeles",
+    "bytes": 4374,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -706,8 +706,8 @@
    {
     "file": "r43.svg",
     "url": "/uploads/seed/rooms/r43.svg",
-    "bytes": 5880,
-    "label": "Bedroom · Pittsburgh",
+    "bytes": 5852,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -715,8 +715,8 @@
    {
     "file": "r44.svg",
     "url": "/uploads/seed/rooms/r44.svg",
-    "bytes": 6662,
-    "label": "Study · Urbana",
+    "bytes": 6640,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -724,8 +724,8 @@
    {
     "file": "r45.svg",
     "url": "/uploads/seed/rooms/r45.svg",
-    "bytes": 6090,
-    "label": "Living room · Ann Arbor",
+    "bytes": 6066,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -733,8 +733,8 @@
    {
     "file": "r46.svg",
     "url": "/uploads/seed/rooms/r46.svg",
-    "bytes": 6132,
-    "label": "Kitchen · New York",
+    "bytes": 6108,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -742,8 +742,8 @@
    {
     "file": "r47.svg",
     "url": "/uploads/seed/rooms/r47.svg",
-    "bytes": 6233,
-    "label": "Studio · Cambridge",
+    "bytes": 6209,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -751,8 +751,8 @@
    {
     "file": "r48.svg",
     "url": "/uploads/seed/rooms/r48.svg",
-    "bytes": 5440,
-    "label": "Building · Evanston",
+    "bytes": 5414,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -760,8 +760,8 @@
    {
     "file": "r49.svg",
     "url": "/uploads/seed/rooms/r49.svg",
-    "bytes": 5393,
-    "label": "Bedroom · Seattle",
+    "bytes": 5371,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -769,8 +769,8 @@
    {
     "file": "r50.svg",
     "url": "/uploads/seed/rooms/r50.svg",
-    "bytes": 7257,
-    "label": "Study · Evanston",
+    "bytes": 7231,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -778,8 +778,8 @@
    {
     "file": "r51.svg",
     "url": "/uploads/seed/rooms/r51.svg",
-    "bytes": 5833,
-    "label": "Living room · New York",
+    "bytes": 5811,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -787,8 +787,8 @@
    {
     "file": "r52.svg",
     "url": "/uploads/seed/rooms/r52.svg",
-    "bytes": 6328,
-    "label": "Kitchen · Pittsburgh",
+    "bytes": 6300,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -796,8 +796,8 @@
    {
     "file": "r53.svg",
     "url": "/uploads/seed/rooms/r53.svg",
-    "bytes": 5885,
-    "label": "Studio · Brooklyn",
+    "bytes": 5863,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -805,8 +805,8 @@
    {
     "file": "r54.svg",
     "url": "/uploads/seed/rooms/r54.svg",
-    "bytes": 6374,
-    "label": "Building · Austin",
+    "bytes": 6354,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"
@@ -814,8 +814,8 @@
    {
     "file": "r55.svg",
     "url": "/uploads/seed/rooms/r55.svg",
-    "bytes": 5857,
-    "label": "Bedroom · Chicago",
+    "bytes": 5835,
+    "label": "Bedroom",
     "width": 1200,
     "height": 900,
     "type": "bedroom"
@@ -823,8 +823,8 @@
    {
     "file": "r56.svg",
     "url": "/uploads/seed/rooms/r56.svg",
-    "bytes": 7460,
-    "label": "Study · Ann Arbor",
+    "bytes": 7434,
+    "label": "Study",
     "width": 1200,
     "height": 900,
     "type": "study"
@@ -832,8 +832,8 @@
    {
     "file": "r57.svg",
     "url": "/uploads/seed/rooms/r57.svg",
-    "bytes": 6677,
-    "label": "Living room · Atlanta",
+    "bytes": 6655,
+    "label": "Living room",
     "width": 1200,
     "height": 900,
     "type": "living"
@@ -841,8 +841,8 @@
    {
     "file": "r58.svg",
     "url": "/uploads/seed/rooms/r58.svg",
-    "bytes": 6552,
-    "label": "Kitchen · Boston",
+    "bytes": 6530,
+    "label": "Kitchen",
     "width": 1200,
     "height": 900,
     "type": "kitchen"
@@ -850,8 +850,8 @@
    {
     "file": "r59.svg",
     "url": "/uploads/seed/rooms/r59.svg",
-    "bytes": 6023,
-    "label": "Studio · Austin",
+    "bytes": 6005,
+    "label": "Studio",
     "width": 1200,
     "height": 900,
     "type": "studio"
@@ -859,8 +859,8 @@
    {
     "file": "r60.svg",
     "url": "/uploads/seed/rooms/r60.svg",
-    "bytes": 6380,
-    "label": "Building · Brooklyn",
+    "bytes": 6354,
+    "label": "Building",
     "width": 1200,
     "height": 900,
     "type": "building"

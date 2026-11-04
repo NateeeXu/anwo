@@ -339,8 +339,10 @@ function room(i) {
     }
     body = mirror ? rect(0, 0, W, H, { fill: wall }) + g(s, { transform: `translate(${W} 0) scale(-1 1)` }) : s;
   }
-  body += labelChip(40, H - 110, `${name} · ${city}`);
-  return { svg: svg(W, H, body, { role: 'img', 'aria-label': `${name} in ${city}` }), meta: { label: `${name} · ${city}`, width: W, height: H, type } };
+  // room type only: a city caption made Evanston listings look like they were in Seattle (review fix)
+  void city; // still drawn from the PRNG so every other pixel stays identical
+  body += labelChip(40, H - 110, name);
+  return { svg: svg(W, H, body, { role: 'img', 'aria-label': name }), meta: { label: name, width: W, height: H, type } };
 }
 
 // =====================================================================

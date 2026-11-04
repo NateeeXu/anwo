@@ -61,7 +61,7 @@ export const TrustBadge = forwardRef<HTMLSpanElement, TrustBadgeProps>(function 
   if (lv === 0 && size !== 'profile' && !showLabel) return null
 
   const color = lv === 0 ? 'text-ink-4' : lv === 1 ? 'text-ink-2' : 'text-accent'
-  const labelColor = lv === 0 ? 'text-ink-3' : lv === 1 ? 'text-ink-2' : 'text-accent-text'
+  const labelColor = lv === 0 ? 'text-ink-3' : lv === 1 ? 'text-ink-2' : 'text-accent-text-strong' // strong: badges sit on sunken / tinted rows (DESIGN tokens)
   const icon =
     lv === 0 ? <DashedCircle size={px} /> : lv === 1 ? <CircleCheck size={px} strokeWidth={1.75} aria-hidden /> : lv === 2 ? <ShieldCheckFilled size={px} /> : <ShieldStarFilled size={px} />
 

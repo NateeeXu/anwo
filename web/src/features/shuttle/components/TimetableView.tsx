@@ -72,7 +72,7 @@ export function TimetableView({ data, loading, headwayMin }: { data: Timetable |
                   const dep = trip.departures.find((d) => d.stopId === s.id);
                   const departed = data.isToday && dep ? hhmmToMinutes(dep.time) < nowMin : false;
                   return (
-                    <td key={trip.tripIndex} className={cn('px-3 py-2 text-right whitespace-nowrap', idx === nextIdx ? 'bg-accent-soft text-accent-text-strong font-medium' : departed ? 'text-ink-4' : 'text-ink')}>
+                    <td key={trip.tripIndex} className={cn('px-3 py-2 text-right whitespace-nowrap', idx === nextIdx ? 'bg-accent-soft text-accent-text-strong font-medium' : departed ? 'text-ink-3' : 'text-ink')}>
                       {dep ? clock(dep.time, locale) : '—'}
                     </td>
                   );
