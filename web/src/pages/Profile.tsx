@@ -124,11 +124,6 @@ export default function Profile() {
       setOpening(false);
     }
   };
-  const stats = [
-    { key: 'responseRate', value: u.responseRate != null ? `${Math.round(u.responseRate * 100)}%` : '—' },
-    { key: 'deals', value: formatNumber(u.stats.itemsSold + u.stats.activeListings) },
-    { key: 'buddy', value: formatNumber(u.stats.buddyHosted) },
-  ];
 
   return (
     <div className="mx-auto w-full max-w-reading px-4">
@@ -180,17 +175,9 @@ export default function Profile() {
         </Card>
       )}
 
-      <div className="mt-6 grid grid-cols-3 gap-3">
-        {stats.map((s) => (
-          <Card key={s.key} padding="sm">
-            <p className="text-caption text-ink-2">{t(`profile.stat.${s.key}`)}</p>
-            <p className="text-price-lg text-ink tnum">{s.value}</p>
-          </Card>
-        ))}
-      </div>
 
       {/* verify module's public trust profile (one implementation everywhere) */}
-      <TrustProfileCard userId={u.id} compact className="mt-4" />
+      <TrustProfileCard userId={u.id} compact className="mt-6" />
 
       <div className="mt-8">
         <Tabs

@@ -8,6 +8,7 @@ import { Badge, Button, Chip, DropdownMenu, EmptyState, Modal, PhotoGallery, Sel
 import { NoItems } from '@/components/illustrations';
 import { StaticMapPreview } from '@/components/map';
 import { BoostSheet } from '@/features/billing/components/BoostSheet';
+import { CommuteCard } from '@/features/map/components/CommuteCard';
 import { Head } from '@/app/Head';
 import { errorMessage } from '@/app/errors';
 import { ApiError } from '@/lib/api';
@@ -228,6 +229,8 @@ export default function ItemDetail() {
               </p>
               <StaticMapPreview lat={d.pickupLat} lng={d.pickupLng} approximateRadiusM={220} height={240} className="mt-3" aria-label={t('market.detail.pickup')} />
               <p className="mt-2 text-caption text-ink-3">{t('market.detail.pickupApprox')}</p>
+              {/* map module: walk / bike / shuttle time from the pickup spot to campus */}
+              <CommuteCard lat={d.pickupLat} lng={d.pickupLng} campusId={d.campusId} variant="inline" className="mt-2" />
             </section>
           )}
 

@@ -32,8 +32,8 @@
       "illinois.edu"
     ],
     "intlStudentsApprox": 16000,
-    "hasShuttle": false,
-    "shuttleTrackerUrl": null,
+    "hasShuttle": true,
+    "shuttleTrackerUrl": "https://mtd.org/maps-and-schedules/routes/",
     "metro": "Champaign-Urbana"
   },
   {

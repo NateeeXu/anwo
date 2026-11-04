@@ -12,7 +12,8 @@ import { track } from '../../lib/track';
 import { cn } from '../../lib/cn';
 
 /** Routes where the Nationwide scope makes sense (sublets, wanted, global search). */
-export const NATIONWIDE_ROUTES = ['/listings', '/wanted', '/search'];
+// /listings covers /listings/saved (saved listings span campuses); /market = delivery-only nationwide mode (DESIGN §4.10)
+export const NATIONWIDE_ROUTES = ['/listings', '/wanted', '/market', '/search'];
 export function nationwideAllowed(pathname: string) {
   return NATIONWIDE_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '/') || pathname.startsWith(p + '?'));
 }

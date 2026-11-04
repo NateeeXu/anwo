@@ -11,6 +11,7 @@ import type { CampusStat, GeocodeHit, MapLayer } from '@shared/schemas/map';
 import { MAX_BBOX_DEG, RADIUS_PRESETS_M } from '@shared/schemas/map';
 import { Head } from '@/app/Head';
 import { usePostSheet } from '@/app/shell/shellStore';
+import { SecondaryTabs } from '@/app/shell/SecondaryTabs';
 import { Button, EmptyState, SegmentedControl, Skeleton, Tooltip } from '@/components';
 import { DrawSearchControl, MapView, clusterCellForZoom, meIcon, type MapCircle, type MapMarker, type MapPolyline } from '@/components/map';
 import { ApiError } from '@/lib/api';
@@ -511,6 +512,8 @@ export default function MapExplorePage() {
       {/* desktop rail */}
       {isDesktop && railOpen && (
         <aside className="flex w-[400px] shrink-0 flex-col border-r border-line bg-paper xl:w-[440px]" aria-label={drawerTitle} data-testid="map-rail">
+          {/* browse tabs (转租 · 求租 · 二手 · 搭子 · 校车 · 地图) — same entry points as every other browse page */}
+          <SecondaryTabs className="mx-0 shrink-0 border-b border-line px-2 lg:px-2" />
           <header className="flex items-start justify-between gap-3 border-b border-line px-4 pb-3 pt-4">
             <div className="min-w-0">
               <h1 className="text-h3 text-ink">{t('map.explore.title')}</h1>
