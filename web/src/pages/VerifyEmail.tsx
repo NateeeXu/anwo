@@ -58,7 +58,7 @@ function VerifyEmailInner() {
       const me = await api<UserMe>('/api/auth/confirm-edu-code', { method: 'POST', body: { email: email.trim(), code: code.trim() } });
       setUser(me);
       if (me.campusId) setCampus(me.campusId);
-      track('verify.edu_confirmed');
+      track('verify.edu_confirmed_ui');
       setStep('done');
       toast.success(t('verifyEmail.success'));
     } catch (err) {

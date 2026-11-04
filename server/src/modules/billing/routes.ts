@@ -30,6 +30,7 @@ import { loadUsersPublic } from '../../lib/users';
 import { hasSupplyProof } from '../verify/service';
 import { config } from '../../config';
 import { mockStripe, verifyMockWebhook } from './mockStripe';
+import { addSponsorshipInvoice, createSponsorship, liveSponsorships, loadSponsorship, patchSponsorship, recordSponsorClick, setInvoiceStatus, SponsorshipInput, SponsorshipInvoiceInput, SponsorshipPatch, SponsorshipsQuery, toSponsorshipAdminDto, type SponsorshipRow } from './sponsorships';
 import type { AuthUser } from '../../lib/types';
 import {
   activePlans, bindBillingHooks, changeSubscriptionPlan, boostStats, cancelBoost, cancelOrder, cancelSubscription, createEscrow, createOrder, currentBoost, currentSubscription, entityCard, entityEligibility, escrowPlan,
@@ -365,7 +366,9 @@ router.post('/boosts/:id/click', (req, res) => {
   const { id } = parseParams(req, idParam);
   const b = loadBoost(id);
   if (!b) throw notFound('Boost');
-  checkRate(`boostclick:${req.user?.id ?? req.sessionId ?? ipHashOf(req)}:${id}`, 5, 60_000);
+  // dedupe on the network address (+ user): the anonymous session id is fresh for every cookieless request
+  checkRate(`boostclick:${ipHashOf(req)}:${req.user?.id ?? 'anon'}:${id}`, 5, 60_000);
+  if (b.status !== 'active' || (req.user && req.user.id === b.user_id)) return ok(res, { ok: true, counted: false });
   recordClick(id, req);
   ok(res, { ok: true });
 });
@@ -676,6 +679,22 @@ router.post('/kit/done', requireAuth, (req, res) => {
   logEvent(req, 'kit.card_done', { entityType: 'partner', entityId: body.slug, props: { slug: body.slug, done: body.done } });
   ok(res, { done: q.all<{ slug: string }>('SELECT slug FROM kit_checklist WHERE user_id = ?', [user.id]).map((r) => r.slug) });
 });
+// ---------------------------------------------------------------- sponsored placements (read path; booking is admin-only)
+router.get('/sponsorships', (req, res) => {
+  const p = parseQuery(req, SponsorshipsQuery);
+  const campusId = p.campusId ?? campusIdOf(req);
+  if (!isEnabled('sponsors.enabled', campusId)) return ok(res, { items: [] });
+  ok(res, { items: liveSponsorships({ campusId, surface: p.surface, kitCategory: p.kitCategory, limit: p.limit }, req) });
+});
+router.get('/sponsorships/:id/go', (req, res) => {
+  const { id } = parseParams(req, idParam);
+  const r = loadSponsorship(id);
+  if (!r || r.status !== 'active') throw notFound('Sponsorship');
+  checkRate(`sponsorclick:${ipHashOf(req)}:${id}`, 10, 60_000);
+  recordSponsorClick(r, req);
+  if (!/^https?:\/\//i.test(r.url)) throw notFound('Sponsorship');
+  res.redirect(302, r.url);
+});
 router.post('/sponsor-leads', writes, (req, res) => {
   const body = parseBody(req, SponsorLeadInput);
   const id = uid();
@@ -860,6 +879,39 @@ admin.post('/wallet/:userId/adjust', writes, (req, res) => {
   audit(req, { action: 'wallet.adjust', entityType: 'user', entityId: userId, after: { deltaCents: body.deltaCents, balanceAfterCents: row.balance_after_cents }, reason: body.note });
   notify(userId, 'wallet.adjusted', { title: { zh: '钱包余额已调整', en: 'Your wallet balance was adjusted' }, body: body.note, link: '/wallet' });
   ok(res, toLedgerDto(row));
+});
+admin.get('/sponsorships', (req, res) => {
+  const campusId = typeof req.query.campusId === 'string' ? req.query.campusId : null;
+  const rows = q.all<SponsorshipRow>(`SELECT * FROM sponsorships${campusId ? ' WHERE campus_id = ?' : ''} ORDER BY created_at DESC LIMIT 200`, campusId ? [campusId] : []);
+  ok(res, rows.map(toSponsorshipAdminDto));
+});
+admin.post('/sponsorships', writes, (req, res) => {
+  const body = parseBody(req, SponsorshipInput);
+  const row = createSponsorship(body, me(req).id);
+  audit(req, { action: 'sponsorship.create', entityType: 'sponsorship', entityId: row.id, after: { sponsor: row.sponsor_name, surface: row.surface, campusId: row.campus_id } });
+  ok(res, toSponsorshipAdminDto(row), 201);
+});
+admin.patch('/sponsorships/:id', writes, (req, res) => {
+  const { id } = parseParams(req, idParam);
+  const body = parseBody(req, SponsorshipPatch);
+  const before = loadSponsorship(id);
+  const row = patchSponsorship(id, body);
+  audit(req, { action: 'sponsorship.update', entityType: 'sponsorship', entityId: id, before: before ? { status: before.status, endsAt: before.ends_at } : null, after: body });
+  ok(res, toSponsorshipAdminDto(row));
+});
+admin.post('/sponsorships/:id/invoices', writes, (req, res) => {
+  const { id } = parseParams(req, idParam);
+  const r = loadSponsorship(id);
+  if (!r) throw notFound('Sponsorship');
+  const inv = addSponsorshipInvoice(r, parseBody(req, SponsorshipInvoiceInput));
+  audit(req, { action: 'sponsorship.invoice', entityType: 'sponsorship', entityId: id, after: inv });
+  ok(res, inv, 201);
+});
+admin.post('/sponsorship-invoices/:id/:status', writes, (req, res) => {
+  const { id, status } = parseParams(req, z.object({ id: z.string().min(1).max(128), status: z.enum(['paid', 'void', 'open']) }));
+  const inv = setInvoiceStatus(id, status);
+  audit(req, { action: `sponsorship.invoice_${status}`, entityType: 'sponsorship', entityId: inv.sponsorshipId, after: inv });
+  ok(res, inv);
 });
 admin.get('/sponsor-leads', (_req, res) => {
   ok(res, q.all<{ id: string; business_name: string; contact: string; campus_id: string | null; interest: string; note: string | null; status: string; created_at: string }>('SELECT * FROM sponsor_leads ORDER BY created_at DESC LIMIT 100').map((l) => ({ id: l.id, businessName: l.business_name, contact: l.contact, campusId: l.campus_id, interest: l.interest, note: l.note, status: l.status, createdAt: l.created_at })));

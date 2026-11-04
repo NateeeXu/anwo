@@ -1151,7 +1151,7 @@ export function listPartners(filter: { campusId?: string | null; state?: string 
 }
 
 // ====================================================================== admin revenue
-export type RevenuePoint = { date: string; revenueCents: number; boostCents: number; proCents: number; escrowFeeCents: number; affiliateCents: number; gmvCents: number; refundsCents: number; orders: number };
+export type RevenuePoint = { date: string; revenueCents: number; boostCents: number; proCents: number; escrowFeeCents: number; affiliateCents: number; sponsorCents: number; gmvCents: number; refundsCents: number; orders: number };
 export function revenueSummary(filter: { from: string; to: string; campusId?: string | null; groupBy: 'day' | 'week' | 'month' }): { totals: { revenueCents: number; byKind: Record<string, number>; gmvCents: number; affiliateEstCents: number; affiliateRecognizedCents: number; refundsCents: number; walletContraCents: number; orders: number; payingUsers: number }; series: RevenuePoint[]; topCampuses: { campusId: string; campus: { id: string; shortName: string; city: string; state: string } | null; revenueCents: number }[]; byKind: { kind: string; revenueCents: number; orders: number }[] } {
   const fromIso = `${filter.from}T00:00:00.000Z`;
   const toIso = `${filter.to}T23:59:59.999Z`;
@@ -1162,7 +1162,7 @@ export function revenueSummary(filter: { from: string; to: string; campusId?: st
   const clicks = q.all<{ date: string; est: number; n: number }>(`SELECT ${bucket.replace(/\bat\b/g, 'created_at')} AS date, SUM(CASE WHEN converted = 1 THEN payout_cents ELSE 0 END) AS est, COUNT(*) AS n FROM partner_clicks WHERE created_at >= ? AND created_at <= ?${campusSql} GROUP BY date`, [fromIso, toIso, ...cp]);
   const gmv = q.all<{ date: string; gmv: number }>(`SELECT ${bucket.replace(/\bat\b/g, 'funded_at')} AS date, SUM(amount_cents) AS gmv FROM escrows WHERE funded_at IS NOT NULL AND funded_at >= ? AND funded_at <= ?${campusSql} GROUP BY date`, [fromIso, toIso, ...cp]);
   const points = new Map<string, RevenuePoint>();
-  const pt = (d: string) => { let p = points.get(d); if (!p) { p = { date: d, revenueCents: 0, boostCents: 0, proCents: 0, escrowFeeCents: 0, affiliateCents: 0, gmvCents: 0, refundsCents: 0, orders: 0 }; points.set(d, p); } return p; };
+  const pt = (d: string) => { let p = points.get(d); if (!p) { p = { date: d, revenueCents: 0, boostCents: 0, proCents: 0, escrowFeeCents: 0, affiliateCents: 0, sponsorCents: 0, gmvCents: 0, refundsCents: 0, orders: 0 }; points.set(d, p); } return p; };
   // dense series
   const step = filter.groupBy === 'day' ? DAY : filter.groupBy === 'week' ? 7 * DAY : 0;
   if (step) for (let d = Date.parse(fromIso); d <= Date.parse(toIso); d += step) pt(new Date(d).toISOString().slice(0, 10));
@@ -1177,6 +1177,17 @@ export function revenueSummary(filter: { from: string; to: string; campusId?: st
     else if (r.order_kind === 'subscription' || r.order_kind === 'subscription_renewal') p.proCents += r.revenue;
     else if (r.order_kind === 'escrow_deposit') p.escrowFeeCents += r.revenue;
     byKind[r.order_kind] = (byKind[r.order_kind] ?? 0) + r.revenue;
+    orders += r.n;
+  }
+  // paid sponsored-placement invoices (sold by the team, invoiced outside checkout) count as revenue on their paid date
+  const sponsorRows = q.all<{ date: string; s: number; n: number }>(`SELECT ${bucket.replace(/\bat\b/g, 'paid_at')} AS date, SUM(amount_cents) AS s, COUNT(*) AS n FROM sponsorship_invoices WHERE status = 'paid' AND paid_at >= ? AND paid_at <= ?${campusSql} GROUP BY date`, [fromIso, toIso, ...cp]);
+  const sponsorOrders = sponsorRows.reduce((s, r) => s + r.n, 0);
+  for (const r of sponsorRows) {
+    const p = pt(r.date);
+    p.revenueCents += r.s;
+    p.sponsorCents += r.s;
+    p.orders += r.n;
+    byKind.sponsorship = (byKind.sponsorship ?? 0) + r.s;
     orders += r.n;
   }
   let affiliateEst = 0;
@@ -1197,6 +1208,6 @@ export function revenueSummary(filter: { from: string; to: string; campusId?: st
     totals: { revenueCents: revenueTotal, byKind, gmvCents: gmvTotal, affiliateEstCents: affiliateEst, affiliateRecognizedCents: recognized, refundsCents: refunds, walletContraCents: walletContra, orders, payingUsers },
     series,
     topCampuses: top.map((r) => { const c = r.campus_id ? getCampus(r.campus_id) : null; return { campusId: r.campus_id ?? 'none', campus: c ? { id: c.id, shortName: c.shortName, city: c.city, state: c.state } : null, revenueCents: r.revenue }; }),
-    byKind: Object.entries(byKind).map(([kind, revenueCents]) => ({ kind, revenueCents, orders: rev.filter((r) => r.order_kind === kind).reduce((s, r) => s + r.n, 0) })),
+    byKind: Object.entries(byKind).map(([kind, revenueCents]) => ({ kind, revenueCents, orders: kind === 'sponsorship' ? sponsorOrders : rev.filter((r) => r.order_kind === kind).reduce((s, r) => s + r.n, 0) })),
   };
 }
