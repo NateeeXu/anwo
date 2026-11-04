@@ -1,5 +1,6 @@
 // server/src/modules/market/routes.ts — OWNED BY THE `market` MODULE AGENT. Mounted at /api/market (API.md §9).
 // Static paths (/items/mine, /wishlist, /price-suggestion, /categories, /bundles/for-listing/:id) are declared before /:id routes.
+import { hooks } from '../../lib/hooks';
 import { Router, type Request } from 'express';
 import { z } from 'zod';
 import type { ItemCard, UserPublic } from '@shared/types';
@@ -470,6 +471,7 @@ router.post('/items/:id/publish', requireTrust(1), writes, (req, res) => {
   assertPublishable(r, r.photo_count);
   q.update('market_items', { status: 'active', expires_at: daysFromNow(ITEM_TTL_DAYS), updated_at: nowIso() }, 'id = ?', [r.id]);
   logEvent(req, 'item.publish', { entityType: 'market_item', entityId: r.id, props: { category: r.category, priceCents: r.price_cents, campusId: r.campus_id } });
+  hooks.emit('content.published', { userId: r.seller_id, entityType: 'market_item', entityId: r.id });
   ok(res, itemDto(requireItem(r.id), req));
 });
 router.post('/items/:id/reserve', requireAuth, writes, (req, res) => ok(res, itemDto(transition(req, ['active'], 'reserved'), req)));

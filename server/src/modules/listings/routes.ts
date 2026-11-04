@@ -1,4 +1,5 @@
 // server/src/modules/listings/routes.ts — OWNED BY THE `listings` MODULE AGENT. Mounted at /api/listings (API.md §3).
+import { hooks } from '../../lib/hooks';
 import { Router } from 'express';
 import { z } from 'zod';
 import type { Lead, Listing, ListingCard, ListingPin } from '@shared/types';
@@ -304,6 +305,7 @@ router.post('/:id/publish', requireAuth, writes, (req, res) => {
   if (u.role !== 'admin' && u.trust_level < 1) throw trustError(u, 1);
   const updated = publishListing(u, row);
   logEvent(req, 'listing.publish', { entityType: 'listing', entityId: id, campusId: updated.campus_id, props: { priceCents: updated.price_cents, bedrooms: updated.bedrooms } });
+  hooks.emit('content.published', { userId: updated.owner_id, entityType: 'listing', entityId: id });
   ok(res, toListingDto(updated, { viewer: req.user, exact: true, ownerView: true }));
 });
 router.post('/:id/pause', requireAuth, writes, (req, res) => {

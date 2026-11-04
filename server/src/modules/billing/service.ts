@@ -7,7 +7,7 @@ import type { BoostEntity, EscrowRail } from '@shared/schemas/billing';
 import { q, uid, parseJson, placeholders } from '../../db';
 import { ApiError, invalidState, notFound } from '../../lib/errors';
 import { logEvent } from '../../lib/events';
-import { isEnabled } from '../../lib/flags';
+import { flagValue, isEnabled } from '../../lib/flags';
 import { hooks } from '../../lib/hooks';
 import { notify } from '../../lib/notify';
 import { DAY, HOUR, nowIso, nowMs } from '../../lib/time';
@@ -1100,11 +1100,27 @@ export function qualifyReferral(referredId: string, rule: 'edu_verified' | 'firs
   notify(r.referrer_id, 'referral.rewarded', { title: { zh: '推荐奖励到账', en: 'Referral reward added' }, body: { zh: `${maskName(referee?.name ?? '')} 完成验证，你获得 $${(r.referrer_reward_cents / 100).toFixed(0)} 推广额度。`, en: `${maskName(referee?.name ?? '')} verified — $${(r.referrer_reward_cents / 100).toFixed(0)} boost credit is yours.` }, link: '/wallet', entityType: 'referral', entityId: r.id });
   notify(r.referred_id, 'referral.rewarded', { title: { zh: '欢迎礼到账', en: 'Welcome credit added' }, body: { zh: `你获得 $${(r.referred_reward_cents / 100).toFixed(0)} 推广额度，可用于推广你的发布。`, en: `$${(r.referred_reward_cents / 100).toFixed(0)} boost credit added to your wallet.` }, link: '/wallet', entityType: 'referral', entityId: r.id });
 }
+/** billing-requirements §6.3: the referrer earns a second credit when the referee publishes a first post within 30 days
+ *  of signing up. Idempotent per referral (ledger note 'post_bonus'); only after the referral itself was rewarded. */
+export function awardReferralPostBonus(userId: string, entityType: string, entityId: string): void {
+  if (!isEnabled('referrals.enabled')) return;
+  const r = q.get<{ id: string; referrer_id: string; code: string; created_at: string }>("SELECT id, referrer_id, code, created_at FROM referrals WHERE referred_id = ? AND status = 'rewarded'", [userId]);
+  if (!r || Date.parse(r.created_at) < nowMs() - 30 * DAY) return;
+  if (q.get("SELECT 1 FROM wallet_ledger WHERE ref_type = 'referral' AND ref_id = ? AND note = 'post_bonus'", [r.id])) return;
+  const referrer = q.get<{ banned: number }>('SELECT banned FROM users WHERE id = ?', [r.referrer_id]);
+  if (!referrer || referrer.banned) return;
+  const cents = flagValue<{ postBonusCents?: number }>('referrals.enabled', {}).postBonusCents ?? 500;
+  const dollars = (cents / 100).toFixed(0);
+  ledgerAppend(r.referrer_id, cents, 'referral_reward', { refType: 'referral', refId: r.id, note: 'post_bonus', expiresAt: new Date(nowMs() + 180 * DAY).toISOString() });
+  logEvent(null, 'referral.post_bonus', { userId: r.referrer_id, entityType: 'referral', entityId: r.id, props: { code: r.code, cents, postType: entityType, postId: entityId } });
+  notify(r.referrer_id, 'referral.rewarded', { title: { zh: '推荐奖励：好友已发布', en: 'Referral bonus: your friend posted' }, body: { zh: '好友发布了第一条内容，你又获得 $' + dollars + ' 推广额度。', en: 'Your friend published their first post: another $' + dollars + ' of boost credit is yours.' }, link: '/wallet', entityType: 'referral', entityId: r.id });
+}
 let hooksBound = false;
 export function bindBillingHooks(): void {
   if (hooksBound) return;
   hooksBound = true;
   hooks.on('user.trustChanged', ({ userId, to }) => { if (to >= 1) qualifyReferral(userId, 'edu_verified'); });
+  hooks.on('content.published', ({ userId, entityType, entityId }) => { awardReferralPostBonus(userId, entityType, entityId); });
   hooks.on('user.banned', ({ userId, banned }) => {
     if (!banned) return;
     const t = nowIso();

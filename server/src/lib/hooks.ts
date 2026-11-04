@@ -13,6 +13,8 @@ export type HookEvents = {
   'user.campusChanged': { userId: string; from: string | null; to: string | null };
   'flags.changed': { key: string };
   'notification.created': { userId: string; kind: string; id: string };
+  /** a listing / market item / buddy post went live (billing: referral post bonus) */
+  'content.published': { userId: string; entityType: 'listing' | 'market_item' | 'buddy_post'; entityId: string };
 };
 type Handler<K extends keyof HookEvents> = (payload: HookEvents[K]) => void | Promise<void>;
 

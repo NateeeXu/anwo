@@ -1,4 +1,5 @@
 // server/src/modules/buddy/routes.ts — OWNED BY THE `buddy` MODULE AGENT. Mounted at /api/buddy (API.md §10).
+import { hooks } from '../../lib/hooks';
 import { Router, type Request } from 'express';
 import { z } from 'zod';
 import {
@@ -362,6 +363,7 @@ router.post('/posts', requireTrust(1), rateLimit('writes'), (req, res) => {
     }
   });
   logEvent(req, 'buddy.create', { entityType: 'buddy_post', entityId: id, props: { type: body.type, verifiedOnly: body.verifiedOnly, requiresApproval: body.requiresApproval, maxMembers: body.maxMembers }, campusId: campus.id });
+  hooks.emit('content.published', { userId: req.user!.id, entityType: 'buddy_post', entityId: id });
   created(res, toBuddyDetail(requirePost(id), me));
 });
 
