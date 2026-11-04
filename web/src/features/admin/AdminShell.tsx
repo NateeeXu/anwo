@@ -39,8 +39,8 @@ export function useAdminNav(): NavGroup[] {
           { to: '/admin/market', key: 'market', icon: ShoppingBag },
           { to: '/admin/buddy', key: 'buddy', icon: UsersRound },
           { to: '/admin/chat', key: 'chat', icon: MessagesSquare },
-          { to: '/admin/shuttle', key: 'shuttle', icon: Bus },
-          { to: '/admin/map', key: 'map', icon: MapIcon },
+          { to: '/admin/shuttle', key: 'shuttle', icon: Bus, count: data?.openShuttleRequests },
+          { to: '/admin/map', key: 'map', icon: MapIcon, count: data?.pendingPoiSuggestions },
         ],
       },
       {

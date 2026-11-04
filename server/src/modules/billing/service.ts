@@ -17,6 +17,7 @@ import { recordClick, recordImpressions, sponsoredSlotCount, mergeSponsored, typ
 import { contextCardFor, postContextCard, postSystemMessage, openConversation as openRawConversation } from '../../lib/conversations';
 import { getCampus } from '../../lib/campuses';
 import { hasSupplyProof } from '../verify/service';
+import { recomputeTrust } from '../../lib/trust';
 import type { AuthUser } from '../../lib/types';
 import { mockStripe, type CardLike } from './mockStripe';
 import { logger } from '../../lib/logger';
@@ -232,6 +233,8 @@ export function savePaymentMethod(userId: string, card: CardLike, opts: { setDef
     q.run('INSERT INTO payment_methods (id, user_id, provider, provider_token, brand, last4, exp_month, exp_year, is_default, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [row.id, userId, 'mock_stripe', row.provider_token, row.brand, row.last4, row.exp_month, row.exp_year, row.is_default, nowIso()]);
     q.run('UPDATE users SET payment_verified_at = COALESCE(payment_verified_at, ?), updated_at = ? WHERE id = ?', [nowIso(), nowIso(), userId]);
   });
+  // a card saved during checkout counts toward trust level 3 just like one added in the verification center
+  recomputeTrust(userId, 'payment_method_added');
   return row;
 }
 

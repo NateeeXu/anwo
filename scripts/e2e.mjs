@@ -7,7 +7,8 @@
 //   E2E_KEEP_DB=1 npm run e2e                 # reuse server/data/e2e.db instead of re-seeding
 //   PORT=4300 VITE_PORT=5300 npm run e2e      # other ports (specs read WEB_PORT)
 //
-// Env passed to the server: GEOCODE_OFFLINE=1 (no Nominatim), RATE_LIMIT_DISABLED=1 (specs hammer the API).
+// Env passed to the server: GEOCODE_OFFLINE=1 (no Nominatim), RATE_LIMIT_DISABLED=1 (specs hammer the API),
+// ALLOW_SEED_API=1 (the market + admin specs re-seed their module through POST /api/dev/seed; only on the e2e DB).
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import net from 'node:net';
@@ -25,7 +26,7 @@ const specs = [...(noCore ? [] : ['core']), ...(args.length ? MODULES.filter((m)
 const LOG_DIR = path.join(ROOT, 'server', 'data', 'e2e-logs');
 fs.mkdirSync(LOG_DIR, { recursive: true });
 
-const baseEnv = { ...process.env, GEOCODE_OFFLINE: '1', RATE_LIMIT_DISABLED: '1', DB_PATH, PORT: String(API_PORT), VITE_PORT: String(WEB_PORT), VITE_API_TARGET: `http://127.0.0.1:${API_PORT}`, WEB_PORT: String(WEB_PORT), FORCE_COLOR: '0' };
+const baseEnv = { ...process.env, GEOCODE_OFFLINE: '1', RATE_LIMIT_DISABLED: '1', ALLOW_SEED_API: '1', DB_PATH, PORT: String(API_PORT), VITE_PORT: String(WEB_PORT), VITE_API_TARGET: `http://127.0.0.1:${API_PORT}`, WEB_PORT: String(WEB_PORT), FORCE_COLOR: '0' };
 const children = [];
 
 function portFree(port) {

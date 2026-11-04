@@ -66,6 +66,8 @@ router.get('/nav-counts', (_req, res) => {
       q.count("SELECT COUNT(*) FROM wanted_posts WHERE moderation_status = 'flagged' AND status <> 'removed'"),
     openCampusRequests: q.count("SELECT COUNT(*) FROM campus_requests WHERE status = 'open'"),
     disputedEscrows: q.count("SELECT COUNT(*) FROM escrows WHERE status = 'disputed'"),
+    pendingPoiSuggestions: q.count("SELECT COUNT(*) FROM poi_suggestions WHERE status = 'pending'"),
+    openShuttleRequests: q.count("SELECT COUNT(*) FROM shuttle_requests WHERE status = 'open'"),
   };
   ok(res, counts);
 });

@@ -376,6 +376,10 @@ export type AdminNavCounts = {
   flaggedOther: number;
   openCampusRequests: number;
   disputedEscrows: number;
+  /** map module: POI suggestions awaiting review */
+  pendingPoiSuggestions: number;
+  /** shuttle module: open 「request my campus」 shuttle requests */
+  openShuttleRequests: number;
 };
 
 export type SystemHealth = {
