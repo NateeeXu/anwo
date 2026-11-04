@@ -46,11 +46,13 @@ export type PaymentRow = {
 export type BoostRow = {
   id: string; user_id: string; campus_id: string | null; entity_type: BoostEntity; entity_id: string; plan_id: string | null; order_id: string | null;
   tier: Boost['tier']; starts_at: string; ends_at: string; status: Boost['status']; impressions: number; clicks: number; nationwide: number; paused_at: string | null;
+  price_cents?: number | null;
   created_at: string; updated_at: string;
 };
 export type SubscriptionRow = {
   id: string; user_id: string; plan_id: string; status: Subscription['status']; current_period_start: string; current_period_end: string;
   cancel_at_period_end: number; cancelled_at: string | null; trial_ends_at: string | null; last_order_id: string | null; payment_method_id: string | null;
+  pending_plan_id?: string | null; plan_changed_at?: string | null;
   created_at: string; updated_at: string;
 };
 export type EscrowRow = {
@@ -319,6 +321,11 @@ export function fulfilBoostOrder(order: OrderRow, plan: PlanRow): BoostRow[] {
   const planKeys = meta.fulfils?.length ? meta.fulfils : [plan.key];
   const t = nowIso();
   const out: BoostRow[] = [];
+  // what was actually paid (card + wallet credit, after discount) is apportioned over the boosts this order creates,
+  // weighted by each boost's list price (the spotlight add-on belongs to the order's own entity) → boosts.price_cents
+  const paidCents = Math.max(0, order.subtotal_cents - order.discount_cents);
+  const addonCents = (meta.addons ?? []).reduce((s, k) => s + (loadPlan(k)?.price_cents ?? 0), 0);
+  const planned: { p: PlanRow; target: { type: BoostEntity; id: string }; weight: number }[] = [];
   for (const key of planKeys) {
     const p = key === plan.key ? plan : requirePlan(key);
     if (p.kind !== 'boost' || !p.entity_type || !p.tier || !p.duration_days) continue;
@@ -331,15 +338,29 @@ export function fulfilBoostOrder(order: OrderRow, plan: PlanRow): BoostRow[] {
       if (bundleId) for (const it of q.all<{ id: string }>("SELECT id FROM market_items WHERE bundle_id = ? AND status IN ('active','reserved')", [bundleId])) targets.push({ type: 'market_item', id: it.id });
     } else if (order.entity_type && order.entity_id) targets.push({ type: order.entity_type as BoostEntity, id: order.entity_id });
     for (const target of targets) {
+      const own = target.type === order.entity_type && target.id === order.entity_id;
+      planned.push({ p, target, weight: Math.max(1, p.price_cents + (own ? addonCents : 0)) });
+    }
+  }
+  const weightSum = planned.reduce((s, x) => s + x.weight, 0);
+  let apportioned = 0;
+  planned.forEach((x, i) => {
+    const share = i === planned.length - 1 ? paidCents - apportioned : Math.floor((paidCents * x.weight) / weightSum);
+    apportioned += share;
+    (x as typeof x & { price: number }).price = share;
+  });
+  for (const x of planned as (typeof planned[number] & { price: number })[]) {
+    const { p, target } = x;
+    {
       const e = loadEntity(target.type, target.id);
       if (!e) continue;
       const existing = currentBoost(target.type, target.id);
       const startsMs = existing ? Math.max(Date.parse(existing.ends_at), nowMs()) : nowMs();
       const starts = new Date(startsMs).toISOString();
-      const ends = new Date(startsMs + p.duration_days * DAY).toISOString();
+      const ends = new Date(startsMs + p.duration_days! * DAY).toISOString();
       const status: Boost['status'] = startsMs <= nowMs() + 1000 ? 'active' : 'scheduled';
-      const row: BoostRow = { id: uid(), user_id: order.user_id, campus_id: e.campusId, entity_type: target.type, entity_id: target.id, plan_id: p.id, order_id: order.id, tier: p.tier, starts_at: starts, ends_at: ends, status, impressions: 0, clicks: 0, nationwide, paused_at: null, created_at: t, updated_at: t };
-      q.run('INSERT INTO boosts (id, user_id, campus_id, entity_type, entity_id, plan_id, order_id, tier, starts_at, ends_at, status, impressions, clicks, nationwide, paused_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, NULL, ?, ?)', [row.id, row.user_id, row.campus_id, row.entity_type, row.entity_id, row.plan_id, row.order_id, row.tier, row.starts_at, row.ends_at, row.status, nationwide, t, t]);
+      const row: BoostRow = { id: uid(), user_id: order.user_id, campus_id: e.campusId, entity_type: target.type, entity_id: target.id, plan_id: p.id, order_id: order.id, tier: p.tier!, starts_at: starts, ends_at: ends, status, impressions: 0, clicks: 0, nationwide, paused_at: null, price_cents: x.price, created_at: t, updated_at: t };
+      q.run('INSERT INTO boosts (id, user_id, campus_id, entity_type, entity_id, plan_id, order_id, tier, starts_at, ends_at, status, impressions, clicks, nationwide, paused_at, price_cents, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, NULL, ?, ?, ?)', [row.id, row.user_id, row.campus_id, row.entity_type, row.entity_id, row.plan_id, row.order_id, row.tier, row.starts_at, row.ends_at, row.status, nationwide, x.price, t, t]);
       out.push(row);
       notify(order.user_id, 'boost.started', {
         title: { zh: status === 'active' ? '推广已开始' : '推广已排期', en: status === 'active' ? 'Your boost is live' : 'Your boost is scheduled' },
@@ -355,10 +376,17 @@ export function cancelBoost(row: BoostRow, by: 'owner' | 'moderation' | 'admin',
   if (!['scheduled', 'active'].includes(row.status)) throw invalidState(row.status, 'cancelled');
   const plan = row.plan_id ? loadPlan(row.plan_id) : undefined;
   const order = row.order_id ? q.get<OrderRow>('SELECT * FROM orders WHERE id = ?', [row.order_id]) : undefined;
-  const paid = order ? order.subtotal_cents - order.discount_cents : plan?.price_cents ?? 0;
+  const orderPaid = order ? Math.max(0, order.subtotal_cents - order.discount_cents) : 0;
+  // this boost's own share of the order (legacy rows without price_cents: its plan price, never the whole pack)
+  const paid = row.price_cents ?? (order ? Math.min(orderPaid, plan?.price_cents ?? orderPaid) : 0);
   const total = Date.parse(row.ends_at) - Date.parse(row.starts_at);
   const remaining = Math.max(0, Math.min(total, Date.parse(row.ends_at) - nowMs()));
-  const refund = by === 'moderation' ? 0 : total > 0 ? Math.floor((paid * remaining) / total) : 0;
+  let refund = by === 'moderation' ? 0 : total > 0 ? Math.floor((paid * remaining) / total) : 0;
+  if (order && refund > 0) {
+    // cumulative refunds for all boosts of one order never exceed what that order paid
+    const already = q.get<{ s: number | null }>("SELECT SUM(w.delta_cents) AS s FROM wallet_ledger w JOIN boosts b ON b.id = w.ref_id WHERE w.ref_type = 'boost' AND w.kind = 'refund' AND b.order_id = ?", [order.id])?.s ?? 0;
+    refund = Math.max(0, Math.min(refund, orderPaid - already));
+  }
   return q.tx(() => {
     const t = nowIso();
     q.run("UPDATE boosts SET status = 'cancelled', updated_at = ? WHERE id = ?", [t, row.id]);
@@ -661,13 +689,15 @@ export function refundOrder(order: OrderRow, amountCents: number | undefined, ac
 
 // ====================================================================== subscriptions (Landlord Pro)
 export const TRIAL_DAYS = 14;
-export function toSubscriptionDto(r: SubscriptionRow): Subscription & { userId: string; lastOrderId: string | null; seats: number } {
+export function toSubscriptionDto(r: SubscriptionRow): Subscription & { userId: string; lastOrderId: string | null; seats: number; pendingPlan: PlanDto | null; planChangedAt: string | null } {
   const plan = requirePlan(r.plan_id);
+  const pending = r.pending_plan_id ? loadPlan(r.pending_plan_id) : undefined;
   const pm = r.payment_method_id ? q.get<PaymentMethodRow>('SELECT * FROM payment_methods WHERE id = ?', [r.payment_method_id]) : undefined;
   return {
     id: r.id, planId: r.plan_id, plan: toPlanDto(plan), status: r.status, currentPeriodStart: r.current_period_start, currentPeriodEnd: r.current_period_end, cancelAtPeriodEnd: r.cancel_at_period_end === 1,
     cancelledAt: r.cancelled_at, trialEndsAt: r.trial_ends_at, paymentMethod: pm ? toPaymentMethodDto(pm) : undefined, userId: r.user_id, lastOrderId: r.last_order_id,
     seats: plan.key.startsWith('proplus') ? 5 : 1,
+    pendingPlan: pending ? toPlanDto(pending) : null, planChangedAt: r.plan_changed_at ?? null,
   };
 }
 export function currentSubscription(userId: string): SubscriptionRow | undefined {
@@ -697,12 +727,14 @@ export function activateSubscription(order: OrderRow, req: Request | null): Subs
   const plan = order.plan_id ? requirePlan(order.plan_id) : null;
   if (!plan || plan.kind !== 'subscription') throw new ApiError('INTERNAL', 'Subscription order without plan');
   const t = nowIso();
-  const meta = parseJson<{ subscriptionId?: string; trial?: boolean; paymentMethodId?: string | null }>(order.metadata_json, {});
+  const meta = parseJson<{ subscriptionId?: string; trial?: boolean; paymentMethodId?: string | null; upgradeFrom?: string }>(order.metadata_json, {});
   const existing = meta.subscriptionId ? q.get<SubscriptionRow>('SELECT * FROM subscriptions WHERE id = ?', [meta.subscriptionId]) : currentSubscription(order.user_id);
   if (existing) {
-    const start = existing.status === 'trialing' ? nowMs() : Math.max(Date.parse(existing.current_period_end), nowMs() - DAY);
+    // a paid mid-period upgrade starts a fresh period now (the unused part of the old plan was deducted from its price)
+    const upgrade = !!meta.upgradeFrom;
+    const start = existing.status === 'trialing' || upgrade ? nowMs() : Math.max(Date.parse(existing.current_period_end), nowMs() - DAY);
     const end = periodEnd(start, plan.interval);
-    q.run("UPDATE subscriptions SET status = 'active', plan_id = ?, current_period_start = ?, current_period_end = ?, last_order_id = ?, cancel_at_period_end = 0, updated_at = ? WHERE id = ?", [plan.id, new Date(start).toISOString(), end, order.id, t, existing.id]);
+    q.run("UPDATE subscriptions SET status = 'active', plan_id = ?, pending_plan_id = NULL, plan_changed_at = CASE WHEN ? THEN ? ELSE plan_changed_at END, current_period_start = ?, current_period_end = ?, last_order_id = ?, cancel_at_period_end = 0, updated_at = ? WHERE id = ?", [plan.id, upgrade ? 1 : 0, t, new Date(start).toISOString(), end, order.id, t, existing.id]);
     grantProBoostCredit(order.user_id, existing.id, plan.key, req);
     logEvent(req, order.kind === 'subscription_renewal' ? 'pro.renew' : 'pro.subscribe', { entityType: 'subscription', entityId: existing.id, props: { planKey: plan.key } });
     return q.get<SubscriptionRow>('SELECT * FROM subscriptions WHERE id = ?', [existing.id])!;
@@ -717,6 +749,36 @@ export function activateSubscription(order: OrderRow, req: Request | null): Subs
   logEvent(req, trial ? 'pro.trial_start' : 'pro.subscribe', { entityType: 'subscription', entityId: id, props: { planKey: plan.key, promo: parseJson<{ promoCode?: string }>(order.metadata_json, {}).promoCode ?? null } });
   notify(order.user_id, 'pro.activated', { title: { zh: trial ? '房东 Pro 试用已开始' : '房东 Pro 已开通', en: trial ? 'Your Landlord Pro trial has started' : 'Landlord Pro is active' }, body: { zh: '房源数量不再受限，线索收件箱已开启。', en: 'Unlimited listings and your lead inbox are now on.' }, link: '/pro', entityType: 'subscription', entityId: id });
   return q.get<SubscriptionRow>('SELECT * FROM subscriptions WHERE id = ?', [id])!;
+}
+/** Plan change rules: no change while trialing; at most one change per billing period; downgrades (or same price) are
+ *  scheduled for the period end; upgrades create a `subscription` order for (new price − unused part of the current
+ *  plan) and switch the plan only when that order is paid. Never credits the wallet. */
+export function changeSubscriptionPlan(user: AuthUser, sub: SubscriptionRow, plan: PlanRow, req: Request | null): { subscription: SubscriptionRow; order: OrderRow | null } {
+  if (plan.kind !== 'subscription' || plan.is_active !== 1) throw new ApiError('BAD_REQUEST', 'Not a subscription plan');
+  const reload = () => q.get<SubscriptionRow>('SELECT * FROM subscriptions WHERE id = ?', [sub.id])!;
+  if (plan.id === sub.plan_id) {
+    // picking the current plan again cancels a scheduled downgrade
+    if (sub.pending_plan_id) q.run('UPDATE subscriptions SET pending_plan_id = NULL, updated_at = ? WHERE id = ?', [nowIso(), sub.id]);
+    return { subscription: reload(), order: null };
+  }
+  if (sub.status === 'trialing') throw new ApiError('INVALID_STATE', 'You can change plans after the trial ends', { data: { from: sub.status, to: 'change_plan', reason: 'trialing' } });
+  if (sub.status !== 'active') throw invalidState(sub.status, 'change_plan');
+  if (sub.plan_changed_at && sub.plan_changed_at >= sub.current_period_start) throw new ApiError('CONFLICT', 'One plan change per billing period', { data: { reason: 'one_change_per_period', nextAt: sub.current_period_end } });
+  const current = requirePlan(sub.plan_id);
+  const t = nowIso();
+  if (plan.price_cents <= current.price_cents) {
+    q.run('UPDATE subscriptions SET pending_plan_id = ?, plan_changed_at = ?, updated_at = ? WHERE id = ?', [plan.id, t, t, sub.id]);
+    logEvent(req, 'pro.change_plan', { entityType: 'subscription', entityId: sub.id, props: { from: current.key, to: plan.key, scheduled: true } });
+    return { subscription: reload(), order: null };
+  }
+  // drop earlier unpaid upgrade orders so only one can be paid
+  for (const o of q.all<OrderRow>("SELECT * FROM orders WHERE user_id = ? AND kind = 'subscription' AND entity_id = ? AND status IN ('awaiting_payment','failed')", [user.id, sub.id])) cancelOrder(o);
+  const total = Date.parse(sub.current_period_end) - Date.parse(sub.current_period_start);
+  const remaining = Math.max(0, Date.parse(sub.current_period_end) - nowMs());
+  const unused = total > 0 ? Math.min(current.price_cents, Math.floor((current.price_cents * remaining) / total)) : 0;
+  const order = createOrder(user, { kind: 'subscription', plan, entityType: 'subscription', entityId: sub.id, subtotalCents: Math.max(0, plan.price_cents - unused), useWallet: false, metadata: { subscriptionId: sub.id, upgradeFrom: current.key, prorationCents: unused, listPriceCents: plan.price_cents }, surface: 'pro' }, req);
+  logEvent(req, 'pro.change_plan', { entityType: 'subscription', entityId: sub.id, props: { from: current.key, to: plan.key, scheduled: false, orderId: order.id, prorationCents: unused } });
+  return { subscription: reload(), order: requireOrder(order.id) };
 }
 export function cancelSubscription(sub: SubscriptionRow, immediately: boolean, req: Request | null, reason?: string): SubscriptionRow {
   const t = nowIso();
@@ -752,7 +814,8 @@ export function renewSubscriptions(): { renewed: number; pastDue: number; cancel
       continue;
     }
     const user = q.get<AuthUser>('SELECT * FROM users WHERE id = ?', [s.user_id]);
-    const plan = requirePlan(s.plan_id);
+    // a scheduled downgrade takes effect at renewal
+    const plan = requirePlan(s.pending_plan_id ?? s.plan_id);
     const pm = s.payment_method_id ? q.get<PaymentMethodRow>('SELECT * FROM payment_methods WHERE id = ? AND deleted_at IS NULL', [s.payment_method_id]) : q.get<PaymentMethodRow>('SELECT * FROM payment_methods WHERE user_id = ? AND deleted_at IS NULL ORDER BY is_default DESC LIMIT 1', [s.user_id]);
     if (!user || !pm) {
       q.run("UPDATE subscriptions SET status = 'past_due', updated_at = ? WHERE id = ?", [t, s.id]);

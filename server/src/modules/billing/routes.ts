@@ -32,7 +32,7 @@ import { config } from '../../config';
 import { mockStripe, verifyMockWebhook } from './mockStripe';
 import type { AuthUser } from '../../lib/types';
 import {
-  activePlans, bindBillingHooks, boostStats, cancelBoost, cancelOrder, cancelSubscription, createEscrow, createOrder, currentBoost, currentSubscription, entityCard, entityEligibility, escrowPlan,
+  activePlans, bindBillingHooks, changeSubscriptionPlan, boostStats, cancelBoost, cancelOrder, cancelSubscription, createEscrow, createOrder, currentBoost, currentSubscription, entityCard, entityEligibility, escrowPlan,
   estimatedReach, expiringSoon, hasUsedTrial, isProUser, latestPayment, ledgerAppend, listPartners, listPaymentMethods, loadBoost, loadEntity, loadEscrow, loadOrder, loadPartner, loadPlan, payOrder,
   payeeEligible, planLock, quoteEscrowFee, recordClick, redeemWalletPromo, referralSummary, refundOrder, repriceOrder, requireEscrow, requireOrder, requirePlan, resumeSubscription, revenueSummary,
   savePaymentMethod, settleOrder, sponsoredCards, toPartyOrderDto, toBoostDto, toEscrowDto, toLedgerDto, toOrderDto, toPartnerDto, toPaymentMethodDto, toPlanDto, toPromoDto, toSubscriptionDto,
@@ -401,18 +401,9 @@ router.post('/subscription/change-plan', requireAuth, writes, (req, res) => {
   const sub = currentSubscription(me(req).id);
   if (!sub) throw notFound('Subscription');
   const plan = requirePlan(body.planId);
-  if (plan.kind !== 'subscription') throw new ApiError('BAD_REQUEST', 'Not a subscription plan');
-  const current = requirePlan(sub.plan_id);
-  const t = nowIso();
-  // upgrade mid-period: prorated wallet credit of the unused portion of the current plan
-  if (plan.price_cents > current.price_cents && sub.status === 'active') {
-    const total = Date.parse(sub.current_period_end) - Date.parse(sub.current_period_start);
-    const remaining = Math.max(0, Date.parse(sub.current_period_end) - nowMs());
-    const credit = total > 0 ? Math.floor((current.price_cents * remaining) / total) : 0;
-    if (credit > 0) ledgerAppend(sub.user_id, credit, 'refund', { refType: 'subscription', refId: sub.id, note: 'plan_upgrade_proration', expiresAt: new Date(nowMs() + 180 * DAY).toISOString(), req });
-  }
-  q.run('UPDATE subscriptions SET plan_id = ?, updated_at = ? WHERE id = ?', [plan.id, t, sub.id]);
-  ok(res, toSubscriptionDto(currentSubscription(sub.user_id)!));
+  // upgrades return an order to pay (plan switches on payment); downgrades are scheduled for the period end
+  const r = changeSubscriptionPlan(me(req), sub, plan, req);
+  ok(res, { ...toSubscriptionDto(r.subscription), order: r.order ? toOrderDto(r.order, { checkout: true }) : null });
 });
 router.get('/subscription/invoices', requireAuth, (req, res) => {
   ok(res, q.all<OrderRow>("SELECT * FROM orders WHERE user_id = ? AND kind IN ('subscription','subscription_renewal') ORDER BY created_at DESC", [me(req).id]).map((o) => toOrderDto(o)));
