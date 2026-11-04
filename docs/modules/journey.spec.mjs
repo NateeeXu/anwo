@@ -136,13 +136,14 @@ await step('browse sublets: campus, nationwide, map', async () => {
   await sp.goto('/listings');
   await sp.waitForSelector('[data-listing-id]', { timeout: 15000 });
   await shot(sp, 'listings-campus');
-  await sp.goto('/listings?scope=nationwide');
-  const toggle = sp.getByRole('radio', { name: /全美|Nationwide/ }).first();
-  if (await toggle.count()) await toggle.click().catch(() => {});
+  // nationwide scope (persisted by lib/campus in localStorage['anwo.scope'], same as the header switcher's 全美 row)
+  await sp.evaluate(() => localStorage.setItem('anwo.scope', 'nationwide'));
+  await sp.goto('/listings');
   await sp.waitForSelector('[data-listing-id]', { timeout: 15000 });
+  await sp.getByRole('radio', { name: /全美/ }).first().click().catch(() => {});
+  await settle(sp, 800);
   await shot(sp, 'listings-nationwide');
-  const campusToggle = sp.getByRole('radio', { name: /Northwestern/ }).first();
-  if (await campusToggle.count()) await campusToggle.click().catch(() => {});
+  await sp.evaluate(() => localStorage.setItem('anwo.scope', 'campus'));
   await sp.goto('/map');
   await sp.waitForSelector('[data-testid=map-explore]', { timeout: 15000 });
   await shot(sp, 'map-explore');
@@ -210,7 +211,11 @@ await step('post a second-hand item', async () => {
   await sp.goto('/post/item?category=kitchen');
   await sp.waitForSelector('form', { timeout: 20000 });
   await settle(sp);
-  const png = await sp.screenshot({ clip: { x: 0, y: 0, width: 480, height: 480 } });
+  const pic = await S.context.newPage();
+  await pic.setViewportSize({ width: 800, height: 800 });
+  await pic.goto('/uploads/seed/items/i21.svg');
+  const png = await pic.screenshot({ clip: { x: 0, y: 0, width: 800, height: 800 } });
+  await pic.close();
   await sp.locator('input[type=file]').first().setInputFiles({ name: 'lamp.png', mimeType: 'image/png', buffer: png });
   await sp.waitForFunction(() => document.querySelectorAll('img[src^="/uploads/"]').length > 0, null, { timeout: 15000 }).catch(() => {});
   await settle(sp, 600);
@@ -241,7 +246,11 @@ await step('join a buddy group', async () => {
 
 await step('post a sublet and boost it through the mock checkout', async () => {
   // photo through the real upload endpoint, then the listing through the same API the wizard uses (wizard UI is covered by listings.spec)
-  const png = await sp.screenshot({ clip: { x: 0, y: 0, width: 640, height: 480 } });
+  const pic = await S.context.newPage();
+  await pic.setViewportSize({ width: 1200, height: 900 });
+  await pic.goto('/uploads/seed/rooms/r07.svg');
+  const png = await pic.screenshot({ clip: { x: 0, y: 0, width: 1200, height: 900 } });
+  await pic.close();
   const up = await sp.request.post('/api/uploads', { headers: H, multipart: { purpose: 'listing', file: { name: 'room.png', mimeType: 'image/png', buffer: png } } });
   const upBody = await up.json();
   if (!up.ok()) throw new Error(`upload → ${up.status()} ${JSON.stringify(upBody.error)}`);

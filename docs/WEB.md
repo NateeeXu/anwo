@@ -62,6 +62,8 @@ Browse pages render `<SecondaryTabs />` at the top (see §4). Post wizards live 
 | `useUnread()` → `{ notifications, messages }`, `UNREAD_KEY` | `app/shell/useUnread` | Unread counters (REST + ws `notification` / `notification.count` / `chat.conversation` + 30 s polling). Invalidate `UNREAD_KEY` after you mark things read. |
 | `NotificationBell`, `UserMenu`, `TopNav`, `MobileTopBar`, `BottomTabs`, `Footer`, `PostSheet`, `AppShell` | `app/shell/*` | Shell internals; modules do not render these. |
 
+Shell wiring after integration: the desktop top nav has a 消息 button and the mobile 消息 tab both fed by chat's `useUnreadMessages()`; the account menu links every module dashboard (messages, my listings / wanted / items / groups, saved, wallet, pricing, Newcomer Kit, verification, admin for admins). The map explore rail shows `SecondaryTabs` too.
+
 Mobile shell rules: the top bar shows the campus pill on root pages (`/`, `/map`, `/chat`, `/settings`, `/listings`, `/wanted`, `/market`, `/buddy`, `/shuttle`, `/search`, `/notifications`) and a back chevron elsewhere; the centre title is whatever `<Head title>` set (the mark on `/`). The bottom tab 我的 goes to `/settings` (or login).
 
 ## 5. Head / document titles
@@ -84,9 +86,9 @@ Static text pages read sections from i18n keys `<prefix>.s<n>.title/body` (`page
 
 `pages/home/Section.tsx` exports `Section`, `CardGrid`, `QueryState` and `isStub()`/`isNotImplemented()`: `QueryState` renders skeleton → "under construction" (HTTP 501, `NOT_FOUND` on a missing router, or a `{ module, status: 'stub' }` body) → inline error with retry → empty → data. Modules may import these helpers but should prefer their own list components.
 
-## 8. SimpleCards (temporary)
+## 8. Cards on core pages
 
-`web/src/pages/home/SimpleCards.tsx` — `SimpleListingCard`, `SimpleWantedCard`, `SimpleItemCard`, `SimpleBuddyCard`, `SimpleUserRow`, `SimpleCampusRow`. Plain `Card`-based renderings of the DTOs used by Home, Search and Profile only. **Module agents own the real cards** (DESIGN.md §4.1–4.3) and should export them from `features/<key>/index.ts`; the scaffold can then swap the imports in Home/Search/Profile. Do not import SimpleCards from a module.
+Home, Search and Profile render the modules' real cards (integration pass): `ListingCard` (`features/listings/components/ListingCard`), `WantedCard` (`features/wanted/components/WantedCard`), `ItemCard` (`features/market/components/ItemCard`), `BuddyCard` (`features/buddy/BuddyCard`); Profile also mounts verify's `TrustProfileCard`. They are imported from the component files (not the feature barrels) so the barrels' `AdminPanel` exports stay out of the main chunk. `web/src/pages/home/SimpleCards.tsx` now only provides `SimpleUserRow` and `SimpleCampusRow` (search results); the other Simple* cards are unused leftovers.
 
 ## 9. i18n
 
