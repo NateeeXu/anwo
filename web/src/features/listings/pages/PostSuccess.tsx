@@ -39,7 +39,7 @@ export default function PostSuccess() {
         <h2 className="text-h3 text-ink">{t('listings.success.boost.title')}</h2>
         <p className="text-body text-ink-2">{t('listings.success.boost.body')}</p>
         <div className="flex flex-wrap gap-2">
-          <Button asChild variant="primary"><Link to={`/pricing?boost=listing:${id}`}>{t('listings.success.boost.cta')}</Link></Button>
+          <Button asChild variant="primary"><Link to={`/pricing?boost=listing:${id}&surface=publish_upsell`}>{t('listings.success.boost.cta')}</Link></Button>
           <Button asChild variant="ghost"><Link to={`/listings/${id}`}>{t('listings.success.boost.skip')}</Link></Button>
         </div>
       </Card>

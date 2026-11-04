@@ -1,6 +1,6 @@
 // /kit/:slug — partner detail: full description zh/en, what you need, user bonus, disclosure line, tracked 「前往」,
 // "report a problem with this partner" (reports entity_type='partner'), related partners.
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, ArrowUpRight, CircleAlert, Flag, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { Badge, Button, Card, Checkbox, Chip, EmptyState, Modal, Select, Skeleton, Textarea } from '@/components';
@@ -10,7 +10,6 @@ import { useAuth } from '@/lib/auth';
 import { useCampus } from '@/lib/campus';
 import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
-import { track } from '@/lib/track';
 import { usePartner, useReportPartner } from '../api';
 import { PartnerCard, PartnerMark, useKitChecklist } from './Kit';
 

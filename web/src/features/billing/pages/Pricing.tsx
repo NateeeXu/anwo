@@ -1,6 +1,6 @@
 // /pricing — DESIGN §7.13: display 「免费发布，按需加速。」, Students / Landlords / Businesses tabs, three cards
 // (Boost · Landlord Pro · Secure Payment), "always free" box, FAQ accordion. `?boost=listing:<id>` opens the BoostSheet.
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowRight, ArrowUpRight, Building2, ChevronDown, Gift, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { Badge, Button, Card, EmptyState, Input, Select, Skeleton, Tabs, Textarea } from '@/components';
@@ -11,7 +11,6 @@ import { useCampus } from '@/lib/campus';
 import { cn } from '@/lib/cn';
 import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
-import { track } from '@/lib/track';
 import { usePricing, useSponsorLead, useSubscription, useWallet, type PlanDto } from '../api';
 import { BoostSheet } from '../components/BoostSheet';
 import { FeatureList, TestModeBand, durationLabel, tierLabel, usePlanName } from '../components/shared';
@@ -25,7 +24,6 @@ export default function PricingPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const { status, user } = useAuth();
-  const { campus } = useCampus();
   const q = usePricing();
   const wallet = useWallet(1, status === 'authed');
   const sub = useSubscription(status === 'authed');
@@ -37,7 +35,9 @@ export default function PricingPage() {
     const [type, id] = boostParam.split(':');
     return type && id && ['listing', 'market_item', 'buddy_post'].includes(type) ? { type: type as 'listing' | 'market_item' | 'buddy_post', id } : null;
   }, [boostParam]);
-  const closeBoost = () => { const p = new URLSearchParams(params); p.delete('boost'); setParams(p, { replace: true }); };
+  const closeBoost = () => { const p = new URLSearchParams(params); p.delete('boost'); p.delete('surface'); setParams(p, { replace: true }); };
+  // publish-success upsells link here with &surface=publish_upsell so the funnel attributes them correctly
+  const boostSurface = params.get('surface') === 'publish_upsell' ? 'publish_upsell' : 'pricing';
   const [entity, setEntity] = useState<'listing' | 'market_item' | 'buddy_post'>('listing');
   // pricing.view is logged once by the server (GET /api/billing/pricing) — no client duplicate
 
@@ -168,7 +168,7 @@ export default function PricingPage() {
       <div className="mt-8"><TestModeBand compact /></div>
       <p className="mt-6 pb-4 text-center text-caption text-ink-3">{t('billing.pricing.footnote', { partners: data?.kit.partnerCount ?? 0 })} <Link to="/kit" className="text-accent-text underline">{t('billing.kit.title')}</Link></p>
 
-      {boostTarget && <BoostSheet open entityType={boostTarget.type} entityId={boostTarget.id} onClose={closeBoost} surface="pricing" />}
+      {boostTarget && <BoostSheet open entityType={boostTarget.type} entityId={boostTarget.id} onClose={closeBoost} surface={boostSurface} />}
     </div>
   );
 }

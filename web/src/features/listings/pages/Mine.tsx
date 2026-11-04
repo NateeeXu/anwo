@@ -63,7 +63,7 @@ function MineInner() {
     <div className="mx-auto w-full max-w-content px-4 lg:px-8">
       <Head title={t('listings.mine.title')} />
       <PageHeader title={t('listings.mine.title')} subtitle={subtitle} back actions={<Button asChild iconLeft={<Plus className="size-4" />}><Link to="/post/listing">{t('listings.mine.post')}</Link></Button>} />
-      {quota && quota.limit !== null && quota.active >= quota.limit && <p className="mb-3 rounded-card bg-warning-soft px-3 py-2 text-small text-warning">{t('listings.mine.quotaFull', { limit: quota.limit })}</p>}
+      {quota && quota.limit !== null && quota.active >= quota.limit && <p className="mb-3 rounded-card bg-warning-soft px-3 py-2 text-small text-warning">{t(user?.role === 'landlord' ? 'listings.mine.quotaFullLandlord' : 'listings.mine.quotaFull', { limit: quota.limit })}</p>}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatTile label={t('listings.mine.summary.active')} value={counts.active ?? 0} />
         <StatTile label={t('listings.mine.summary.views')} value={data?.summary.views ?? 0} />

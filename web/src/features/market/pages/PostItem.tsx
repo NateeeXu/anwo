@@ -113,7 +113,9 @@ function ItemForm({ existing }: { existing?: Item }) {
       create.mutate(body, {
         onSuccess: (it) => {
           track(draft ? 'item.draft' : 'item.publish', { entityType: 'market_item', entityId: it.id, props: { category: it.category } });
-          toast.success(t(draft ? 'market.form.draftSaved' : 'market.form.published'));
+          // non-blocking boost upsell after publish (BUSINESS_PLAN §4.4)
+          if (draft) toast.success(t('market.form.draftSaved'));
+          else toast.success(t('market.form.published'), t('market.form.boostUpsell'), { label: t('market.form.boostUpsellCta'), onClick: () => navigate(`/pricing?boost=market_item:${it.id}&surface=publish_upsell`) }, 9000);
           navigate(draft ? '/market/mine' : `/market/${it.id}`);
         },
         onError,

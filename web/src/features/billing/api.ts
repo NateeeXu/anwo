@@ -1,4 +1,5 @@
 // React Query hooks + API calls for the billing module. Query keys are prefixed ['billing', …].
+import { useRef } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { Boost, BuddyCard, Escrow, ItemCard, LedgerEntry, ListingCard, Order, Paginated, Partner, PaymentMethod, Plan, Subscription, UserPublic } from '@shared/types';
 import type { CardInput, EscrowInput, EscrowRail, OrderInput, SubscribeInput } from '@shared/schemas/billing';

@@ -96,7 +96,7 @@ export default {
     'billing.features.events': '校园活动联名',
     'billing.features.payout1800': '看房员报酬 $18',
     'billing.features.payout2500': '看房员报酬 $25',
-    'billing.features.freeListings': '2 套在架长租房源',
+    'billing.features.freeListings': '同时上线 3 条长租房源',
     'billing.features.freeMessaging': '无限私信与线索提醒',
     'billing.features.freeBadges': '免费验证与信任标识',
 
@@ -860,7 +860,7 @@ export default {
     'billing.features.events': 'Co-branded campus events',
     'billing.features.payout1800': 'Viewer payout $18',
     'billing.features.payout2500': 'Viewer payout $25',
-    'billing.features.freeListings': '2 active long-term listings',
+    'billing.features.freeListings': '3 active long-term listings',
     'billing.features.freeMessaging': 'Unlimited messages and lead alerts',
     'billing.features.freeBadges': 'Free verification and trust badges',
 

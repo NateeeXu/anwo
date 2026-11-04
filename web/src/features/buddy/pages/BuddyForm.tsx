@@ -176,7 +176,8 @@ function FormInner({ editId }: { editId?: string }) {
         navigate(`/buddy/${d.id}`, { replace: true });
       } else {
         const d = await m.create.mutateAsync(body);
-        toast.success(t('buddy.toast.created'));
+        // non-blocking boost upsell after publish (BUSINESS_PLAN §4.4)
+        toast.success(t('buddy.toast.created'), t('buddy.toast.boostUpsell'), { label: t('buddy.toast.boostUpsellCta'), onClick: () => navigate(`/pricing?boost=buddy_post:${d.id}&surface=publish_upsell`) }, 9000);
         navigate(`/buddy/${d.id}`, { replace: true });
       }
     } catch (e) {
