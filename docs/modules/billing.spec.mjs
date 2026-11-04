@@ -152,6 +152,7 @@ step = 'secure'
   await s.page.getByRole('button', { name: /^支付 / }).click()
   const dlg = s.page.getByRole('dialog')
   await dlg.getByText('支付押金').waitFor()
+  await settle(s.page, 800) // saved cards load after the dialog opens and replace the card form when present
   if (await dlg.getByLabel('卡号').count()) { await dlg.getByLabel('卡号').fill('4242424242424242'); await dlg.getByLabel('有效期').fill('12/30'); await dlg.getByLabel('安全码').fill('123') }
   await dlg.getByRole('button', { name: /支付 .* 测试模式/ }).click()
   await s.page.waitForURL(/\/billing\/success/); await settle(s.page)
