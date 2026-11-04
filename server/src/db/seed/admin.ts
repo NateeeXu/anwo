@@ -282,7 +282,11 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
       );
     }
 
-    // moderation state that matches the reports above
+    // moderation state that matches the reports above (re-runs reset what a walkthrough may have changed)
+    if (nuScam) q.run("UPDATE listings SET moderation_status = 'ok', moderation_note = NULL WHERE id = ?", [nuScam.id]);
+    if (uiucListing) q.run("UPDATE listings SET moderation_status = 'ok', moderation_note = NULL WHERE id = ?", [uiucListing.id]);
+    if (nyuItem) q.run("UPDATE market_items SET moderation_status = 'ok' WHERE id = ?", [nyuItem.id]);
+    if (uscBuddy) q.run("UPDATE buddy_posts SET moderation_status = 'ok' WHERE id = ?", [uscBuddy.id]);
     if (nuHidden) q.run("UPDATE listings SET moderation_status = 'hidden', moderation_note = 'Overseas wire-transfer request (report adm-rp-10)' WHERE id = ?", [nuHidden.id]);
     if (nuDup) q.run("UPDATE listings SET moderation_status = 'flagged', moderation_note = 'auto: 2+ open reports' WHERE id = ?", [nuDup.id]);
 

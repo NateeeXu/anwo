@@ -31,7 +31,7 @@ const zh: Record<string, string> = {
 
   // filters & common
   'admin.filters.campus': '校区',
-  'admin.filters.allCampuses': '全部校区（全美合计）',
+  'admin.filters.allCampuses': '全部校区',
   'admin.filters.range': '时间范围',
   'admin.filters.d7': '7 天',
   'admin.filters.d30': '30 天',
@@ -596,7 +596,7 @@ const en: Record<string, string> = {
   'admin.nav.notFound': 'Page not found',
 
   'admin.filters.campus': 'Campus',
-  'admin.filters.allCampuses': 'All campuses (nationwide)',
+  'admin.filters.allCampuses': 'All campuses',
   'admin.filters.range': 'Date range',
   'admin.filters.d7': '7 days',
   'admin.filters.d30': '30 days',

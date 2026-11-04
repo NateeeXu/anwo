@@ -131,7 +131,7 @@ export default function Reports() {
               key: 'entity',
               header: t('admin.col.entity'),
               render: (r, i) => (
-                <div className="flex min-w-0 flex-col">
+                <div className="flex min-w-0 max-w-[340px] flex-col">
                   <span className={cn('truncate font-medium text-ink', i === cursor && 'underline decoration-accent decoration-2 underline-offset-4')}>{r.entity?.title ?? r.entityId}</span>
                   <span className="text-caption text-ink-3">
                     {t(`admin.entity.${r.entityType}`)}

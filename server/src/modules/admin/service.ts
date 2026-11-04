@@ -94,7 +94,8 @@ export function entitySummary(type: string, id: string, users?: Map<string, User
       [id],
     );
     if (!c) return { ...base, missing: true };
-    return { ...base, title: c.title ?? c.kind, subtitle: `${c.members}`, status: c.is_locked ? 'locked' : 'open', owner: ownerOf(c.created_by ?? null), campus: toCampusLite(c.campus_id), createdAt: c.created_at };
+    const names = q.all<{ name: string }>('SELECT u.name FROM conversation_members cm JOIN users u ON u.id = cm.user_id WHERE cm.conversation_id = ? ORDER BY cm.joined_at LIMIT 3', [id]).map((m) => m.name);
+    return { ...base, title: c.title ?? (names.join(' ↔ ') || c.kind), subtitle: `${c.kind} · ${c.members}`, status: c.is_locked ? 'locked' : 'open', owner: ownerOf(c.created_by ?? null), campus: toCampusLite(c.campus_id), createdAt: c.created_at };
   }
   if (type === 'partner') {
     const p = q.get<{ id: string; name: string; category: string; is_active: number; created_at: string }>('SELECT id, name, category, is_active, created_at FROM partners WHERE id = ?', [id]);
