@@ -3,7 +3,7 @@
 // stops the stack. Exit code 1 when any spec fails.
 //
 //   npm run e2e                               # all specs
-//   npm run e2e -- listings chat              # a subset (core always runs first unless --no-core)
+//   npm run e2e -- listings chat              # a subset (core always runs first unless --no-core); `journey` = cross-module journey
 //   E2E_KEEP_DB=1 npm run e2e                 # reuse server/data/e2e.db instead of re-seeding
 //   PORT=4300 VITE_PORT=5300 npm run e2e      # other ports (specs read WEB_PORT)
 //
@@ -22,7 +22,9 @@ const DB_PATH = process.env.E2E_DB || 'server/data/e2e.db';
 const MODULES = ['listings', 'wanted', 'chat', 'verify', 'map', 'shuttle', 'market', 'buddy', 'billing', 'admin'];
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const noCore = process.argv.includes('--no-core');
-const specs = [...(noCore ? [] : ['core']), ...(args.length ? MODULES.filter((m) => args.includes(m)) : MODULES)];
+// journey.spec.mjs = the cross-module user journey (register → … → admin), screenshots in docs/screenshots/journey/
+const ALL = [...MODULES, 'journey'];
+const specs = [...(noCore ? [] : ['core']), ...(args.length ? ALL.filter((m) => args.includes(m)) : ALL)];
 const LOG_DIR = path.join(ROOT, 'server', 'data', 'e2e-logs');
 fs.mkdirSync(LOG_DIR, { recursive: true });
 
