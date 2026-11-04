@@ -20,7 +20,9 @@ const TEXT: Record<AvatarSize, string> = { xs: 'text-[10px]', sm: 'text-caption'
 export function initialsOf(name?: string | null): string {
   const n = (name ?? '').trim()
   if (!n) return '?'
-  if (/[㐀-鿿]/.test(n)) return n[n.length - 1]
+  // Chinese names: last character of the first CJK run (「林小安 Journey」→「安」, not the trailing Latin letter)
+  const cjk = n.match(/[㐀-鿿]+/)
+  if (cjk) return cjk[0][cjk[0].length - 1]
   const parts = n.split(/\s+/).filter(Boolean)
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
   return n.slice(0, 2).toUpperCase()
