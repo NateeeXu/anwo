@@ -217,6 +217,8 @@ async function main() {
     await page.keyboard.press('k');
     await page.keyboard.press('Enter');
     await page.getByRole('dialog').waitFor();
+    // the dialog mounts before its request detail loads; R only works once the request is known to be open
+    await page.getByRole('dialog').getByText('证件姓名').waitFor();
     await page.keyboard.press('r');
     await page.getByRole('dialog').getByText('拒绝申请').waitFor();
     const rejected = page.waitForResponse((r) => r.url().includes('/reject') && r.request().method() === 'POST');
