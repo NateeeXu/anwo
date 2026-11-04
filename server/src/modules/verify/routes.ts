@@ -438,7 +438,7 @@ router.post('/admin/users/:userId/trust', requireAdmin, (req, res) => {
 function notifyFullyVerified(userId: string): void {
   notify(userId, 'system', {
     title: { zh: '你已完成全部验证', en: 'You are fully verified' },
-    body: { zh: '信任等级 L3：可以使用押金托管、购买房东 Pro，私信不再限量。', en: 'Trust level 3 unlocks escrow, Landlord Pro, and unlimited messaging.' },
+    body: { zh: '信任等级 L3：可以使用安心付、购买房东 Pro，私信不再限量。', en: 'Trust level 3 unlocks Secure Payment, Landlord Pro, and unlimited messaging.' },
     link: '/verify',
     entityType: 'user',
     entityId: userId,

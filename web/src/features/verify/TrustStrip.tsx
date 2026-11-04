@@ -35,7 +35,7 @@ export function TrustStrip({ user, role = 'host', onReport, className }: TrustSt
           <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="text-caption text-ink-3">{t(`verify.strip.${role}`)}</span>
             <span className="truncate text-body font-semibold text-ink">{user.name}</span>
-            <TrustBadge level={user.trustLevel} size="card" />
+            <TrustBadge level={user.trustLevel} accountRole={user.role} size="card" />
             {user.isPro && <Badge variant="pro" size="sm" />}
           </p>
           <p className="text-small text-ink-2">{facts.join(' · ')}</p>

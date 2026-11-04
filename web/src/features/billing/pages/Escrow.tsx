@@ -96,6 +96,7 @@ export function QuoteLines({ quote, feePayer }: { quote: EscrowQuote; feePayer: 
 
 function RailPicker({ value, onChange, amountCents }: { value: EscrowRail; onChange: (r: EscrowRail) => void; amountCents: number }) {
   const t = useT();
+  const { formatMoney } = useLocale();
   return (
     <div role="radiogroup" aria-label={t('billing.secure.rail')} className="grid grid-cols-2 gap-2">
       {RAILS.map((r) => {

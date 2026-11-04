@@ -65,7 +65,7 @@ export function SellerStrip({ seller, onReport, className }: { seller: UserPubli
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span className="truncate text-body font-semibold text-ink">{seller.name}</span>
-            <TrustBadge level={seller.trustLevel} size="card" />
+            <TrustBadge level={seller.trustLevel} accountRole={seller.role} size="card" />
           </div>
           {facts.length > 0 && <p className="truncate text-small text-ink-2">{facts.join(' · ')}</p>}
         </div>

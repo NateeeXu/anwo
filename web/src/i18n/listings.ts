@@ -145,7 +145,7 @@ export default {
     'listings.detail.priceRail.utilitiesEst': '水电约 {amount} / 月',
     'listings.detail.priceRail.minTerm': '最短 {n} 个月',
     'listings.detail.priceRail.flexible': '日期可商量',
-    'listings.detail.priceRail.escrow': '安全支付押金',
+    'listings.detail.priceRail.escrow': '安心付押金',
     'listings.detail.priceRail.escrowHint': '可用安心付支付押金 · 确认入住后放款',
     'listings.detail.priceRail.stats': '浏览 {views} · 收藏 {saves} · 发布于 {ago}',
     'listings.detail.priceRail.loginToContact': '登录后联系房东',

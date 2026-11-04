@@ -268,7 +268,7 @@ export default function WantedDetail() {
             <div className="min-w-0 flex-1">
               <p className="flex flex-wrap items-center gap-2 text-body font-semibold text-ink">
                 <span className="truncate">{w.author.name}</span>
-                <TrustBadge level={w.author.trustLevel} size="card" showLabel />
+                <TrustBadge level={w.author.trustLevel} accountRole={w.author.role} size="card" showLabel />
               </p>
               <p className="text-small text-ink-2">
                 {[w.author.program, t('wanted.detail.memberSince', { date: formatDate(w.author.memberSince, 'long') })].filter(Boolean).join(' · ')}

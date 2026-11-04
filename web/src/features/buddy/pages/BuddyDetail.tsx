@@ -551,7 +551,7 @@ export default function BuddyDetail() {
               <Avatar src={post.author.avatarUrl} name={post.author.name} size="md" trustLevel={post.author.trustLevel} />
               <span className="min-w-0">
                 <span className="block truncate text-body font-semibold text-ink">{post.author.name}</span>
-                <TrustBadge level={post.author.trustLevel} size="card" />
+                <TrustBadge level={post.author.trustLevel} accountRole={post.author.role} size="card" />
               </span>
             </Link>
             {post.author.program && <p className="text-small text-ink-2">{post.author.program}</p>}

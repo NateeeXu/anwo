@@ -14,6 +14,8 @@ export interface TrustBadgeProps extends HTMLAttributes<HTMLSpanElement> {
   showLabel?: boolean
   /** Disable the explanatory tooltip */
   noTooltip?: boolean
+  /** Account role: L2 reads 「学生认证」 for students only; landlords / companies / admins read 「身份已审核」 */
+  accountRole?: string | null
 }
 
 const PX = { inline: 14, card: 16, profile: 20 }
@@ -46,13 +48,14 @@ function DashedCircle({ size }: { size: number }) {
 
 /** DESIGN.md §4.5 trust-level badge. Never purchasable; L0 renders only at profile size. */
 export const TrustBadge = forwardRef<HTMLSpanElement, TrustBadgeProps>(function TrustBadge(
-  { level, size = 'inline', showLabel, noTooltip, className, ...rest },
+  { level, size = 'inline', showLabel, noTooltip, accountRole, className, ...rest },
   ref,
 ) {
   const t = useT()
   const lv = Math.max(0, Math.min(3, Math.round(Number(level) || 0))) as TrustLevel
-  const label = t(`ui.trust.l${lv}`)
-  const desc = t(`ui.trust.l${lv}.desc`)
+  const nonStudent = lv === 2 && !!accountRole && accountRole !== 'student'
+  const label = nonStudent ? t('ui.trust.l2.id') : t(`ui.trust.l${lv}`)
+  const desc = nonStudent ? t('ui.trust.l2.id.desc') : t(`ui.trust.l${lv}.desc`)
   const px = PX[size]
   const withLabel = showLabel ?? size !== 'inline'
   if (lv === 0 && size !== 'profile' && !showLabel) return null

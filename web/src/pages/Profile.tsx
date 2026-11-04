@@ -137,7 +137,7 @@ export default function Profile() {
             {u.role === 'landlord' && !u.isPro && <Badge variant="neutral">{t('profile.landlord')}</Badge>}
           </h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <TrustBadge level={u.trustLevel as 0 | 1 | 2 | 3} size="profile" showLabel />
+            <TrustBadge level={u.trustLevel as 0 | 1 | 2 | 3} accountRole={u.role} size="profile" showLabel />
           </div>
           <p className="mt-1 text-small text-ink-2">
             {u.campus?.shortName ?? t('campus.none')} · {t('profile.memberSince', { date: formatDate(u.memberSince, 'month', { year: true }) })}

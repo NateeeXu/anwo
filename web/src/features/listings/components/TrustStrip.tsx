@@ -23,7 +23,7 @@ export function TrustStrip({ user, onReport, className }: { user: UserPublic; on
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <div className="flex flex-wrap items-center gap-2">
             <Link to={`/u/${user.id}`} className="truncate text-body font-semibold text-ink hover:underline">{user.name}</Link>
-            <TrustBadge level={user.trustLevel} size="card" />
+            <TrustBadge level={user.trustLevel} accountRole={user.role} size="card" />
             {user.isPro && <Badge variant="pro" size="sm" />}
             <span className="text-caption text-ink-3">{user.role === 'landlord' ? t('listings.detail.trust.landlord') : t('listings.detail.trust.host')}</span>
           </div>
