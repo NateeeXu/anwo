@@ -19,7 +19,9 @@
     "seed": "npm run seed -w server --",
     "test": "npm test -w server",
     "build": "npm run typecheck -w shared && npm run build -w web",
-    "start": "NODE_ENV=production npm run start -w server"
+    "start": "NODE_ENV=production npm run start -w server",
+    "e2e": "node scripts/e2e.mjs",
+    "i18n:check": "node scripts/i18n-check.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

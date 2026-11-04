@@ -85,7 +85,8 @@ const inbox = await apiGet(page, '/api/chat/conversations?pageSize=50');
 assert(inbox.items.length >= 12, `alice has ${inbox.items.length} conversations in the inbox`);
 assert(inbox.items.filter((c) => c.unreadCount > 0).length >= 7, 'alice has ≥ 7 unread threads');
 const landlordConv = inbox.items.find((c) => c.peer?.name.includes('Evanston Homes'));
-const groupConv = inbox.items.find((c) => c.kind === 'group');
+// the integrated DB also holds buddy groups (newer activity); pick the chat seed's own group thread
+const groupConv = inbox.items.find((c) => c.kind === 'group' && c.id.startsWith('chatseed-')) ?? inbox.items.find((c) => c.kind === 'group');
 assert(!!landlordConv && !!groupConv, 'listing thread and group thread exist');
 
 await page.goto('/chat');
