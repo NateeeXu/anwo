@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { E164, ReportInput, idParam } from '@shared/schemas/common';
 import { q } from '../../db';
-import { clearSessionCookie, loadUser, requireAuth, setCampusCookie, verifyPassword } from '../../lib/auth';
+import { bumpSessionVersion, clearSessionCookie, loadUser, requireAuth, setCampusCookie, verifyPassword } from '../../lib/auth';
 import { ApiError } from '../../lib/errors';
 import { ok, parseBody, parseParams } from '../../lib/http';
 import { loadUserPublicRow, toUserMe, toUserPublic } from '../../lib/users';
@@ -15,6 +15,7 @@ import { nowIso } from '../../lib/time';
 import { createReport } from '../../lib/reports';
 import { kickUser } from '../../realtime/hub';
 import { recomputeTrust } from '../../lib/trust';
+import { purgeUserDocuments } from '../verify/service';
 
 const router = Router();
 
@@ -93,6 +94,8 @@ router.delete('/me', requireAuth, async (req, res) => {
     q.run("UPDATE market_items SET status = 'removed', updated_at = ? WHERE seller_id = ? AND status <> 'removed'", [t, req.user!.id]);
     q.run("UPDATE wanted_posts SET status = 'removed', updated_at = ? WHERE user_id = ? AND status <> 'removed'", [t, req.user!.id]);
   });
+  purgeUserDocuments(req.user!.id); // ID images / selfies go with the account
+  bumpSessionVersion(req.user!.id);
   kickUser(req.user!.id);
   clearSessionCookie(res);
   ok(res, null);

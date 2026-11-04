@@ -74,6 +74,7 @@ router.post('/id', requireTrust(1), rateLimit('writes'), (req, res) => {
   const body = parseBody(req, IdRequestInput);
   const open = openRequest(u.id, body.type);
   if (open) throw new ApiError('CONFLICT', 'You already have an open request of this type', { data: { requestId: open.id, status: open.status } });
+  if (body.selfieUploadId && body.selfieConsent !== true) throw new ApiError('VALIDATION', 'Consent is required to submit a selfie', { fields: { selfieConsent: 'required with a selfie' } });
 
   const sides = { front: body.frontUploadId, back: body.backUploadId, selfie: body.selfieUploadId } as const;
   const fields: Record<string, string> = {};
@@ -91,7 +92,9 @@ router.post('/id', requireTrust(1), rateLimit('writes'), (req, res) => {
   const row: VerificationRow = {
     id: uid(), user_id: u.id, campus_id: campusId, type: body.type,
     front_upload_id: body.frontUploadId, back_upload_id: body.backUploadId ?? null, selfie_upload_id: body.selfieUploadId ?? null,
-    full_name: body.fullName, doc_number_last4: body.docNumberLast4 ?? null, status: 'pending', reviewer_id: null, reason: null, internal_note: null,
+    full_name: body.fullName, doc_number_last4: body.docNumberLast4 ?? null, status: 'pending', reviewer_id: null, reason: null,
+    // the consent the user ticked is recorded with the request (selfies are optional; review-only, deleted with the documents)
+    internal_note: body.selfieUploadId ? `selfie consent v1 given ${t}` : null,
     submitted_at: t, reviewed_at: null, created_at: t, updated_at: t,
   };
   q.insert('verification_requests', row as unknown as Record<string, string | number | null>);

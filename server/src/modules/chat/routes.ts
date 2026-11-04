@@ -90,6 +90,7 @@ router.get('/admin/conversations', requireAdmin, (req, res) => {
 router.get('/admin/conversations/:id/messages', requireAdmin, (req, res) => {
   const { id } = parseParams(req, convParam);
   if (!loadConversation(id)) throw new ApiError('NOT_FOUND', 'Conversation not found');
+  audit(req, { action: 'chat.view_conversation', entityType: 'conversation', entityId: id }); // private DMs: every admin read is logged
   ok(res, { items: svc.adminMessages(id) });
 });
 router.post('/admin/conversations/:id/lock', requireAdmin, writes, (req, res) => {

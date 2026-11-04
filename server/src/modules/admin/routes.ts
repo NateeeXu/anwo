@@ -748,7 +748,9 @@ const EXPORT_COLUMNS: Record<ExportTable, string> = {
 };
 function csvCell(v: unknown): string {
   if (v === null || v === undefined) return '';
-  const s = String(v);
+  // neutralise spreadsheet formulas (=HYPERLINK(...) in a user's name runs when the export is opened in Excel / Sheets)
+  const raw = String(v);
+  const s = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 router.get('/export/:file', (req, res) => {

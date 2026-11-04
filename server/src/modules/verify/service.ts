@@ -16,7 +16,7 @@ import { nextTrustStep } from '../../lib/auth';
 import { badgesFor, recomputeTrust } from '../../lib/trust';
 import { nowIso } from '../../lib/time';
 import { loadUserPublic } from '../../lib/users';
-import { toUploadDto, getUpload } from '../../lib/uploads';
+import { deleteUploadFile, toUploadDto, getUpload } from '../../lib/uploads';
 import type { AuthUser } from '../../lib/types';
 
 // ---------------------------------------------------------------- rows + DTOs
@@ -262,4 +262,36 @@ export function uploadDtoOrNull(id: string | null) {
   if (!id) return undefined;
   const up = getUpload(id);
   return up ? toUploadDto(up) : undefined;
+}
+
+// ---------------------------------------------------------------- document retention (BIPA-style caution)
+/** Days after review (approve / reject / cancel) before the document images are deleted. The request row keeps the
+ *  decision; the uploads row keeps only its sha256 (duplicate detection) — the file itself is removed. No biometric
+ *  template is ever derived from the selfie. */
+export const DOC_RETENTION_DAYS = 30;
+function purgeRequestFiles(r: Pick<VerificationRow, 'id' | 'front_upload_id' | 'back_upload_id' | 'selfie_upload_id'>): void {
+  for (const uploadId of [r.front_upload_id, r.back_upload_id, r.selfie_upload_id]) {
+    if (!uploadId) continue;
+    const up = getUpload(uploadId);
+    if (!up || up.purpose !== 'verification') continue;
+    deleteUploadFile(up);
+    q.run("UPDATE uploads SET size_bytes = 0, width = NULL, height = NULL, filename = 'purged' WHERE id = ?", [uploadId]);
+  }
+  q.run('UPDATE verification_requests SET files_purged_at = ?, updated_at = ? WHERE id = ?', [nowIso(), nowIso(), r.id]);
+}
+/** Daily job: purge documents of requests decided more than DOC_RETENTION_DAYS ago. Returns the number of requests purged. */
+export function purgeReviewedDocuments(now = Date.now()): number {
+  const before = new Date(now - DOC_RETENTION_DAYS * 86_400_000).toISOString();
+  const rows = q.all<VerificationRow>("SELECT * FROM verification_requests WHERE files_purged_at IS NULL AND status IN ('approved','rejected','cancelled') AND COALESCE(reviewed_at, updated_at) <= ? LIMIT 500", [before]);
+  for (const r of rows) purgeRequestFiles(r);
+  return rows.length;
+}
+/** Account deletion: every document of the user is removed immediately, whatever the request status. */
+export function purgeUserDocuments(userId: string): number {
+  const rows = q.all<VerificationRow>('SELECT * FROM verification_requests WHERE user_id = ? AND files_purged_at IS NULL', [userId]);
+  for (const r of rows) {
+    if (r.status === 'pending' || r.status === 'in_review') q.run("UPDATE verification_requests SET status = 'cancelled', updated_at = ? WHERE id = ?", [nowIso(), r.id]);
+    purgeRequestFiles(r);
+  }
+  return rows.length;
 }

@@ -96,7 +96,8 @@ function photosFor(itemIds: string[]): Map<string, Photo[]> {
 export function setItemPhotos(item: MarketItemRow, uploadIds: string[]): Photo[] {
   const ids = [...new Set(uploadIds)].slice(0, 10);
   if (ids.length) {
-    const found = new Set(q.all<{ id: string }>(`SELECT id FROM uploads WHERE id IN (${placeholders(ids.length)}) AND kind = 'image' AND is_private = 0`, ids).map((u) => u.id));
+    // only the seller's own uploads (or photos already on this item / seed art) — never someone else's chat image
+    const found = new Set(q.all<{ id: string }>(`SELECT id FROM uploads WHERE id IN (${placeholders(ids.length)}) AND kind = 'image' AND is_private = 0 AND (owner_id = ? OR purpose = 'seed' OR id IN (SELECT upload_id FROM market_item_photos WHERE item_id = ?))`, [...ids, item.seller_id, item.id]).map((u) => u.id));
     const missing = ids.filter((id) => !found.has(id));
     if (missing.length) throw new ApiError('VALIDATION', 'Unknown upload', { fields: { photos: `unknown upload ${missing[0]}` } });
   }

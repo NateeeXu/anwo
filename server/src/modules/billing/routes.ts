@@ -470,7 +470,8 @@ router.patch('/pro/leads/:id', requireAuth, writes, (req, res) => {
 router.get('/pro/leads.csv', requireAuth, (req, res) => {
   const user = requirePro(req);
   const rows = q.all<{ created_at: string; listing_id: string; title: string; name: string; trust_level: number; source: string; status: string }>('SELECT ll.created_at, ll.listing_id, l.title, u.name, u.trust_level, ll.source, ll.status FROM listing_leads ll JOIN listings l ON l.id = ll.listing_id JOIN users u ON u.id = ll.user_id WHERE ll.owner_id = ? ORDER BY ll.created_at DESC', [user.id]);
-  const esc = (s: unknown) => `"${String(s ?? '').replace(/"/g, '""')}"`;
+  // quote every cell and neutralise spreadsheet formulas (names / titles are user-controlled)
+  const esc = (s: unknown) => { const raw = String(s ?? ''); const v = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw; return `"${v.replace(/"/g, '""')}"`; };
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="leads.csv"');
   res.send(['created_at,listing_id,listing_title,name,trust_level,source,status', ...rows.map((r) => [r.created_at, r.listing_id, r.title, r.name, r.trust_level, r.source, r.status].map(esc).join(','))].join('\n'));

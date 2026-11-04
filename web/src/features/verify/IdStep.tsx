@@ -3,7 +3,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { CircleCheck, Clock, FileCheck, ShieldCheck, TriangleAlert } from 'lucide-react';
 import type { VerificationRequest } from '@shared/types';
 import type { VerificationType } from '@shared/enums';
-import { Badge, Button, Input, PhotoUploader, Select, type UploaderFile } from '@/components';
+import { Badge, Button, Checkbox, Input, PhotoUploader, Select, type UploaderFile } from '@/components';
 import { useLocale, useT } from '@/lib/i18n';
 import { toast } from '@/lib/toast';
 import { track } from '@/lib/track';
@@ -86,6 +86,7 @@ export function IdStep({ status, onSubmitted, presetType }: { status: VerifyStat
   const [front, setFront] = useState<UploaderFile[]>([]);
   const [back, setBack] = useState<UploaderFile[]>([]);
   const [selfie, setSelfie] = useState<UploaderFile[]>([]);
+  const [selfieConsent, setSelfieConsent] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const typeOptions = useMemo(() => ID_TYPES.map((v) => ({ value: v, label: typeLabel(t, v), description: t(`verify.id.type.${v}.desc`) })), [t]);
@@ -109,6 +110,7 @@ export function IdStep({ status, onSubmitted, presetType }: { status: VerifyStat
         frontUploadId: frontId,
         backUploadId: back.find((f) => f.uploadId)?.uploadId,
         selfieUploadId: selfie.find((f) => f.uploadId)?.uploadId,
+        selfieConsent: selfie.some((f) => f.uploadId) ? selfieConsent : undefined,
         fullName: fullName.trim(),
         docNumberLast4: last4.trim() || undefined,
       });
@@ -152,11 +154,14 @@ export function IdStep({ status, onSubmitted, presetType }: { status: VerifyStat
               <PhotoUploader label={`${t('verify.id.back')} · ${t('verify.id.optional')}`} files={back} onChange={setBack} max={1} purpose="verification" isPrivate accept={ACCEPT} maxSizeMB={10} />
               <PhotoUploader label={`${t('verify.id.selfie')} · ${t('verify.id.optional')}`} files={selfie} onChange={setSelfie} max={1} purpose="verification" isPrivate accept={ACCEPT} maxSizeMB={10} />
             </div>
+            {selfie.some((f) => f.uploadId) && (
+              <Checkbox checked={selfieConsent} onChange={(e) => setSelfieConsent(e.target.checked)} label={t('verify.id.selfieConsent')} />
+            )}
             {(localError || submit.error != null) && (
               <p role="alert" className="text-small text-danger">{localError ?? errorMessage(t, submit.error)}</p>
             )}
             <div className="flex flex-wrap items-center gap-3">
-              <Button type="submit" variant="primary" loading={submit.isPending} disabled={uploading} iconLeft={<FileCheck />}>{t('verify.id.submit')}</Button>
+              <Button type="submit" variant="primary" loading={submit.isPending} disabled={uploading || (selfie.some((f) => f.uploadId) && !selfieConsent)} iconLeft={<FileCheck />}>{t('verify.id.submit')}</Button>
               {latest && <Button variant="ghost" onClick={() => setShowForm(false)}>{t('common.cancel')}</Button>}
             </div>
           </div>

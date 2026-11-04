@@ -17,6 +17,8 @@ export const IdRequestInput = z.object({
   frontUploadId: z.string().min(1).max(128),
   backUploadId: z.string().min(1).max(128).optional(),
   selfieUploadId: z.string().min(1).max(128).optional(),
+  /** required with a selfie: explicit consent to the review-only use + 30-day deletion (no face templates are derived) */
+  selfieConsent: z.boolean().optional(),
   fullName: z.string().trim().min(2).max(80),
   docNumberLast4: z
     .string()
