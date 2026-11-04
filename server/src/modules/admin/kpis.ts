@@ -441,41 +441,46 @@ export function revenueAtRisk(campusId: string | null): number {
   );
 }
 
+/** Flow metrics for an arbitrary [startIso, endIso) window (rolling 24 h tiles). */
+function windowFlows(start: string, end: string, campusId: string | null): Pick<Record<KpiKey, number>, 'dau' | 'signups' | 'listingsPublished' | 'matches' | 'messages' | 'revenueCents'> {
+  const c = campusClause('campus_id', campusId);
+  const lc = campusClause('l.campus_id', campusId);
+  const cc = campusClause('c.campus_id', campusId);
+  const r = [start, end];
+  const revenue =
+    (q.scalar<number>(
+      `SELECT COALESCE(SUM(MAX(0, revenue_cents - CASE WHEN order_kind = 'escrow_deposit' THEN 0 ELSE COALESCE(refunded_cents, 0) END)), 0) FROM v_revenue WHERE at >= ? AND at < ?${c.sql}`,
+      [...r, ...c.params],
+    ) ?? 0) +
+    (hasConversions()
+      ? q.scalar<number>(`SELECT COALESCE(SUM(payout_cents), 0) FROM partner_conversions WHERE status IN ('approved','paid') AND occurred_at >= ? AND occurred_at < ?${c.sql}`, [...r, ...c.params]) ?? 0
+      : 0);
+  return {
+    dau: q.count(`SELECT COUNT(DISTINCT user_id) FROM events WHERE user_id IS NOT NULL AND created_at >= ? AND created_at < ?${c.sql}`, [...r, ...c.params]),
+    signups: q.count(`SELECT COUNT(*) FROM users WHERE deleted_at IS NULL AND created_at >= ? AND created_at < ?${c.sql}`, [...r, ...c.params]),
+    listingsPublished: q.count(`SELECT COUNT(*) FROM listings WHERE published_at >= ? AND published_at < ?${c.sql}`, [...r, ...c.params]),
+    matches: q.count(`SELECT COUNT(*) FROM matches m JOIN listings l ON l.id = m.listing_id WHERE m.score >= 50 AND m.computed_at >= ? AND m.computed_at < ?${lc.sql}`, [...r, ...lc.params]),
+    messages: q.count(`SELECT COUNT(*) FROM messages m JOIN conversations c ON c.id = m.conversation_id WHERE m.kind <> 'system' AND m.created_at >= ? AND m.created_at < ?${cc.sql}`, [...r, ...cc.params]),
+    revenueCents: revenue,
+  };
+}
+
+/** Overview tiles: rolling last 24 h vs the same 24 h one week earlier (no UTC-midnight cliff); backlogs now vs 7 days ago. */
 export function computeOverview(campusIdIn?: string | null): Overview {
   const campusId = campusIdIn || null;
   const today = todayUtc();
-  const from = addDays(today, -29);
-  const series = computeSeries(from, today, campusId);
-  const byDate = new Map(series.map((p) => [p.date, p]));
-  const t = byDate.get(today)!;
-  const w = byDate.get(addDays(today, -7))!;
-  const nowBacklog = backlogAt(nowIso(), campusId);
-  const weekAgoBacklog = backlogAt(new Date(nowMs() - 7 * DAY).toISOString(), campusId);
-  const todayVals: Record<KpiKey, number> = {
-    dau: t.dau,
-    signups: t.signups,
-    listingsPublished: t.listingsPublished,
-    matches: t.matches,
-    messages: t.messages,
-    revenueCents: t.revenueCents,
-    ...nowBacklog,
-  };
-  const prevVals: Record<KpiKey, number> = {
-    dau: w.dau,
-    signups: w.signups,
-    listingsPublished: w.listingsPublished,
-    matches: w.matches,
-    messages: w.messages,
-    revenueCents: w.revenueCents,
-    ...weekAgoBacklog,
-  };
+  const series = computeSeries(addDays(today, -29), today, campusId);
+  const nowAt = nowMs();
+  const iso = (ms: number) => new Date(ms).toISOString();
+  const todayVals: Record<KpiKey, number> = { ...windowFlows(iso(nowAt - DAY), iso(nowAt), campusId), ...backlogAt(iso(nowAt), campusId) };
+  const prevVals: Record<KpiKey, number> = { ...windowFlows(iso(nowAt - 8 * DAY), iso(nowAt - 7 * DAY), campusId), ...backlogAt(iso(nowAt - 7 * DAY), campusId) };
   const deltas = {} as Record<KpiKey, number | null>;
   for (const k of Object.keys(todayVals) as KpiKey[]) {
     const prev = prevVals[k];
     deltas[k] = prev > 0 ? Math.round(((todayVals[k] - prev) / prev) * 1000) / 10 : todayVals[k] > 0 ? null : 0;
   }
   return {
-    date: today,
+    date: nowIso(),
     campusId,
     today: todayVals,
     deltas7d: deltas,

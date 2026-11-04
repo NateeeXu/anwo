@@ -3,13 +3,13 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { AlertTriangle, CheckCircle2, Clock, Table2, TrendingUp } from 'lucide-react';
 import type { KpiKey, KpiPoint, SlaItem } from '@shared/schemas/admin';
-import { Badge, Button, SegmentedControl, Skeleton, StatTile, Table, Tabs } from '@/components';
+import { Badge, Button, SegmentedControl, Select, Skeleton, StatTile, Table, Tabs } from '@/components';
 import { useLocale, useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 import { Head } from '@/app/Head';
 import { useEvents, useKpis, useOverview } from '../api';
 import { BarList, Funnel, LineChart } from '../charts';
-import { CampusFilter, ErrorState, ExportLink, PageTitle, Panel, useAdminFilters, useAge, type RangeKey } from '../ui';
+import { CampusFilter, DefHint, ErrorState, ExportLink, PageTitle, Panel, useAdminFilters, useAge, type RangeKey } from '../ui';
 
 const TILE_KEYS: { key: KpiKey; format?: 'money'; invert?: boolean; spark?: 'dau' | 'listingsPublished' | 'revenueCents' | 'signups' }[] = [
   { key: 'dau', spark: 'dau' },
@@ -69,8 +69,8 @@ export function SlaStrip({ items }: { items: SlaItem[] }) {
             >
               <Icon size={18} strokeWidth={1.75} aria-hidden className={s.status === 'breach' ? 'text-danger' : s.status === 'warn' ? 'text-warning' : 'text-success'} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-small font-medium text-ink">{t(`admin.sla.${s.key}`)}</p>
-                <p className="truncate text-caption text-ink-2">
+                <p className="text-small font-medium text-ink">{t(`admin.sla.${s.key}`)}</p>
+                <p className="text-caption text-ink-2">
                   {s.count ? t('admin.sla.detail', { count: s.count, age: age(s.oldestHours) }) : t('admin.sla.clear')} · {t('admin.sla.target', { h: s.targetHours })}
                 </p>
               </div>
@@ -120,7 +120,9 @@ export function TrendPanel({ series, groupBy, onGroupBy, initial = 'dau', keys =
         </>
       }
     >
-      <Tabs<string> variant="underline" scrollable label={t('admin.trend.metric')} value={metric} onChange={setMetric} items={keys.map((k) => ({ key: k, label: t(`admin.metric.${k}`) }))} className="mb-4" />
+      <div className="mb-4 max-w-[240px]">
+        <Select size="sm" aria-label={t('admin.trend.metric')} value={metric} onChange={setMetric} options={keys.map((k) => ({ value: k, label: t(`admin.metric.${k}`) }))} data-testid="trend-metric" />
+      </div>
       <LineChart points={points} format={fmt(metric)} label={t(`admin.metric.${metric}`)} dateLabel={(d) => formatDate(d, 'monthDay')} showTable={table} />
     </Panel>
   );
@@ -155,7 +157,7 @@ export default function Overview() {
       <Head title={t('admin.nav.overview')} />
       <PageTitle
         title={t('admin.nav.overview')}
-        subtitle={o ? t('admin.overview.subtitle', { date: formatDate(o.date, 'long') }) : undefined}
+        subtitle={o ? t('admin.overview.subtitle', { date: formatDate(o.date, 'datetime') }) : undefined}
         actions={<RangeControls />}
       />
 
@@ -166,18 +168,23 @@ export default function Overview() {
           <h2 id="today-h" className="sr-only">
             {t('admin.overview.today')}
           </h2>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-9">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-9">
             {TILE_KEYS.map((tk) =>
               o ? (
                 <StatTile
                   key={tk.key}
                   data-testid={`tile-${tk.key}`}
-                  label={t(`admin.kpi.${tk.key}`)}
+                  label={
+                    <span className="inline-flex items-center gap-0.5">
+                      {t(`admin.kpi.${tk.key}`)}
+                      <DefHint text={t(`admin.def.${tk.key}`)} />
+                    </span>
+                  }
                   value={o.today[tk.key]}
                   format={tk.format ?? 'number'}
                   invertDelta={tk.invert}
                   spark={sparkOf(tk.spark)}
-                  hint={t(`admin.def.${tk.key}`)}
+                  hint={t('admin.overview.vsLastWeek')}
                   delta={o.deltas7d[tk.key] === null ? undefined : { value: Math.abs(o.deltas7d[tk.key]!), direction: o.deltas7d[tk.key]! > 0 ? 'up' : o.deltas7d[tk.key]! < 0 ? 'down' : 'flat' }}
                 />
               ) : (
