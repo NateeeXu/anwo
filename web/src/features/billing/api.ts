@@ -56,7 +56,7 @@ export type EscrowEligibility = { enabled: boolean; state: string | null; payeeE
 export type PartnerDto = Partner & { network: string | null; noSsnOk: boolean; stages: string[]; subcategory: string | null; feeFree: boolean; campusBranch: boolean; states: string[]; sortOrder: number; needs: string[] };
 export type PartnersData = { categories: { key: string; partners: PartnerDto[] }[]; done: string[]; campusId: string | null; enabled: boolean };
 export type PartnerDetail = PartnerDto & { related: PartnerDto[]; done: boolean; clickCount: number };
-export type RevenuePoint = { date: string; revenueCents: number; boostCents: number; proCents: number; escrowFeeCents: number; affiliateCents: number; gmvCents: number; refundsCents: number; orders: number };
+export type RevenuePoint = { date: string; revenueCents: number; boostCents: number; proCents: number; escrowFeeCents: number; affiliateCents: number; sponsorCents?: number; gmvCents: number; refundsCents: number; orders: number };
 export type RevenueData = {
   totals: { revenueCents: number; byKind: Record<string, number>; gmvCents: number; affiliateEstCents: number; affiliateRecognizedCents: number; refundsCents: number; walletContraCents: number; orders: number; payingUsers: number };
   series: RevenuePoint[];

@@ -630,8 +630,10 @@ router.get('/partners/:slug/go', (req, res) => {
   checkRate(`partnergo:${ipHash}:${partner.id}`, 20, DAY);
   const campusId = p.campusId ?? campusIdOf(req);
   const clickId = uid();
+  // partner_clicks.placement predates the home strip: home clicks are stored as 'banner' (the event keeps 'home')
+  const storedPlacement = p.placement === 'home' ? 'banner' : p.placement;
   q.run('INSERT INTO partner_clicks (id, partner_id, user_id, campus_id, session_id, placement, referer, ip_hash, user_agent, converted, payout_cents, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)', [
-    clickId, partner.id, req.user?.id ?? null, campusId, req.sessionId ?? cookieOf(req, ANON_COOKIE) ?? null, p.placement, String(req.headers.referer ?? '').slice(0, 300), ipHash, String(req.headers['user-agent'] ?? '').slice(0, 200), partner.payout_model === 'cpc' ? partner.payout_cents : 0, nowIso(),
+    clickId, partner.id, req.user?.id ?? null, campusId, req.sessionId ?? cookieOf(req, ANON_COOKIE) ?? null, storedPlacement, String(req.headers.referer ?? '').slice(0, 300), ipHash, String(req.headers['user-agent'] ?? '').slice(0, 200), partner.payout_model === 'cpc' ? partner.payout_cents : 0, nowIso(),
   ]);
   logEvent(req, 'affiliate.click', { entityType: 'partner', entityId: partner.id, campusId, props: { slug: partner.slug, category: partner.category, placement: p.placement, campusId, clickId } });
   const target = partner.affiliate_url.replace(/\{\{clickId\}\}/g, clickId).replace(/\{\{campusId\}\}/g, encodeURIComponent(campusId ?? 'none')).replace(/\{\{assocTag\}\}/g, 'anwo-20');

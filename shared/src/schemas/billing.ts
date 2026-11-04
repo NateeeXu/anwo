@@ -160,7 +160,7 @@ export const PartnersQuery = z.object({
   stage: z.enum(['pre_arrival', 'arrival', 'settled']).optional(),
 });
 export const PartnerGoQuery = z.object({
-  placement: z.enum(['kit', 'listing_detail', 'onboarding', 'chat_card', 'banner', 'other']).default('kit'),
+  placement: z.enum(['kit', 'home', 'listing_detail', 'onboarding', 'chat_card', 'banner', 'other']).default('kit'),
   campusId: z.string().max(64).optional(),
 });
 export const PartnerConvertedInput = z.object({ clickId: z.string().min(1).max(128), payoutCents: z.coerce.number().int().min(0).max(100000).optional() });

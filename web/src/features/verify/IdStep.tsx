@@ -70,16 +70,17 @@ function RequestCard({ request, onResubmit, onCancel, cancelling }: { request: V
   );
 }
 
-export function IdStep({ status, onSubmitted }: { status: VerifyStatus; onSubmitted?: () => void }) {
+/** `presetType`: deep link `/verify?type=landlord_proof` (boost sheet → lease proof) opens the form with that type. */
+export function IdStep({ status, onSubmitted, presetType }: { status: VerifyStatus; onSubmitted?: () => void; presetType?: VerificationType | null }) {
   const t = useT();
   const step = status.steps.id;
   const latest = step.request;
   const openRequest = latest && (latest.status === 'pending' || latest.status === 'in_review') ? latest : null;
-  const [showForm, setShowForm] = useState(!latest || latest.status === 'cancelled');
+  const [showForm, setShowForm] = useState(!latest || latest.status === 'cancelled' || (!!presetType && presetType !== latest.type));
   const submit = useSubmitId();
   const cancel = useCancelId();
 
-  const [type, setType] = useState<VerificationType>(latest?.type ?? 'student_id');
+  const [type, setType] = useState<VerificationType>(presetType ?? latest?.type ?? 'student_id');
   const [fullName, setFullName] = useState(latest?.fullName ?? '');
   const [last4, setLast4] = useState('');
   const [front, setFront] = useState<UploaderFile[]>([]);

@@ -102,6 +102,7 @@ export default function BillingAdminPanel() {
               { label: t('billing.admin.kind.pro'), value: tileValue.proCents, color: 'var(--color-ink-2)' },
               { label: t('billing.admin.kind.escrow'), value: tileValue.escrowFeeCents, color: 'var(--color-success)' },
               { label: t('billing.admin.kind.affiliate'), value: tileValue.affiliateCents, color: 'var(--color-info)' },
+              { label: t('billing.admin.kind.sponsorship'), value: d.totals.byKind.sponsorship ?? 0, color: 'var(--color-warning)' },
             ]} />
           ) : <Skeleton variant="rect" height={180} />}
           {d && d.topCampuses.length > 0 && (

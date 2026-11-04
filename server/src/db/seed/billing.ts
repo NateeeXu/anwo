@@ -117,7 +117,7 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
     // ---- wipe our rows
     const affected = q.all<{ user_id: string }>("SELECT DISTINCT user_id FROM wallet_ledger WHERE id LIKE 'bil-%'").map((r) => r.user_id);
     q.run("DELETE FROM promo_redemptions WHERE id LIKE 'bil-%' OR promo_code_id LIKE 'bil-%' OR order_id LIKE 'bil-%'");
-    for (const tbl of ['escrow_events', 'escrows', 'boosts', 'subscriptions', 'payments', 'orders', 'wallet_ledger', 'referrals', 'partner_conversions', 'partner_clicks', 'sponsor_leads', 'listing_leads']) q.run(`DELETE FROM ${tbl} WHERE id LIKE 'bil-%'`);
+    for (const tbl of ['escrow_events', 'escrows', 'boosts', 'subscriptions', 'payments', 'orders', 'wallet_ledger', 'referrals', 'partner_conversions', 'partner_clicks', 'sponsor_leads', 'listing_leads', 'sponsorship_invoices', 'sponsorships']) q.run(`DELETE FROM ${tbl} WHERE id LIKE 'bil-%'`);
     q.run("DELETE FROM events WHERE session_id = 'seed-billing'");
     q.run("DELETE FROM kit_checklist WHERE user_id = ?", [userByEmail('alice@u.northwestern.edu')]);
     q.run("DELETE FROM partners WHERE id LIKE 'bil-%'");
@@ -416,6 +416,24 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
     // ---- sponsor leads
     q.run("INSERT INTO sponsor_leads (id, business_name, contact, campus_id, interest, note, status, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?)", [bid('lead:1'), 'Joy Yee Noodle Evanston', 'owner@joyyee-evanston.example', 'northwestern', 'sponsor', 'Interested in the Newcomer Kit food section for fall arrivals.', 'contacted', iso(9 * DAY)]);
     q.run("INSERT INTO sponsor_leads (id, business_name, contact, campus_id, interest, note, status, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?)", [bid('lead:2'), 'The Link Evanston', 'leasing@thelink.example', 'northwestern', 'building', 'Verified Building page for 2027 pre-leasing (240 beds).', 'new', iso(2 * DAY)]);
+
+    // ---- sponsored placements (booked by the team; labelled 「赞助」 on the home feed) + their invoices
+    const sponsorships: { key: string; name: string; plan: string; campus: string; title: string; titleZh: string; body: string; bodyZh: string; url: string; logo: number; price: number; startedDaysAgo: number }[] = [
+      { key: 'sp:nu:1', name: 'Joy Yee Noodle Evanston', plan: 'sponsor.feed', campus: 'northwestern', title: 'Student lunch set $9.99 near campus', titleZh: '学生午餐套餐 $9.99，校园步行 5 分钟', body: 'Show your student ID · Mon–Fri', bodyZh: '出示学生证 · 周一至周五', url: 'https://example.com/joyyee-evanston', logo: 7, price: 35000, startedDaysAgo: 12 },
+      { key: 'sp:nu:2', name: 'Evanston Bike Shop', plan: 'sponsor.local', campus: 'northwestern', title: 'Tune-up + lock bundle for new students', titleZh: '新生自行车保养 + 车锁套餐', body: '15% off through October', bodyZh: '10 月底前 85 折', url: 'https://example.com/evanston-bikes', logo: 12, price: 15000, startedDaysAgo: 5 },
+      { key: 'sp:uiuc:1', name: 'Green Street Tea', plan: 'sponsor.feed', campus: 'uiuc', title: 'Bubble tea BOGO for UIUC students', titleZh: 'UIUC 学生奶茶买一送一', body: 'Green St · weekdays', bodyZh: 'Green St · 工作日', url: 'https://example.com/green-street-tea', logo: 15, price: 35000, startedDaysAgo: 8 },
+    ];
+    const adminUser = userByEmail('admin@example.edu');
+    for (const s of sponsorships) {
+      if (!campusExists(s.campus)) continue;
+      const id = bid(s.key);
+      q.run(
+        `INSERT INTO sponsorships (id, sponsor_name, plan_key, campus_id, surface, kit_category, title, title_zh, body, body_zh, url, logo_upload_id, starts_at, ends_at, status, impressions, clicks, price_cents, created_by, created_at, updated_at)
+         VALUES (?, ?, ?, ?, 'home_feed', NULL, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?)`,
+        [id, s.name, s.plan, s.campus, s.title, s.titleZh, s.body, s.bodyZh, s.url, logos[s.logo - 1] ?? null, iso(s.startedDaysAgo * DAY), iso(-(30 - s.startedDaysAgo) * DAY), 40 * s.startedDaysAgo, 2 * s.startedDaysAgo, s.price, adminUser, iso(s.startedDaysAgo * DAY), iso(s.startedDaysAgo * DAY)],
+      );
+      q.run("INSERT INTO sponsorship_invoices (id, sponsorship_id, amount_cents, status, campus_id, issued_at, paid_at, note) VALUES (?, ?, ?, 'paid', ?, ?, ?, ?)", [bid(`${s.key}:inv`), id, s.price, s.campus, iso((s.startedDaysAgo + 3) * DAY), iso((s.startedDaysAgo + 1) * DAY), 'Seed invoice · paid by ACH']);
+    }
   });
   void orderCount();
 }

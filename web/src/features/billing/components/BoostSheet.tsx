@@ -3,7 +3,7 @@
 // Eligibility first → tier cards → Spotlight add-on → promo + wallet → creates the order and hands off to /checkout/:orderId.
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, CircleAlert, Globe2, Lock, ShieldCheck, Sparkles, Tag, Wallet } from 'lucide-react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { Badge, Button, EmptyState, Input, Modal, Skeleton, Switch } from '@/components';
 import { errorMessage } from '@/app/errors';
 import { useAuth } from '@/lib/auth';
@@ -147,7 +147,7 @@ export function BoostSheet({ open, onClose, entityType, entityId, surface = 'own
           {!q.data.supplyProof && entityType === 'listing' && (
             <p className="flex items-start gap-2 rounded-sm border border-line bg-surface px-3 py-2 text-caption text-ink-2">
               <Lock className="mt-0.5 size-3.5 shrink-0 text-ink-3" aria-hidden />
-              <span>{t('billing.boost.lock.leaseProofLong')} <Link to="/verify?next=%2Fpricing" className="text-accent-text underline">{t('billing.boost.lock.leaseProofCta')}</Link></span>
+              <span>{t('billing.boost.lock.leaseProofLong')} <Link to={`/verify?step=id&type=landlord_proof&next=${encodeURIComponent(`${location.pathname}${location.search}`)}`} className="text-accent-text-strong underline">{t('billing.boost.lock.leaseProofCta')}</Link></span>
             </p>
           )}
           {addon && entityType === 'listing' && (
