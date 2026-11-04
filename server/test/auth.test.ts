@@ -80,6 +80,10 @@ test('login sets cookie; logout clears it; CSRF header required on writes; non-e
   const me = await c.get('/api/auth/me');
   assert.equal(me.status, 401);
   assert.equal(me.json.error!.code, 'UNAUTHORIZED');
+  // the web app's boot probe: anonymous → 200 null (no console 401)
+  const probe = await c.get('/api/auth/me?optional=1');
+  assert.equal(probe.status, 200);
+  assert.equal(probe.json.data, null);
 
   const c2 = client(base);
   const reg = await c2.post('/api/auth/register', { email: 'someone@gmail.com', password: 'Passw0rd!', name: 'Gmail' });

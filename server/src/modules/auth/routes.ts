@@ -106,7 +106,7 @@ router.post('/logout', requireAuth, (_req, res) => {
 // log a 401 in the browser console. Without the flag the contract is unchanged (401 UNAUTHORIZED).
 router.get('/me', (req, res, next) => {
   if (!req.user && req.query.optional === '1') return ok(res, null);
-  return requireAuth(req, res, () => ok(res, toUserMe(req.user!)));
+  return requireAuth(req, res, (err?: unknown) => (err ? next(err) : ok(res, toUserMe(req.user!))));
 });
 
 router.post('/request-edu-code', requireAuth, rateLimit({ name: 'edu-code', limit: 5, windowMs: 10 * 60_000 }), (req, res) => {
