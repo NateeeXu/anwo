@@ -9,18 +9,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <title>安窝 Anwo</title>
-    <script>
-      // Resolve theme before first paint so CSS variables and the dark: variant agree (DESIGN.md §9).
-      (function () {
-        try {
-          var pref = localStorage.getItem('theme');
-          var dark = pref === 'dark' || (pref !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
-          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-          var m = document.cookie.match(/(?:^|;\s*)lang=(zh-CN|en)/);
-          if (m) document.documentElement.setAttribute('lang', m[1]);
-        } catch (e) {}
-      })();
-    </script>
+    <script src="/theme-boot.js"></script>
   </head>
   <body>
     <div id="root"></div>

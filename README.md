@@ -62,7 +62,7 @@ npm run e2e                                  # fresh-seeds server/data/e2e.db, s
 npm run e2e -- chat journey                  # subset (core runs first unless --no-core); logs in server/data/e2e-logs/
 WEB_PORT=5173 node docs/modules/<key>.spec.mjs   # one walkthrough against an already running stack
 npm run build                                # typecheck shared + vite production build → web/dist
-JWT_SECRET=<long random> NODE_ENV=production PORT=4500 GEOCODE_OFFLINE=1 npm start
+JWT_SECRET=<long random> NODE_ENV=production PORT=4500 WEB_ORIGIN=http://localhost:4500 GEOCODE_OFFLINE=1 npm start
                                              # API + web/dist with SPA fallback on one port (JWT_SECRET is required in prod;
                                              # cookies are `Secure`, so sign-in needs HTTPS or localhost behind a TLS proxy)
 node server/scripts/gen-placeholders.mjs     # regenerate the placeholder SVGs (deterministic)

@@ -12,7 +12,7 @@ npm run i18n:check                   # zh/en dictionary parity + every literal t
 rm -f server/data/app.db* && GEOCODE_OFFLINE=1 npm run seed   # fresh DB; running it again is a no-op
 npm run e2e                          # fresh e2e DB → API :4000 + web :5173 → core + 10 module specs + journey → stop
 npm run build                        # vite production build → web/dist
-JWT_SECRET=<secret> NODE_ENV=production PORT=4500 GEOCODE_OFFLINE=1 npm start   # serves web/dist + SPA fallback
+JWT_SECRET=<secret> NODE_ENV=production PORT=4500 WEB_ORIGIN=http://localhost:4500 GEOCODE_OFFLINE=1 npm start   # serves web/dist + SPA fallback
 ```
 
 `npm run e2e` (`scripts/e2e.mjs`) seeds `server/data/e2e.db` from scratch, starts the API (`npm start -w server` with
