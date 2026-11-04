@@ -62,3 +62,11 @@ boosts.price_cents, users.session_version, verification_requests.files_purged_at
 - Sponsored placements (#10): build the admin booking UI on the new API, the Kit-category sponsor card and the map POI layer.
 - Lease proof (#11): add a real `lease_proof` type (table rebuild for the CHECK) and a separate review queue filter if ops want them apart from ownership proofs.
 - Promo reservations (#4) and Stripe-Signature over the raw body (#1) belong with the real Stripe seam.
+
+## e2e result
+
+`npm run e2e` (fresh seed, API :4000 + Vite :5173): **12/12 specs passed** — core, listings, wanted, chat, verify, map,
+shuttle, market, buddy, billing (new step: sponsored card → `?boost=<id>` → `boosts.clicks` + 1; home feed 1–3 labelled
+sponsors), admin, journey. Baseline before the fixes was also 12/12. The first post-fix run failed only on the new
+billing step, which opened the listing detail page and logged blocked OpenStreetMap tile requests in the offline sandbox;
+the step now calls the same `GET /api/listings/:id?boost=` the page uses.
