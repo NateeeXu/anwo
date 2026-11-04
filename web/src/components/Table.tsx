@@ -67,7 +67,7 @@ function TableInner<Row>(
   return (
     <div ref={ref} className={cn('w-full', className)} aria-busy={loading || undefined} {...rest}>
       {/* desktop table (only one layout is mounted so role/aria lookups are unambiguous) */}
-      {!isMobile && <div className={cn('hidden overflow-x-auto rounded-card border border-line bg-surface md:block', stickyHeader && 'max-h-[70dvh] overflow-y-auto')}>
+      {!isMobile && <div className={cn('relative hidden overflow-x-auto rounded-card border border-line bg-surface md:block', stickyHeader && 'max-h-[70dvh] overflow-y-auto')}>
         <table className="w-full border-collapse text-body">
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead className={cn('bg-sunken', stickyHeader && 'sticky top-0 z-[1]')}>
