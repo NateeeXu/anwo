@@ -160,7 +160,7 @@ export default function PricingPage() {
           </Card>
           <div>
             <h2 className="mb-2 text-h3 text-ink">{t('billing.pricing.faq.title')}</h2>
-            <Faq keys={data.faq} />
+            <Faq keys={data.faq} vars={{ feePct: `${(data.escrow?.feeBps ?? 300) / 100}%`, feeMin: formatMoney(data.escrow?.feeMinCents ?? 500), feeCap: formatMoney(data.escrow?.feeCapCents ?? 6000) }} />
           </div>
         </section>
       )}
@@ -173,7 +173,7 @@ export default function PricingPage() {
   );
 }
 
-function Faq({ keys }: { keys: string[] }) {
+function Faq({ keys, vars }: { keys: string[]; vars: Record<string, string> }) {
   const t = useT();
   const [open, setOpen] = useState<string | null>(keys[0] ?? null);
   return (
@@ -186,7 +186,7 @@ function Faq({ keys }: { keys: string[] }) {
               <span>{t(`billing.faq.${k}.q`)}</span>
               <ChevronDown className={cn('size-4 shrink-0 text-ink-3 transition-transform duration-token-fast', isOpen && 'rotate-180')} aria-hidden />
             </button>
-            {isOpen && <p id={`faq-${k}`} className="pb-3 text-small text-ink-2">{t(`billing.faq.${k}.a`)}</p>}
+            {isOpen && <p id={`faq-${k}`} className="pb-3 text-small text-ink-2">{t(`billing.faq.${k}.a`, vars)}</p>}
           </li>
         );
       })}

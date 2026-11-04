@@ -24,6 +24,10 @@ import { useCreateEscrow, useEscrow, useEscrowAction, useEscrowEligibility, useE
 import { CardForm, EMPTY_CARD, EscrowStatusBadge, MoneyLine, TestModeBand, cardValid, type CardFormValue } from '../components/shared';
 
 const RAILS: EscrowRail[] = ['ach', 'card', 'alipay', 'wechat_pay'];
+/** Secure Payment limits (mirror EscrowInput on the server: $100 – $10,000; card rail under $500). */
+const DEPOSIT_MIN_CENTS = 10_000;
+const DEPOSIT_MAX_CENTS = 1_000_000;
+const CARD_RAIL_MAX_CENTS = 50_000;
 const TIMELINE = ['proposed', 'accepted', 'funded', 'in_inspection', 'released'] as const;
 
 // ---------------------------------------------------------------- list
@@ -100,7 +104,7 @@ function RailPicker({ value, onChange, amountCents }: { value: EscrowRail; onCha
           <button key={r} type="button" role="radio" aria-checked={value === r} disabled={disabled} onClick={() => onChange(r)}
             className={cn('flex flex-col items-start rounded-card border px-3 py-2 text-left', value === r ? 'border-accent bg-accent-soft' : 'border-line bg-surface hover:border-line-strong', disabled && 'cursor-not-allowed opacity-60')}>
             <span className="text-small font-medium text-ink">{t(`billing.secure.rails.${r}`)}</span>
-            <span className="text-caption text-ink-3">{disabled ? t('billing.secure.cardLimit') : t(`billing.secure.railsHint.${r}`)}</span>
+            <span className="text-caption text-ink-3">{disabled ? t('billing.secure.cardLimit', { achThreshold: formatMoney(CARD_RAIL_MAX_CENTS) }) : t(`billing.secure.railsHint.${r}`)}</span>
           </button>
         );
       })}
@@ -137,7 +141,7 @@ function EscrowNew() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listing.data?.id]);
   const amountCents = Math.round(Number(amount || 0) * 100);
-  const amountOk = amountCents >= 10000 && amountCents <= 1000000;
+  const amountOk = amountCents >= DEPOSIT_MIN_CENTS && amountCents <= DEPOSIT_MAX_CENTS;
   const effectiveRail: EscrowRail = rail === 'card' && amountCents >= 50000 ? 'ach' : rail;
   const quote = useEscrowQuote(amountOk ? amountCents : 0, feePayer, effectiveRail, amountOk);
   useEffect(() => { if (amountOk) track('escrow.quote_viewed', { amountCents, rail: effectiveRail }); }, [amountOk, amountCents, effectiveRail]);
@@ -187,7 +191,7 @@ function EscrowNew() {
             )}
             {isHost && !counterpartyParam && <p className="rounded-sm bg-sunken px-3 py-2 text-small text-ink-2">{t('billing.secure.hostFromChat')}</p>}
             <div className="grid gap-3 sm:grid-cols-2">
-              <Input label={t('billing.secure.amount')} prefix="$" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, '').slice(0, 5))} error={amount && !amountOk ? t('billing.secure.amountRange') : undefined} hint={t('billing.secure.amountHint')} required />
+              <Input label={t('billing.secure.amount')} prefix="$" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, '').slice(0, 5))} error={amount && !amountOk ? t('billing.secure.amountRange', { min: formatMoney(DEPOSIT_MIN_CENTS), max: formatMoney(DEPOSIT_MAX_CENTS) }) : undefined} hint={t('billing.secure.amountHint', { min: formatMoney(DEPOSIT_MIN_CENTS), max: formatMoney(DEPOSIT_MAX_CENTS) })} required />
               <Input label={t('billing.secure.moveIn')} type="date" value={moveIn} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setMoveIn(e.target.value)} required />
             </div>
             <Select label={t('billing.secure.feeSplit')} value={feePayer} onChange={(v) => v && setFeePayer(v as typeof feePayer)} options={(['payer', 'payee', 'split'] as const).map((k) => ({ value: k, label: t(`billing.secure.feePayer.${k}`) }))} />
@@ -201,7 +205,7 @@ function EscrowNew() {
           <aside className="flex flex-col gap-3">
             <Card padding="lg" className="flex flex-col gap-3">
               <h2 className="text-h3 text-ink">{t('billing.secure.quote')}</h2>
-              {quote.data && amountOk ? <QuoteLines quote={quote.data} feePayer={feePayer} /> : <p className="text-small text-ink-3">{t('billing.secure.amountRange')}</p>}
+              {quote.data && amountOk ? <QuoteLines quote={quote.data} feePayer={feePayer} /> : <p className="text-small text-ink-3">{t('billing.secure.amountRange', { min: formatMoney(DEPOSIT_MIN_CENTS), max: formatMoney(DEPOSIT_MAX_CENTS) })}</p>}
               <Button variant="primary" size="lg" fullWidth loading={create.isPending} disabled={!amountOk || !moveIn || !counterpartyId || !!blocked} onClick={submit} iconRight={<ArrowRight />}>{t('billing.secure.propose')}</Button>
               <p className="text-caption text-ink-3">{t('billing.secure.proposeHint', { amount: amountOk ? formatMoney(amountCents) : '—' })}</p>
             </Card>

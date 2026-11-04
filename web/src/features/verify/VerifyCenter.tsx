@@ -14,6 +14,7 @@ import type { NextStep, VerifyStatus } from './api';
 import { useVerifyStatus, useVerifiedOnlySetting } from './api';
 import { StepRow, type StepState } from './StepRow';
 import { EduStep } from './EduStep';
+import { ID_TYPES } from './labels';
 import { IdStep } from './IdStep';
 import { PhoneStep } from './PhoneStep';
 import { PaymentStep } from './PaymentStep';
@@ -147,6 +148,7 @@ function VerifyCenterInner() {
   const status = useVerifyStatus();
   const [params] = useSearchParams();
   const location = useLocation();
+  const presetType = ID_TYPES.find((x) => x === params.get('type')) ?? null;
   const [open, setOpen] = useState<StepKey | null>(null);
   const [touched, setTouched] = useState(false);
   const { formatDate: fmt } = useLocale();
@@ -157,9 +159,9 @@ function VerifyCenterInner() {
     if (!status.data || touched) return;
     const hash = location.hash.replace('#', '') as StepKey;
     const q = params.get('step') as StepKey | null;
-    const wanted = STEPS.includes(hash) ? hash : q && STEPS.includes(q) ? q : status.data.nextStep;
+    const wanted = STEPS.includes(hash) ? hash : q && STEPS.includes(q) ? q : presetType ? 'id' : status.data.nextStep;
     setOpen(wanted ?? null);
-  }, [status.data, touched, location.hash, params]);
+  }, [status.data, touched, location.hash, params, presetType]);
 
   const rows = useMemo(() => {
     if (!status.data) return [];
@@ -189,7 +191,7 @@ function VerifyCenterInner() {
             {rows.map((r) => (
               <StepRow key={r.key} anchor={r.key} index={r.index} levelLabel={r.levelLabel} title={r.title} statusText={r.statusText} state={r.state} open={open === r.key} onToggle={() => toggle(r.key)}>
                 {r.key === 'edu' && <EduStep status={s} />}
-                {r.key === 'id' && <IdStep status={s} />}
+                {r.key === 'id' && <IdStep status={s} presetType={presetType} />}
                 {r.key === 'phone' && <PhoneStep status={s} />}
                 {r.key === 'payment' && <PaymentStep status={s} />}
               </StepRow>

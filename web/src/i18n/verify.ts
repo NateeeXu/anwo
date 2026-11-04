@@ -2,7 +2,7 @@
 export default {
   zh: {
     'verify.title': '身份验证',
-    'verify.subtitle': '完成验证，解锁押金托管与更高曝光。验证永远免费，徽章不可购买。',
+    'verify.subtitle': '完成验证，解锁安心付与更高曝光。验证永远免费，徽章不可购买。',
     'verify.head.trust': '信任档案',
     'verify.head.admin': '验证队列',
 
@@ -36,11 +36,11 @@ export default {
     'verify.unlock.l1.3': '使用优惠码与推荐奖励',
     'verify.unlock.l2.title': 'L2 · 学生认证',
     'verify.unlock.l2.1': '房源显示「已验证」标识，进入「已验证房东」筛选',
-    'verify.unlock.l2.2': '发起押金托管（作为收款方）',
+    'verify.unlock.l2.2': '发起安心付（作为收款方）',
     'verify.unlock.l2.3': '每日私信上限提升到 50 条',
     'verify.unlock.l3.title': 'L3 · 完全认证',
-    'verify.unlock.l3.1': '支付押金托管、购买房东 Pro',
-    'verify.unlock.l3.2': '接收托管放款',
+    'verify.unlock.l3.1': '用安心付支付押金、购买房东 Pro',
+    'verify.unlock.l3.2': '接收安心付放款',
     'verify.unlock.l3.3': '私信不限量',
     'verify.badge.title': '你的徽章',
     'verify.badge.hint': '徽章会出现在你的头像旁、房源卡片和信任档案里。',
@@ -77,7 +77,7 @@ export default {
     'verify.id.type.student_id.desc': '当前学年的学生卡，正反面',
     'verify.id.type.passport.desc': '护照照片页',
     'verify.id.type.government_id.desc': '身份证或驾照，正反面',
-    'verify.id.type.landlord_proof.desc': '转租房客：上传租约首页（含你的姓名和地址）；房东：产权证明或管理合同。通过后可解锁更长推广和 Plus / Max。'
+    'verify.id.type.landlord_proof.desc': '转租房客：上传租约首页（含你的姓名和地址）；房东：产权证明或管理合同。通过后可解锁更长推广和 Plus / Max。',
     'verify.id.fullName': '证件上的姓名',
     'verify.id.fullNameHint': '按证件原样填写，拼音或中文都可以。',
     'verify.id.last4': '证件号后 4 位',
@@ -109,7 +109,7 @@ export default {
     'verify.id.frontRequired': '请上传证件正面',
 
     // ---- phone
-    'verify.phone.description': '接收一条短信验证码。手机号只用于安全验证和托管通知，不会公开。',
+    'verify.phone.description': '接收一条短信验证码。手机号只用于安全验证和安心付通知，不会公开。',
     'verify.phone.number': '手机号',
     'verify.phone.numberHint': '国际格式，例如 +1 847 555 0100',
     'verify.phone.send': '发送短信',
@@ -122,7 +122,7 @@ export default {
     'verify.phone.invalid': '请输入国际格式的手机号（以 + 开头）',
 
     // ---- payment
-    'verify.payment.description': '保存一张支付方式用于押金托管和房东 Pro。测试模式：不会真实扣款，只保存卡种和后 4 位。',
+    'verify.payment.description': '保存一张支付方式用于安心付和房东 Pro。测试模式：不会真实扣款，只保存卡种和后 4 位。',
     'verify.payment.testMode': '测试模式',
     'verify.payment.testHint': '测试卡号 4242 4242 4242 4242 可通过；以 0002 结尾会被拒绝。',
     'verify.payment.cardNumber': '卡号',
@@ -322,7 +322,7 @@ export default {
   },
   en: {
     'verify.title': 'Verification',
-    'verify.subtitle': 'Verify once to unlock escrow and better reach. Verification is free and badges are never for sale.',
+    'verify.subtitle': 'Verify once to unlock Secure Payment and better reach. Verification is free and badges are never for sale.',
     'verify.head.trust': 'Trust profile',
     'verify.head.admin': 'Verification queue',
 
@@ -355,11 +355,11 @@ export default {
     'verify.unlock.l1.3': 'Use promo codes and referral credits',
     'verify.unlock.l2.title': 'L2 · Student verified',
     'verify.unlock.l2.1': 'Listings show the verified badge and appear in the verified-host filter',
-    'verify.unlock.l2.2': 'Propose deposit escrow (as the payee)',
+    'verify.unlock.l2.2': 'Propose a Secure Payment (as the payee)',
     'verify.unlock.l2.3': 'Daily message cap raised to 50',
     'verify.unlock.l3.title': 'L3 · Fully verified',
-    'verify.unlock.l3.1': 'Fund escrow deposits and buy Landlord Pro',
-    'verify.unlock.l3.2': 'Receive escrow payouts',
+    'verify.unlock.l3.1': 'Pay deposits with Secure Payment and buy Landlord Pro',
+    'verify.unlock.l3.2': 'Receive Secure Payment payouts',
     'verify.unlock.l3.3': 'Unlimited messaging',
     'verify.badge.title': 'Your badge',
     'verify.badge.hint': 'It appears next to your avatar, on your cards, and in your trust profile.',
@@ -394,7 +394,7 @@ export default {
     'verify.id.type.student_id.desc': 'Current-year student card, front and back',
     'verify.id.type.passport.desc': 'Passport photo page',
     'verify.id.type.government_id.desc': 'ID card or driver license, front and back',
-    'verify.id.type.landlord_proof.desc': 'Subletting? Upload the first page of your lease (your name and the address). Landlords: a deed excerpt or management agreement. Unlocks longer boosts and Plus / Max.'
+    'verify.id.type.landlord_proof.desc': 'Subletting? Upload the first page of your lease (your name and the address). Landlords: a deed excerpt or management agreement. Unlocks longer boosts and Plus / Max.',
     'verify.id.fullName': 'Name as on the document',
     'verify.id.fullNameHint': 'Exactly as printed, in pinyin or Chinese.',
     'verify.id.last4': 'Last 4 of the document number',
@@ -425,7 +425,7 @@ export default {
     'verify.id.needEdu': 'Verify your school email before submitting a document.',
     'verify.id.frontRequired': 'Upload the front of the document',
 
-    'verify.phone.description': 'We text you a code. Your number is used only for security and escrow notices and is never shown publicly.',
+    'verify.phone.description': 'We text you a code. Your number is used only for security and Secure Payment notices and is never shown publicly.',
     'verify.phone.number': 'Phone number',
     'verify.phone.numberHint': 'International format, for example +1 847 555 0100',
     'verify.phone.send': 'Text me a code',
@@ -437,7 +437,7 @@ export default {
     'verify.phone.success': 'Phone number verified.',
     'verify.phone.invalid': 'Enter an international number starting with +',
 
-    'verify.payment.description': 'Save a payment method for escrow deposits and Landlord Pro. Test mode: nothing is charged; only the brand and last 4 digits are kept.',
+    'verify.payment.description': 'Save a payment method for Secure Payment deposits and Landlord Pro. Test mode: nothing is charged; only the brand and last 4 digits are kept.',
     'verify.payment.testMode': 'Test mode',
     'verify.payment.testHint': 'Test card 4242 4242 4242 4242 succeeds; a number ending in 0002 is declined.',
     'verify.payment.cardNumber': 'Card number',

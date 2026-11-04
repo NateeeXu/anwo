@@ -208,7 +208,7 @@ export default {
     'error.HTTP_ERROR': '服务器暂时无法响应。',
     'error.BAD_RESPONSE': '服务器返回了意外的内容。',
 
-    'scam.banner': '请勿在平台外转账或预付押金。安窝的押金托管会在你入住后再放款。',
+    'scam.banner': '请勿在平台外转账或预付押金。使用安心付，押金由持牌支付合作方保管，确认入住后才会放款。',
     'toast.campusSwitched': '已切换到 {campus}',
   },
   en: {
@@ -418,7 +418,7 @@ export default {
     'error.HTTP_ERROR': 'The server is not responding right now.',
     'error.BAD_RESPONSE': 'The server returned something unexpected.',
 
-    'scam.banner': "Never pay deposits off-platform. Anwo's escrow releases funds only after you move in.",
+    'scam.banner': 'Never pay deposits off-platform. With Secure Payment, our licensed payment processor holds the deposit and releases it only after you move in.',
     'toast.campusSwitched': 'Switched to {campus}',
   },
 };

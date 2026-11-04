@@ -39,7 +39,7 @@ const TYPE_LABEL: Record<VerificationRequest['type'], { zh: string; en: string }
   student_id: { zh: '学生证', en: 'student ID' },
   passport: { zh: '护照', en: 'passport' },
   government_id: { zh: '身份证件', en: 'government ID' },
-  landlord_proof: { zh: '房东证明', en: 'landlord proof' },
+  landlord_proof: { zh: '租约或产权证明', en: 'lease or ownership proof' },
 };
 
 // =====================================================================================================

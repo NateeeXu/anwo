@@ -28,6 +28,7 @@ export type BoostSheetProps = {
 export function BoostSheet({ open, onClose, entityType, entityId, surface = 'owner_panel', onOrderCreated }: BoostSheetProps) {
   const t = useT();
   const navigate = useNavigate();
+  const location = useLocation();
   const { status } = useAuth();
   const { formatMoney, formatDate } = useLocale();
   const planName = usePlanName();
