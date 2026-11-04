@@ -1,13 +1,13 @@
 {
   "webPort": 5173,
-  "at": "2026-11-04T01:37:14.141Z",
+  "at": "2026-11-04T01:39:22.442Z",
   "results": [
     {
       "name": "home-desktop",
       "route": "/",
       "viewport": "desktop",
       "ok": true,
-      "ms": 2373,
+      "ms": 2326,
       "errors": [],
       "note": "你在哪所学校？ · 安窝 Anwo"
     },
@@ -16,7 +16,7 @@
       "route": "/welcome",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1482,
+      "ms": 1500,
       "errors": [],
       "note": "你在哪所学校？ · 安窝 Anwo"
     },
@@ -25,7 +25,7 @@
       "route": "/login",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1482,
+      "ms": 1531,
       "errors": [],
       "note": "登录 · 安窝 Anwo"
     },
@@ -34,7 +34,7 @@
       "route": "/",
       "viewport": "desktop",
       "ok": true,
-      "ms": 2084,
+      "ms": 2115,
       "errors": [],
       "note": "Northwestern 的本周 · 安窝 Anwo"
     },
@@ -43,7 +43,7 @@
       "route": "/settings",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1591,
+      "ms": 1620,
       "errors": [],
       "note": "设置 · 安窝 Anwo"
     },
@@ -52,7 +52,7 @@
       "route": "/u/55858834-f4a8-4e17-ad5f-25f841921a91",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1814,
+      "ms": 1832,
       "errors": [],
       "note": "张晓雨 Alice · 安窝 Anwo"
     },
@@ -61,7 +61,7 @@
       "route": "/notifications",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1821,
+      "ms": 1836,
       "errors": [],
       "note": "通知 · 安窝 Anwo"
     },
@@ -70,7 +70,7 @@
       "route": "/dev/mailbox",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1528,
+      "ms": 1580,
       "errors": [],
       "note": "开发邮箱 · 安窝 Anwo"
     },
@@ -79,7 +79,7 @@
       "route": "/search?q=a",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1980,
+      "ms": 2041,
       "errors": [],
       "note": "「a」的搜索结果 · 安窝 Anwo"
     },
@@ -88,7 +88,7 @@
       "route": "/listings",
       "viewport": "desktop",
       "ok": true,
-      "ms": 2164,
+      "ms": 2084,
       "errors": [],
       "note": "转租房源 · 安窝 Anwo"
     },
@@ -97,7 +97,7 @@
       "route": "/wanted",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1834,
+      "ms": 1981,
       "errors": [],
       "note": "求租信息 · 安窝 Anwo"
     },
@@ -106,7 +106,7 @@
       "route": "/chat",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1913,
+      "ms": 1933,
       "errors": [],
       "note": "消息 · 安窝 Anwo"
     },
@@ -124,7 +124,7 @@
       "route": "/map",
       "viewport": "desktop",
       "ok": true,
-      "ms": 2356,
+      "ms": 2360,
       "errors": [],
       "note": "探索地图 · 安窝 Anwo"
     },
@@ -133,7 +133,7 @@
       "route": "/shuttle",
       "viewport": "desktop",
       "ok": true,
-      "ms": 2096,
+      "ms": 2139,
       "errors": [],
       "note": "校车 · 西北大学 · 安窝 Anwo"
     },
@@ -142,7 +142,7 @@
       "route": "/market",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1913,
+      "ms": 1984,
       "errors": [],
       "note": "二手市场 · 安窝 Anwo"
     },
@@ -151,7 +151,7 @@
       "route": "/buddy",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1938,
+      "ms": 1901,
       "errors": [],
       "note": "找搭子 · 安窝 Anwo"
     },
@@ -160,7 +160,7 @@
       "route": "/pricing",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1873,
+      "ms": 1817,
       "errors": [],
       "note": "定价 · 安窝 Anwo"
     },
@@ -169,7 +169,7 @@
       "route": "/admin",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1540,
+      "ms": 1548,
       "errors": [],
       "note": "安窝 Anwo"
     },
@@ -178,7 +178,7 @@
       "route": "/",
       "viewport": "desktop",
       "ok": true,
-      "ms": 1912,
+      "ms": 1927,
       "errors": [],
       "note": "Northwestern 的本周 · 安窝 Anwo"
     },
@@ -187,7 +187,7 @@
       "route": "/",
       "viewport": "desktop",
       "ok": true,
-      "ms": 2075,
+      "ms": 1946,
       "errors": [],
       "note": "This week at Northwestern · 安窝 Anwo"
     },
@@ -196,7 +196,7 @@
       "route": "/listings",
       "viewport": "desktop",
       "ok": true,
-      "ms": 2118,
+      "ms": 2106,
       "errors": [],
       "note": "Sublets · 安窝 Anwo"
     },
@@ -205,7 +205,7 @@
       "route": "/",
       "viewport": "mobile",
       "ok": true,
-      "ms": 2048,
+      "ms": 1976,
       "errors": [],
       "note": "Northwestern 的本周 · 安窝 Anwo"
     },
@@ -214,7 +214,7 @@
       "route": "/welcome",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1503,
+      "ms": 1513,
       "errors": [],
       "note": "你在哪所学校？ · 安窝 Anwo"
     },
@@ -223,7 +223,7 @@
       "route": "/settings",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1532,
+      "ms": 1535,
       "errors": [],
       "note": "设置 · 安窝 Anwo"
     },
@@ -232,7 +232,7 @@
       "route": "/u/55858834-f4a8-4e17-ad5f-25f841921a91",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1815,
+      "ms": 1816,
       "errors": [],
       "note": "张晓雨 Alice · 安窝 Anwo"
     },
@@ -241,7 +241,7 @@
       "route": "/notifications",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1836,
+      "ms": 1823,
       "errors": [],
       "note": "通知 · 安窝 Anwo"
     },
@@ -250,7 +250,7 @@
       "route": "/dev/mailbox",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1586,
+      "ms": 1593,
       "errors": [],
       "note": "开发邮箱 · 安窝 Anwo"
     },
@@ -259,7 +259,7 @@
       "route": "/search?q=a",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1927,
+      "ms": 1968,
       "errors": [],
       "note": "「a」的搜索结果 · 安窝 Anwo"
     },
@@ -268,7 +268,7 @@
       "route": "/listings",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1934,
+      "ms": 1967,
       "errors": [],
       "note": "转租房源 · 安窝 Anwo"
     },
@@ -277,7 +277,7 @@
       "route": "/wanted",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1851,
+      "ms": 1889,
       "errors": [],
       "note": "求租信息 · 安窝 Anwo"
     },
@@ -286,7 +286,7 @@
       "route": "/chat",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1854,
+      "ms": 1875,
       "errors": [],
       "note": "消息 · 安窝 Anwo"
     },
@@ -295,7 +295,7 @@
       "route": "/verify",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1795,
+      "ms": 1801,
       "errors": [],
       "note": "身份验证 · 安窝 Anwo"
     },
@@ -304,7 +304,7 @@
       "route": "/map",
       "viewport": "mobile",
       "ok": true,
-      "ms": 2037,
+      "ms": 2006,
       "errors": [],
       "note": "探索地图 · 安窝 Anwo"
     },
@@ -313,7 +313,7 @@
       "route": "/shuttle",
       "viewport": "mobile",
       "ok": true,
-      "ms": 2030,
+      "ms": 2048,
       "errors": [],
       "note": "校车 · 西北大学 · 安窝 Anwo"
     },
@@ -322,7 +322,7 @@
       "route": "/market",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1901,
+      "ms": 1931,
       "errors": [],
       "note": "二手市场 · 安窝 Anwo"
     },
@@ -331,7 +331,7 @@
       "route": "/buddy",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1876,
+      "ms": 1894,
       "errors": [],
       "note": "找搭子 · 安窝 Anwo"
     },
@@ -340,7 +340,7 @@
       "route": "/pricing",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1782,
+      "ms": 1780,
       "errors": [],
       "note": "定价 · 安窝 Anwo"
     },
@@ -349,7 +349,7 @@
       "route": "/admin",
       "viewport": "mobile",
       "ok": true,
-      "ms": 1521,
+      "ms": 1525,
       "errors": [],
       "note": "安窝 Anwo"
     }

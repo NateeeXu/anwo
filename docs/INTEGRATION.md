@@ -105,7 +105,8 @@ has no outbound access to the tile servers; it is not our code. The specs and th
 - All specs already read `WEB_PORT` (module port as default); they were run with `WEB_PORT=5173`.
 - `chat.spec.mjs`: picks the chat seed's own group thread and counts only `chatseed-*` unread rows (the integrated DB also
   has buddy groups). `verify.spec.mjs`: waits for the review dialog's detail before pressing R (the dialog now mounts
-  one commit earlier, which exposed the race).
+  one commit earlier, which exposed the race). `billing.spec.mjs`: settles after opening the deposit pay dialog (saved cards
+  load after it opens and replace the card form).
 - New `docs/modules/journey.spec.mjs` (cross-module journey) and `scripts/e2e.mjs`, `scripts/i18n-check.mjs`
   (`npm run e2e`, `npm run i18n:check`).
 
@@ -150,7 +151,7 @@ a student found no page errors, no visible dotted i18n keys and no horizontal ov
 | verify | 6 `/api/admin/audit` | done (admin module) · 7 private seed uploads helper: open |
 | wanted | 2 listings → recompute / recordLead | done (listings module) |
 | wanted | 1 DateRange month navigation · 6 digest notifications job | open |
-| wanted | 3 chat wanted context card · 5 admin mount | done |
+| wanted | 3 chat wanted context card · 5 admin mount | done (chat's ContextBar renders any `contextCardFor` type, `/wanted/:id` link included) |
 
 ## 4. Open issues
 
