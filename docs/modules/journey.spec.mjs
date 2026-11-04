@@ -210,6 +210,10 @@ await step('post a second-hand item', async () => {
   await sp.goto('/post/item?category=kitchen');
   await sp.waitForSelector('form', { timeout: 20000 });
   await settle(sp);
+  const png = await sp.screenshot({ clip: { x: 0, y: 0, width: 480, height: 480 } });
+  await sp.locator('input[type=file]').first().setInputFiles({ name: 'lamp.png', mimeType: 'image/png', buffer: png });
+  await sp.waitForFunction(() => document.querySelectorAll('img[src^="/uploads/"]').length > 0, null, { timeout: 15000 }).catch(() => {});
+  await settle(sp, 600);
   await sp.getByLabel(/^标题/).fill('宜家台灯 + 收纳盒 搬家出');
   await sp.getByLabel(/^价格/).first().fill('15');
   await sp.getByLabel(/^描述/).fill('九成新，6 月前可在 Davis St 面交。');
