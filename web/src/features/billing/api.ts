@@ -108,7 +108,19 @@ export const useReferrals = (enabled = true) => useQuery({ queryKey: billingKeys
 export const useOrder = (id: string | undefined) => useQuery({ queryKey: billingKeys.order(id ?? ''), queryFn: () => api<OrderDetail>(`/api/billing/orders/${id}`), enabled: !!id });
 export const useOrders = (p: { kind?: string; page?: number } = {}) => useQuery({ queryKey: billingKeys.orders(p), queryFn: () => api<Paginated<OrderDto>>('/api/billing/orders', { query: { ...p, pageSize: 20 } }) });
 export const useMyBoosts = (status: string, page = 1) => useQuery({ queryKey: billingKeys.boosts(status, page), queryFn: () => api<Paginated<BoostDto> & { counts: { active: number; scheduled: number; ended: number } }>('/api/billing/boosts', { query: { status: status === 'all' ? undefined : status, page, pageSize: 20 } }), placeholderData: (p) => p });
-export const useBoostOptions = (entityType: string | null, entityId: string | null, surface?: string) => useQuery({ queryKey: billingKeys.boostOptions(entityType ?? '', entityId ?? ''), queryFn: () => api<BoostOptions>('/api/billing/boosts/options', { query: { entityType, entityId, surface } }), enabled: !!entityType && !!entityId });
+/** boost.options_viewed is logged by the server on the first fetch of each sheet mount only (refetches send logView=0). */
+export const useBoostOptions = (entityType: string | null, entityId: string | null, surface?: string) => {
+  const logged = useRef(false);
+  return useQuery({
+    queryKey: billingKeys.boostOptions(entityType ?? '', entityId ?? ''),
+    queryFn: () => {
+      const logView = logged.current ? '0' : '1';
+      logged.current = true;
+      return api<BoostOptions>('/api/billing/boosts/options', { query: { entityType, entityId, surface, logView } });
+    },
+    enabled: !!entityType && !!entityId,
+  });
+};
 export const useBoostStats = (id: string | null) => useQuery({ queryKey: billingKeys.boostStats(id ?? ''), queryFn: () => api<BoostStats>(`/api/billing/boosts/${id}/stats`), enabled: !!id });
 export const useSubscription = (enabled = true) => useQuery({ queryKey: billingKeys.subscription(), queryFn: () => api<SubscriptionData>('/api/billing/subscription'), enabled });
 export const useProAnalytics = (days: number, enabled: boolean) => useQuery({ queryKey: billingKeys.analytics(days), queryFn: () => api<ProAnalytics>('/api/billing/pro/analytics', { query: { days } }), enabled });

@@ -30,7 +30,7 @@ export default function PricingPage() {
   const wallet = useWallet(1, status === 'authed');
   const sub = useSubscription(status === 'authed');
   const tab = (params.get('tab') as Tab) || (user?.role === 'landlord' ? 'landlords' : 'students');
-  const setTab = (k: Tab) => { const p = new URLSearchParams(params); p.set('tab', k); setParams(p, { replace: true }); track('pricing.view', { tab: k }); };
+  const setTab = (k: Tab) => { const p = new URLSearchParams(params); p.set('tab', k); setParams(p, { replace: true }); };
   const boostParam = params.get('boost');
   const boostTarget = useMemo(() => {
     if (!boostParam) return null;
@@ -39,7 +39,7 @@ export default function PricingPage() {
   }, [boostParam]);
   const closeBoost = () => { const p = new URLSearchParams(params); p.delete('boost'); setParams(p, { replace: true }); };
   const [entity, setEntity] = useState<'listing' | 'market_item' | 'buddy_post'>('listing');
-  useEffect(() => { track('pricing.view', { tab, campusId: campus?.id ?? null }); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  // pricing.view is logged once by the server (GET /api/billing/pricing) — no client duplicate
 
   const data = q.data;
   const boostGroup = data?.boosts.find((b) => b.entityType === entity) ?? data?.boosts[0];

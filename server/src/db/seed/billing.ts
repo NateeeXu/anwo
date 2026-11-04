@@ -454,6 +454,8 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
       const cappedEnd = new Date(Math.min(Date.parse(r.ends_at), Date.parse(r.starts_at) + 7 * DAY)).toISOString();
       q.run("UPDATE boosts SET tier = 'basic', nationwide = 0, plan_id = COALESCE(?, plan_id), ends_at = ?, status = CASE WHEN ? <= ? THEN 'expired' ELSE status END WHERE id = ?", [basic?.id ?? null, cappedEnd, cappedEnd, t, r.id]);
     }
+    const noFree = q.all<{ category: string }>('SELECT category FROM partners WHERE is_active = 1 GROUP BY category HAVING SUM(CASE WHEN is_sponsored = 0 THEN 1 ELSE 0 END) = 0');
+    if (noFree.length) throw new Error(`seed: Kit categories without a non-sponsored option: ${noFree.map((r) => r.category).join(', ')}`);
     const violations = q.count(`SELECT COUNT(*) FROM boosts b WHERE b.status IN ('active','scheduled') AND ${gated} AND NOT (${proofSql})`);
     if (violations > 0) throw new Error(`seed: ${violations} live boost(s) break the supply-proof gate`);
   });

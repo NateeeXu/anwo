@@ -319,7 +319,7 @@ router.get('/boosts/options', requireAuth, (req, res) => {
   const planRows = plans.map((pl) => ({ plan: pl, row: requirePlan(pl.id) }));
   const bundle = p.entityType === 'listing' ? q.get<{ id: string; item_count: number }>("SELECT id, item_count FROM market_bundles WHERE listing_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1", [e.id]) : undefined;
   const cur = currentBoost(p.entityType, p.entityId);
-  logEvent(req, 'boost.options_viewed', { entityType: e.type, entityId: e.id, props: { eligible: elig.eligible, reason: elig.reason, surface: p.surface ?? 'owner_panel' } });
+  if (p.logView !== '0') logEvent(req, 'boost.options_viewed', { entityType: e.type, entityId: e.id, props: { eligible: elig.eligible, reason: elig.reason, surface: p.surface ?? 'owner_panel' } });
   ok(res, {
     entity: entityCard(p.entityType, p.entityId, { viewerId: user.id }),
     entityTitle: e.title,
@@ -817,6 +817,14 @@ admin.get('/partners', (_req, res) => {
   const rows = q.all<PartnerRow>(`${PARTNER_SELECT} ORDER BY p.category, p.sort_order`);
   ok(res, rows.map((r) => ({ ...toPartnerDto(r), isActive: r.is_active === 1, clickCount: r.click_count, payoutModel: r.payout_model, payoutCents: r.payout_cents, affiliateUrl: r.affiliate_url, payoutNote: r.payout_note, noSsnVerifiedAt: r.no_ssn_verified_at, conversions: q.count('SELECT COUNT(*) FROM partner_clicks WHERE partner_id = ? AND converted = 1', [r.id]) })));
 });
+/** Kit rule 8 (BUSINESS_PLAN §3.8): every category with active partners keeps at least one active non-paying option. */
+function assertFreeOptionPerCategory(categories: string[]): void {
+  for (const c of [...new Set(categories)]) {
+    const active = q.count('SELECT COUNT(*) FROM partners WHERE category = ? AND is_active = 1', [c]);
+    const free = q.count('SELECT COUNT(*) FROM partners WHERE category = ? AND is_active = 1 AND is_sponsored = 0', [c]);
+    if (active > 0 && free === 0) throw new ApiError('CONFLICT', `Category "${c}" needs at least one active non-sponsored option`, { data: { reason: 'kit_free_option_required', category: c } });
+  }
+}
 admin.post('/partners', writes, (req, res) => {
   const body = parseBody(req, PartnerInput);
   const id = uid();
@@ -824,6 +832,7 @@ admin.post('/partners', writes, (req, res) => {
   q.run(`INSERT INTO partners (id, slug, name, name_zh, category, tagline, tagline_zh, description, description_zh, logo_upload_id, website_url, affiliate_url, promo_text, promo_text_zh, payout_model, payout_cents, campus_id, states_json, is_sponsored, is_active, sort_order, network, no_ssn_ok, no_ssn_verified_at, created_at, updated_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [id, body.slug, body.name, body.nameZh ?? null, body.category, body.tagline ?? null, body.taglineZh ?? null, body.description ?? null, body.descriptionZh ?? null, body.logoUploadId ?? null, body.websiteUrl, body.affiliateUrl, body.promoText ?? null, body.promoTextZh ?? null, body.payoutModel ?? 'cpa', body.payoutCents ?? 0, body.campusId ?? null, JSON.stringify(body.states ?? []), body.isSponsored === false ? 0 : 1, body.isActive === false ? 0 : 1, body.sortOrder ?? 0, body.network ?? null, body.noSsnOk ? 1 : 0, body.noSsnOk ? t : null, t, t]);
   const row = loadPartner(id)!;
+  try { assertFreeOptionPerCategory([row.category]); } catch (e) { q.run('DELETE FROM partners WHERE id = ?', [id]); throw e; }
   audit(req, { action: 'partner.create', entityType: 'partner', entityId: id, after: toPartnerDto(row), reason: body.reason });
   ok(res, toPartnerDto(row), 201);
 });
@@ -841,7 +850,10 @@ admin.patch('/partners/:id', writes, (req, res) => {
   if (body.isSponsored !== undefined) { sets.push('is_sponsored = ?'); params.push(body.isSponsored ? 1 : 0); }
   if (body.isActive !== undefined) { sets.push('is_active = ?'); params.push(body.isActive ? 1 : 0); }
   if (body.noSsnOk !== undefined) { sets.push('no_ssn_ok = ?', 'no_ssn_verified_at = ?'); params.push(body.noSsnOk ? 1 : 0, body.noSsnOk ? nowIso() : null); }
-  if (sets.length) q.run(`UPDATE partners SET ${sets.join(', ')}, updated_at = ? WHERE id = ?`, [...params, nowIso(), before.id]);
+  if (sets.length) q.tx(() => {
+    q.run(`UPDATE partners SET ${sets.join(', ')}, updated_at = ? WHERE id = ?`, [...params, nowIso(), before.id]);
+    assertFreeOptionPerCategory([before.category, String(body.category ?? before.category)]);
+  });
   const after = loadPartner(before.id)!;
   audit(req, { action: 'partner.update', entityType: 'partner', entityId: before.id, before: toPartnerDto(before), after: toPartnerDto(after), reason: body.reason ?? null });
   ok(res, toPartnerDto(after));
@@ -850,7 +862,10 @@ admin.delete('/partners/:id', writes, (req, res) => {
   const { id } = parseParams(req, idParam);
   const before = loadPartner(id);
   if (!before) throw notFound('Partner');
-  q.run('UPDATE partners SET is_active = 0, updated_at = ? WHERE id = ?', [nowIso(), before.id]);
+  q.tx(() => {
+    q.run('UPDATE partners SET is_active = 0, updated_at = ? WHERE id = ?', [nowIso(), before.id]);
+    assertFreeOptionPerCategory([before.category]);
+  });
   audit(req, { action: 'partner.update', entityType: 'partner', entityId: before.id, before: { isActive: true }, after: { isActive: false }, reason: 'deactivated' });
   ok(res, null);
 });

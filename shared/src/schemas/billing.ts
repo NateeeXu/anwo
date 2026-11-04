@@ -79,6 +79,8 @@ export const BoostOptionsQuery = z.object({
   entityType: BoostEntity,
   entityId: z.string().min(1).max(128),
   surface: z.enum(['publish_upsell', 'owner_panel', 'detail', 'pricing']).optional(),
+  /** '0' on refetches (after order creation etc.): boost.options_viewed is logged once per sheet open */
+  logView: z.enum(['0', '1']).optional(),
 });
 export const SponsoredQuery = z.object({
   entityType: BoostEntity,

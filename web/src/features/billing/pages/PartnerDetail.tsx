@@ -28,7 +28,7 @@ export default function PartnerDetailPage() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reason, setReason] = useState('wrong_info');
   const [details, setDetails] = useState('');
-  useEffect(() => { if (p) track('kit.card_view', { slug: p.slug, category: p.category, placement: 'detail' }); }, [p?.slug]); // eslint-disable-line react-hooks/exhaustive-deps
+  // kit.card_view / affiliate.click are logged by the server (partner detail + /go redirect)
   const name = p ? (isZh ? p.nameZh || p.name : p.name) : '';
   const go = p ? `${p.goUrl.split('?')[0]}?placement=kit${campusId ? `&campusId=${campusId}` : ''}` : '#';
   const submitReport = async () => {
@@ -78,7 +78,7 @@ export default function PartnerDetailPage() {
           <aside className="flex flex-col gap-3">
             <Card padding="lg" className="flex flex-col gap-3">
               <Button asChild variant="primary" size="lg" fullWidth iconRight={<ArrowUpRight />}>
-                <a href={go} target="_blank" rel="sponsored noopener" onClick={() => track('affiliate.click', { slug: p.slug, category: p.category, placement: 'detail' })}>{t('billing.kit.goTo', { name })}</a>
+                <a href={go} target="_blank" rel="sponsored noopener">{t('billing.kit.goTo', { name })}</a>
               </Button>
               <p className="text-caption text-ink-3">{t('billing.kit.goHint')}</p>
               <Checkbox label={t('billing.kit.done')} checked={checklist.isDone(p.slug)} onChange={() => checklist.toggle(p.slug)} />

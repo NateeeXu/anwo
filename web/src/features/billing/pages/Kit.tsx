@@ -71,7 +71,7 @@ export function PartnerCard({ p, done, onToggle, placement = 'kit', compact, cam
       <div className="mt-auto flex items-center justify-between gap-2 pt-1">
         {onToggle ? <Checkbox label={t('billing.kit.done')} checked={!!done} onChange={onToggle} /> : <span />}
         <Button asChild variant="secondary" size="sm" iconRight={<ArrowUpRight />}>
-          <a href={go} target="_blank" rel="sponsored noopener" onClick={() => track('affiliate.click', { slug: p.slug, category: p.category, placement })}>{t('billing.kit.go')}</a>
+          <a href={go} target="_blank" rel="sponsored noopener">{t('billing.kit.go')}</a>
         </Button>
       </div>
     </Card>

@@ -55,7 +55,6 @@ function Checkout() {
     setFailure(null);
     try {
       const body = preview.total === 0 ? { paymentMethodId: 'wallet', useWallet } : methodId === 'new' ? { card, useWallet } : { paymentMethodId: methodId, useWallet };
-      track('checkout.pay', { kind: order.kind, totalCents: preview.total, surface: 'checkout' });
       const res = await pay.mutateAsync({ id: order.id, body });
       navigate(`/billing/success?order=${res.id}`);
     } catch (e) {
