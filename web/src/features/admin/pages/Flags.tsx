@@ -91,7 +91,18 @@ export default function Flags() {
                 ),
             },
             { key: 'value', header: t('admin.flags.value'), hideOnMobile: true, render: (f) => (f.value === null ? <span className="text-ink-3">—</span> : <code className="line-clamp-1 max-w-[220px] font-mono text-caption text-ink-2">{JSON.stringify(f.value)}</code>) },
-            { key: 'updated', header: t('admin.flags.updated'), hideOnMobile: true, render: (f) => <span className="text-caption text-ink-2">{f.updatedByUser ? `${f.updatedByUser.name} · ` : ''}{formatRelative(f.updatedAt)}</span> },
+            {
+              key: 'updated',
+              header: t('admin.flags.updated'),
+              width: 190,
+              hideOnMobile: true,
+              render: (f) => (
+                <div className="flex flex-col text-caption">
+                  <span className="truncate text-ink-2">{f.updatedByUser?.name ?? t('admin.common.system')}</span>
+                  <span className="whitespace-nowrap text-ink-3">{formatRelative(f.updatedAt)}</span>
+                </div>
+              ),
+            },
           ]}
           rowActions={(f) => (
             <div className="flex gap-1">
