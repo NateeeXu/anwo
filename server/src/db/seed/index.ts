@@ -1,4 +1,5 @@
-// Seed runner. Order: core → listings → wanted → chat → verify → map → shuttle → market → buddy → billing → admin.
+// Seed runner. Order: core → shuttle → map → listings → wanted → chat → verify → market → buddy → billing → admin
+// (shuttle + map first so listings/wanted/market caches get nearest-stop and commute data).
 // Idempotent via seed_meta (key = module, version = the module's exported `version`); `--force` re-runs.
 //
 //   npm run seed                                    # everything (uses DB_PATH)
@@ -12,7 +13,7 @@ import { getDb, openDb, q } from '../index';
 import { logger } from '../../lib/logger';
 import { nowIso } from '../../lib/time';
 
-export const SEED_ORDER = ['core', 'listings', 'wanted', 'chat', 'verify', 'map', 'shuttle', 'market', 'buddy', 'billing', 'admin'] as const;
+export const SEED_ORDER = ['core', 'shuttle', 'map', 'listings', 'wanted', 'chat', 'verify', 'market', 'buddy', 'billing', 'admin'] as const;
 export type SeedKey = (typeof SEED_ORDER)[number];
 export type SeedModule = { default: (db: DatabaseSync) => Promise<void> | void; version?: number };
 

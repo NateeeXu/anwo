@@ -6,12 +6,23 @@
 //   await page.goto(url('/listings'))  // or page.goto(base + '/listings')
 //   await shot(page, 'listings', 'browse-desktop')
 //   await finish(browser)
-// Playwright is pre-installed globally; never npm-install it.
-import { chromium } from 'playwright'
+// Playwright is pre-installed globally; never npm-install it. It is resolved with createRequire so the helper works
+// whether or not node_modules/playwright is symlinked to the global install (ESM imports ignore NODE_PATH).
 import fs from 'node:fs'
 import path from 'node:path'
+import { createRequire } from 'node:module'
+import { execSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = '/home/user/campus-sublet'
+function loadPlaywright() {
+  const req = createRequire(import.meta.url)
+  try { return req('playwright') } catch {}
+  try { return req(path.join(execSync('npm root -g', { encoding: 'utf8' }).trim(), 'playwright')) } catch {}
+  throw new Error('playwright not found (expected a global install)')
+}
+const { chromium } = loadPlaywright()
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 export const DESKTOP = { width: 1280, height: 800 }
 export const MOBILE = { width: 390, height: 844 }
 
@@ -28,7 +39,7 @@ export async function openApp({ webPort = 5173, viewport = DESKTOP, lang = 'zh' 
 
 // Logs in through the real API so the httpOnly `sid` cookie is set on the browser context.
 export async function login(page, email, password = 'Passw0rd!') {
-  const res = await page.request.post('/api/auth/login', { data: { email, password } }).catch(() => null)
+  const res = await page.request.post('/api/auth/login', { data: { email, password }, headers: { 'X-Requested-With': 'fetch' } }).catch(() => null)
   if (!res || !res.ok()) {
     // fall back to the UI form
     await page.goto('/login')
