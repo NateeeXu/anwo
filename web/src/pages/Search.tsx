@@ -10,7 +10,11 @@ import { useT } from '../lib/i18n';
 import { Head } from '../app/Head';
 import { GlobalSearch } from '../app/shell/GlobalSearch';
 import { CardGrid, QueryState, Section } from './home/Section';
-import { SimpleBuddyCard, SimpleCampusRow, SimpleItemCard, SimpleListingCard, SimpleUserRow, SimpleWantedCard } from './home/SimpleCards';
+import { SimpleCampusRow, SimpleUserRow } from './home/SimpleCards';
+import { ListingCard as ListingCardView } from '../features/listings/components/ListingCard';
+import { WantedCard as WantedCardView } from '../features/wanted/components/WantedCard';
+import { ItemCard as ItemCardView } from '../features/market/components/ItemCard';
+import { BuddyCard as BuddyCardView } from '../features/buddy/BuddyCard';
 
 export default function Search() {
   const t = useT();
@@ -75,22 +79,22 @@ export default function Search() {
             <>
               {d.listings.length > 0 && (
                 <Section id="s-listings" title={`${t('tabs.listings')} · ${counts.listing ?? d.listings.length}`} linkTo={`/listings?q=${encodeURIComponent(q)}`} linkLabel={t('common.viewAll')}>
-                  <CardGrid cols={4}>{d.listings.map((l) => <SimpleListingCard key={l.id} listing={l} nationwide={nationwide} />)}</CardGrid>
+                  <CardGrid cols={4}>{d.listings.map((l) => <ListingCardView key={l.id} listing={l} showCity={nationwide} />)}</CardGrid>
                 </Section>
               )}
               {d.wanted.length > 0 && (
                 <Section id="s-wanted" title={`${t('tabs.wanted')} · ${counts.wanted ?? d.wanted.length}`} linkTo={`/wanted?q=${encodeURIComponent(q)}`} linkLabel={t('common.viewAll')}>
-                  <CardGrid cols={2}>{d.wanted.map((w) => <SimpleWantedCard key={w.id} wanted={w} />)}</CardGrid>
+                  <CardGrid cols={2}>{d.wanted.map((w) => <WantedCardView key={w.id} wanted={w} nationwide={nationwide} />)}</CardGrid>
                 </Section>
               )}
               {d.items.length > 0 && (
                 <Section id="s-items" title={`${t('tabs.market')} · ${counts.item ?? d.items.length}`} linkTo={`/market?q=${encodeURIComponent(q)}`} linkLabel={t('common.viewAll')}>
-                  <CardGrid cols={6}>{d.items.map((it) => <SimpleItemCard key={it.id} item={it} />)}</CardGrid>
+                  <CardGrid cols={6}>{d.items.map((it) => <ItemCardView key={it.id} item={it} showCampus={nationwide} />)}</CardGrid>
                 </Section>
               )}
               {d.buddy.length > 0 && (
                 <Section id="s-buddy" title={`${t('tabs.buddy')} · ${counts.buddy ?? d.buddy.length}`} linkTo={`/buddy?q=${encodeURIComponent(q)}`} linkLabel={t('common.viewAll')}>
-                  <CardGrid cols={3}>{d.buddy.map((p) => <SimpleBuddyCard key={p.id} post={p} />)}</CardGrid>
+                  <CardGrid cols={3}>{d.buddy.map((p) => <BuddyCardView key={p.id} post={p} />)}</CardGrid>
                 </Section>
               )}
               {d.campuses.length > 0 && (

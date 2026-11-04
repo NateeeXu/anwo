@@ -13,7 +13,10 @@ import { Head } from '../app/Head';
 import { GlobalSearch } from '../app/shell/GlobalSearch';
 import { usePostSheet } from '../app/shell/shellStore';
 import { CardGrid, QueryState, Section } from './home/Section';
-import { SimpleBuddyCard, SimpleItemCard, SimpleListingCard, SimpleWantedCard } from './home/SimpleCards';
+import { ListingCard as ListingCardView } from '../features/listings/components/ListingCard';
+import { WantedCard as WantedCardView } from '../features/wanted/components/WantedCard';
+import { ItemCard as ItemCardView } from '../features/market/components/ItemCard';
+import { BuddyCard as BuddyCardView } from '../features/buddy/BuddyCard';
 
 const PARTNER_ICONS: Record<string, typeof Landmark> = { bank: Landmark, sim: Smartphone, insurance: Shield, movers: Truck, storage: Warehouse, pickup: Plane, other: ShoppingBag };
 
@@ -123,7 +126,7 @@ export default function Home() {
           {(d) => (
             <CardGrid cols={4}>
               {d.items.map((l) => (
-                <SimpleListingCard key={l.id} listing={l} nationwide={nationwide} />
+                <ListingCardView key={l.id} listing={l} showCity={nationwide} />
               ))}
               {d.items.length < 4 && (
                 <Card padding="md" className="flex flex-col items-center justify-center gap-2 text-center">
@@ -149,7 +152,7 @@ export default function Home() {
           {(d) => (
             <CardGrid cols={2}>
               {d.items.map((w) => (
-                <SimpleWantedCard key={w.id} wanted={w} />
+                <WantedCardView key={w.id} wanted={w} nationwide={nationwide} />
               ))}
             </CardGrid>
           )}
@@ -167,7 +170,7 @@ export default function Home() {
             {(d) => (
               <CardGrid cols={6}>
                 {d.items.slice(0, 6).map((it) => (
-                  <SimpleItemCard key={it.id} item={it} />
+                  <ItemCardView key={it.id} item={it} />
                 ))}
               </CardGrid>
             )}
@@ -186,7 +189,7 @@ export default function Home() {
             {(d) => (
               <CardGrid cols={3}>
                 {d.items.map((p) => (
-                  <SimpleBuddyCard key={p.id} post={p} />
+                  <BuddyCardView key={p.id} post={p} />
                 ))}
               </CardGrid>
             )}

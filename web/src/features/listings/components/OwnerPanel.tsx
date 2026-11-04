@@ -1,11 +1,13 @@
 // Owner rail on the detail page (DESIGN §7.3 「Owner view swaps the rail for an owner panel」).
 import { ChartColumn, Pencil, Rocket, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import type { Listing } from '@shared/types';
 import { Badge, Button, Card, Switch } from '@/components';
 import { useLocale, useT } from '@/lib/i18n';
 import { useListingActions } from './useListingActions';
 import { StatusBadge } from './StatusBadge';
+import { BoostSheet } from '@/features/billing/components/BoostSheet';
 
 export function OwnerPanel({ listing: l, onStats }: { listing: Listing; onStats: () => void }) {
   const t = useT();
@@ -13,6 +15,7 @@ export function OwnerPanel({ listing: l, onStats }: { listing: Listing; onStats:
   const actions = useListingActions();
   const live = l.status === 'active';
   const busy = actions.pending && actions.pendingId === l.id;
+  const [boostOpen, setBoostOpen] = useState(false);
   return (
     <Card padding="lg" className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
@@ -39,7 +42,7 @@ export function OwnerPanel({ listing: l, onStats }: { listing: Listing; onStats:
       {l.activeBoost ? (
         <p className="flex items-center gap-2 text-small text-ink-2"><Badge variant="boosted" size="sm" />{t('listings.detail.owner.boosted', { tier: t(`listings.boostTier.${l.activeBoost.tier}`), date: formatDate(l.activeBoost.endsAt, 'short') })}</p>
       ) : (
-        <Button asChild variant="secondary" iconLeft={<Rocket className="size-4" />}><Link to={`/pricing?boost=listing:${l.id}`}>{t('listings.detail.owner.boost')}</Link></Button>
+        live && <Button variant="secondary" iconLeft={<Rocket className="size-4" />} onClick={() => setBoostOpen(true)}>{t('listings.detail.owner.boost')}</Button>
       )}
       <div className="grid grid-cols-2 gap-2">
         <Button asChild variant="secondary" size="sm" iconLeft={<Pencil className="size-4" />}><Link to={`/listings/${l.id}/edit`}>{t('listings.detail.owner.edit')}</Link></Button>
@@ -49,6 +52,7 @@ export function OwnerPanel({ listing: l, onStats }: { listing: Listing; onStats:
       </div>
       <p className="text-caption text-ink-3">{t('listings.detail.owner.previewNote')}</p>
       {actions.dialogs}
+      <BoostSheet open={boostOpen} onClose={() => setBoostOpen(false)} entityType="listing" entityId={l.id} surface="owner_panel" />
     </Card>
   );
 }

@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import {
-  CalendarPlus, Check, CircleAlert, Clock, DollarSign, Eye, Flag, Globe, Lock, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Share2, ShieldAlert, Users, X,
+  CalendarPlus, Check, CircleAlert, Clock, DollarSign, Eye, Flag, Globe, Lock, MapPin, MessageCircle, MoreHorizontal, Navigation, Pencil, Rocket, Share2, ShieldAlert, Users, X,
 } from 'lucide-react';
 import { ReportReason } from '@shared/enums';
 import { Avatar, Badge, Button, Card, Checkbox, Chip, DropdownMenu, EmptyState, Modal, Select, Skeleton, Tabs, Textarea, TrustBadge } from '@/components';
 import { StaticMapPreview } from '@/components/map';
+import { BoostSheet } from '@/features/billing/components/BoostSheet';
 import { Head } from '@/app/Head';
 import { errorMessage } from '@/app/errors';
 import { ApiError, isApiError } from '@/lib/api';
@@ -93,6 +94,7 @@ export default function BuddyDetail() {
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [boostOpen, setBoostOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState<string>('scam');
   const [reportDetails, setReportDetails] = useState('');
@@ -263,6 +265,7 @@ export default function BuddyDetail() {
             ...(post.status === 'open' || post.status === 'full' ? [{ label: t('buddy.detail.close'), icon: <Lock />, onSelect: () => doStatus('close') }] : []),
             ...(post.status === 'closed' ? [{ label: t('buddy.detail.reopen'), icon: <Users />, onSelect: () => doStatus('reopen') }] : []),
             ...(post.status !== 'cancelled' && post.status !== 'removed' ? [{ label: t('buddy.detail.complete'), icon: <Check />, onSelect: () => doStatus('complete') }] : []),
+            ...((post.status === 'open' || post.status === 'full') && post.author.id === user?.id && !post.sponsored ? [{ label: t('buddy.detail.boost'), icon: <Rocket />, onSelect: () => setBoostOpen(true) }] : []),
             'separator' as const,
             ...(post.status === 'open' || post.status === 'full' ? [{ label: t('buddy.detail.cancel'), icon: <X />, onSelect: () => setCancelOpen(true) }] : []),
             { label: t('buddy.detail.delete'), icon: <X />, danger: true, onSelect: () => setDeleteOpen(true) },
@@ -595,6 +598,8 @@ export default function BuddyDetail() {
         footer={<><Button variant="ghost" onClick={() => setCancelOpen(false)}>{t('common.back')}</Button><Button variant="danger" loading={m.status.isPending} onClick={() => doStatus('cancel', cancelReason.trim() || undefined)}>{t('buddy.detail.cancel')}</Button></>}>
         <Textarea label={t('buddy.detail.cancelReason')} rows={2} maxLength={300} value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} />
       </Modal>
+
+      {isHost && <BoostSheet open={boostOpen} onClose={() => setBoostOpen(false)} entityType="buddy_post" entityId={post.id} surface="owner_panel" />}
 
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={t('buddy.detail.deleteConfirm')} description={t('buddy.detail.deleteConfirmHint')} size="sm"
         footer={<><Button variant="ghost" onClick={() => setDeleteOpen(false)}>{t('common.cancel')}</Button><Button variant="danger" loading={m.remove.isPending} onClick={doDelete}>{t('buddy.detail.delete')}</Button></>} />

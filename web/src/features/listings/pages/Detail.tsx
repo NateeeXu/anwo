@@ -29,6 +29,8 @@ import { OwnerPanel } from '../components/OwnerPanel';
 import { StatsModal } from '../components/OwnerDialogs';
 import { StatusBadge } from '../components/StatusBadge';
 import { markVisited } from './Browse';
+import { SecurePaymentCta } from '@/features/billing/components/EscrowCta';
+import { NearestStopChip } from '@/features/shuttle/components/NearestStopChip';
 
 const ICONS: Record<string, LucideIcon> = {
   wifi: Wifi, 'washing-machine': WashingMachine, snowflake: Snowflake, flame: Flame, utensils: Utensils, dumbbell: Dumbbell, 'arrow-up-down': ArrowUpDown,
@@ -232,6 +234,7 @@ export default function Detail() {
                   {l.distanceToCampusM != null && t('listings.detail.distanceToCampus', { d: formatDistance(l.distanceToCampusM) })}
                   {l.commute?.nearestStop ? ` · ${t('listings.detail.nearestStop', { name: l.commute.nearestStop.name, d: formatDistance(l.commute.nearestStop.distanceM) })}` : l.commute && l.commute.shuttleMin == null ? ` · ${t('listings.detail.commuteNone')}` : ''}
                 </p>
+                {l.commute?.nearestStop && <NearestStopChip campusId={l.campusId} stop={l.commute.nearestStop} distanceM={l.commute.nearestStop.distanceM} radiusM={3000} size="md" className="self-start" />}
                 <Button asChild variant="ghost" size="sm" className="self-start"><Link to={`/map?focus=listing:${l.id}&lat=${l.lat}&lng=${l.lng}`}>{t('listings.detail.openMap')}</Link></Button>
               </div>
             </Card>
@@ -278,8 +281,8 @@ export default function Detail() {
                   <p className="text-small text-ink-2">{formatDateRange(l.availableFrom, l.availableTo, { months: true })}{l.flexibleDates ? ` · ${t('listings.detail.priceRail.flexible')}` : ''} · {t('listings.detail.priceRail.minTerm', { n: l.minTermMonths })}</p>
                 </div>
                 {contactCta}
-                <Button asChild variant="secondary" fullWidth><Link to={`/pricing?escrow=listing:${l.id}`}>{t('listings.detail.priceRail.escrow')}</Link></Button>
-                <p className="text-caption text-ink-3">{t('listings.detail.priceRail.escrowHint')}</p>
+                {/* billing's 安心付 entry: eligibility-aware (state rollout, payee verification, existing payment) */}
+                <SecurePaymentCta listingId={l.id} />
                 <hr className="border-line" />
                 <p className="text-small text-ink-3">{t('listings.detail.priceRail.stats', { views: formatNumber(l.viewCount), saves: formatNumber(l.saveCount), ago: l.publishedAt ? formatRelative(l.publishedAt) : '—' })}</p>
               </Card>

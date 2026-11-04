@@ -1,6 +1,6 @@
 // Public trust profile /u/:id (DESIGN.md §7.8).
 import { useState } from 'react';
-import { CircleCheck, CircleDashed, Flag, MessageCircle, Pencil } from 'lucide-react';
+import { Flag, MessageCircle, Pencil } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { BuddyCard, ItemCard, ListingCard, Paginated, UserProfile } from '@shared/types';
@@ -15,7 +15,11 @@ import { errorMessage } from '../app/errors';
 import { Head } from '../app/Head';
 import { loginPath } from '../app/guards';
 import { CardGrid, QueryState } from './home/Section';
-import { SimpleBuddyCard, SimpleItemCard, SimpleListingCard } from './home/SimpleCards';
+import { ListingCard as ListingCardView } from '../features/listings/components/ListingCard';
+import { ItemCard as ItemCardView } from '../features/market/components/ItemCard';
+import { BuddyCard as BuddyCardView } from '../features/buddy/BuddyCard';
+import { TrustProfileCard } from '../features/verify/TrustProfileCard';
+import { openChatWith } from '../features/chat/api';
 import NotFound from './NotFound';
 
 function ReportModal({ userId, open, onClose }: { userId: string; open: boolean; onClose: () => void }) {
@@ -65,6 +69,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('listings');
   const [report, setReport] = useState(false);
+  const [opening, setOpening] = useState(false);
 
   const profile = useQuery({
     queryKey: ['users', 'profile', id],
@@ -108,13 +113,17 @@ export default function Profile() {
 
   const u = profile.data;
   const isMe = me?.id === u.id;
-  const tp = u.trustProfile;
-  const verifiedRows = [
-    { key: 'edu', ok: tp.eduVerified, at: tp.verifiedAt.edu },
-    { key: 'id', ok: tp.idVerified, at: tp.verifiedAt.id },
-    { key: 'phone', ok: tp.phoneVerified, at: tp.verifiedAt.phone },
-    { key: 'payment', ok: tp.paymentOnFile, at: tp.verifiedAt.payment },
-  ];
+  const startChat = async () => {
+    if (status !== 'authed') return navigate(loginPath(`/u/${u.id}`));
+    setOpening(true);
+    try {
+      await openChatWith({ userId: u.id, source: 'profile', navigate });
+    } catch (err) {
+      toast.error(errorMessage(t, err));
+    } finally {
+      setOpening(false);
+    }
+  };
   const stats = [
     { key: 'responseRate', value: u.responseRate != null ? `${Math.round(u.responseRate * 100)}%` : '—' },
     { key: 'deals', value: formatNumber(u.stats.itemsSold + u.stats.activeListings) },
@@ -148,7 +157,7 @@ export default function Profile() {
             </Button>
           ) : (
             <>
-              <Button variant="primary" size="sm" iconLeft={<MessageCircle />} onClick={() => navigate(status === 'authed' ? `/chat/new?userId=${u.id}` : loginPath(`/u/${u.id}`))}>
+              <Button variant="primary" size="sm" iconLeft={<MessageCircle />} loading={opening} onClick={startChat}>
                 {t('profile.message')}
               </Button>
               <Button variant="ghost" size="sm" iconLeft={<Flag />} onClick={() => (status === 'authed' ? setReport(true) : navigate(loginPath(`/u/${u.id}`)))}>
@@ -180,15 +189,8 @@ export default function Profile() {
         ))}
       </div>
 
-      <Card variant="sunken" padding="sm" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-small">
-        {verifiedRows.map((r) => (
-          <span key={r.key} className={r.ok ? 'flex items-center gap-1.5 text-ink' : 'flex items-center gap-1.5 text-ink-3'}>
-            {r.ok ? <CircleCheck className="size-4 text-success" aria-hidden /> : <CircleDashed className="size-4 text-ink-4" aria-hidden />}
-            {t(`profile.verified.${r.key}`)}
-            {r.ok && r.at && <span className="text-ink-3">{formatDate(r.at, 'month', { year: true })}</span>}
-          </span>
-        ))}
-      </Card>
+      {/* verify module's public trust profile (one implementation everywhere) */}
+      <TrustProfileCard userId={u.id} compact className="mt-4" />
 
       <div className="mt-8">
         <Tabs
@@ -204,17 +206,17 @@ export default function Profile() {
         <div className="mt-4">
           {tab === 'listings' && (
             <QueryState query={listings} skeleton={<CardGrid cols={2}><Skeleton variant="listing-card" /><Skeleton variant="listing-card" /></CardGrid>} isEmpty={(d) => !d.items?.length} empty={<EmptyState size="sm" icon={<NoListings />} title={t('profile.empty.listings')} />}>
-              {(d) => <CardGrid cols={2}>{d.items.map((l) => <SimpleListingCard key={l.id} listing={l} />)}</CardGrid>}
+              {(d) => <CardGrid cols={2}>{d.items.map((l) => <ListingCardView key={l.id} listing={l} showCity />)}</CardGrid>}
             </QueryState>
           )}
           {tab === 'items' && (
             <QueryState query={items} skeleton={<CardGrid cols={3}><Skeleton variant="item-card" /><Skeleton variant="item-card" /><Skeleton variant="item-card" /></CardGrid>} isEmpty={(d) => !d.items?.length} empty={<EmptyState size="sm" icon={<NoItems />} title={t('profile.empty.items')} />}>
-              {(d) => <CardGrid cols={3}>{d.items.map((it) => <SimpleItemCard key={it.id} item={it} />)}</CardGrid>}
+              {(d) => <CardGrid cols={3}>{d.items.map((it) => <ItemCardView key={it.id} item={it} />)}</CardGrid>}
             </QueryState>
           )}
           {tab === 'buddy' && (
             <QueryState query={buddy} skeleton={<CardGrid cols={2}><Skeleton variant="buddy-card" /><Skeleton variant="buddy-card" /></CardGrid>} isEmpty={(d) => !d.items?.length} empty={<EmptyState size="sm" icon={<NoBuddy />} title={t('profile.empty.buddy')} />}>
-              {(d) => <CardGrid cols={2}>{d.items.map((p) => <SimpleBuddyCard key={p.id} post={p} />)}</CardGrid>}
+              {(d) => <CardGrid cols={2}>{d.items.map((p) => <BuddyCardView key={p.id} post={p} />)}</CardGrid>}
             </QueryState>
           )}
         </div>

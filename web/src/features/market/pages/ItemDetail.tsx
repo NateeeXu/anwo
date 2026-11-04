@@ -7,6 +7,7 @@ import type { Item } from '@shared/types';
 import { Badge, Button, Chip, DropdownMenu, EmptyState, Modal, PhotoGallery, Select, Skeleton, Textarea, Input } from '@/components';
 import { NoItems } from '@/components/illustrations';
 import { StaticMapPreview } from '@/components/map';
+import { BoostSheet } from '@/features/billing/components/BoostSheet';
 import { Head } from '@/app/Head';
 import { errorMessage } from '@/app/errors';
 import { ApiError } from '@/lib/api';
@@ -103,6 +104,7 @@ export default function ItemDetail() {
   const [contactOpen, setContactOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [soldOpen, setSoldOpen] = useState(false);
+  const [boostOpen, setBoostOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   if (item.isPending) {
@@ -167,6 +169,7 @@ export default function ItemDetail() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-card bg-sunken px-3 py-2 text-small text-ink-2">
           <span>{t('market.detail.ownerBar')} · <Link to="/market/mine" className="text-ink underline-offset-2 hover:underline">{t('market.mine')}</Link></span>
           <div className="flex items-center gap-2">
+            {d.status === 'active' && !(d.sponsored || d.boostTier) && <Button size="sm" variant="secondary" onClick={() => setBoostOpen(true)}>{t('market.detail.boost')}</Button>}
             {(d.status === 'active' || d.status === 'reserved') && <Button size="sm" variant="secondary" onClick={() => setSoldOpen(true)}>{t('market.detail.markSold')}</Button>}
             <DropdownMenu label={t('market.mine.more')} align="end" trigger={<Button size="sm" variant="ghost">{t('market.mine.more')}</Button>} items={ownerMenu} />
           </div>
@@ -300,6 +303,7 @@ export default function ItemDetail() {
       {!isOwner && <ContactModal item={d} open={contactOpen} onClose={() => setContactOpen(false)} />}
       {!isOwner && <ReportModal itemId={d.id} open={reportOpen} onClose={() => setReportOpen(false)} />}
       {isOwner && <MarkSoldModal item={d} open={soldOpen} onClose={() => setSoldOpen(false)} />}
+      {isOwner && <BoostSheet open={boostOpen} onClose={() => setBoostOpen(false)} entityType="market_item" entityId={d.id} surface="owner_panel" />}
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={t('market.detail.delete')} description={t('market.detail.deleteConfirm')} size="sm" footer={<><Button variant="ghost" onClick={() => setDeleteOpen(false)}>{t('common.cancel')}</Button><Button variant="danger" onClick={onDelete} loading={del.isPending}>{t('common.delete')}</Button></>} />
     </div>
   );

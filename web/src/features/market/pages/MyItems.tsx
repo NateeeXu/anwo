@@ -6,6 +6,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import type { Item } from '@shared/types';
 import { Badge, Button, DropdownMenu, EmptyState, Modal, Skeleton, StatTile, Tabs, type MenuEntry } from '@/components';
 import { NoItems } from '@/components/illustrations';
+import { BoostSheet } from '@/features/billing/components/BoostSheet';
 import { Head } from '@/app/Head';
 import { RequireAuth } from '@/app/guards';
 import { errorMessage } from '@/app/errors';
@@ -20,7 +21,7 @@ import { CategoryIcon, statusLabelKey } from '../components/shared';
 
 const TABS = ['all', 'active', 'reserved', 'draft', 'sold', 'expired'] as const;
 
-function ItemRow({ item, onSold, onDelete }: { item: Item; onSold: () => void; onDelete: () => void }) {
+function ItemRow({ item, onSold, onDelete, onBoost }: { item: Item; onSold: () => void; onDelete: () => void; onBoost: () => void }) {
   const t = useT();
   const navigate = useNavigate();
   const { formatPrice, formatRelative, formatMoney } = useLocale();
@@ -34,6 +35,7 @@ function ItemRow({ item, onSold, onDelete }: { item: Item; onSold: () => void; o
     ...(item.status === 'active' ? [{ label: t('market.detail.reserve'), onSelect: () => run('reserve', 'market.mine.reserved') }] : []),
     ...(item.status === 'reserved' ? [{ label: t('market.detail.unreserve'), onSelect: () => run('unreserve', 'market.mine.unreserved') }] : []),
     ...(item.status === 'expired' || item.status === 'active' ? [{ label: t('market.detail.renew'), onSelect: () => run('renew', 'market.mine.renewed') }] : []),
+    ...(item.status === 'active' ? [{ label: t('market.detail.boost'), onSelect: onBoost }] : []),
     'separator',
     { label: t('market.detail.delete'), danger: true, onSelect: onDelete },
   ];
@@ -83,6 +85,7 @@ function Dashboard() {
   const del = useDeleteItem();
   const [soldItem, setSoldItem] = useState<Item | null>(null);
   const [deleteItem, setDeleteItem] = useState<Item | null>(null);
+  const [boostItem, setBoostItem] = useState<Item | null>(null);
 
   const stats = useMemo(() => {
     const items = all.data?.items ?? [];
@@ -128,7 +131,7 @@ function Dashboard() {
           )
         ) : (
           <ul className="flex flex-col gap-3">
-            {list.data.items.map((it) => <ItemRow key={it.id} item={it} onSold={() => setSoldItem(it)} onDelete={() => setDeleteItem(it)} />)}
+            {list.data.items.map((it) => <ItemRow key={it.id} item={it} onSold={() => setSoldItem(it)} onDelete={() => setDeleteItem(it)} onBoost={() => setBoostItem(it)} />)}
           </ul>
         )}
       </div>
@@ -155,6 +158,7 @@ function Dashboard() {
       </section>
 
       {soldItem && <MarkSoldModal item={soldItem} open onClose={() => setSoldItem(null)} />}
+      {boostItem && <BoostSheet open onClose={() => setBoostItem(null)} entityType="market_item" entityId={boostItem.id} surface="owner_panel" />}
       <Modal open={!!deleteItem} onClose={() => setDeleteItem(null)} title={t('market.detail.delete')} description={t('market.detail.deleteConfirm')} size="sm" footer={<><Button variant="ghost" onClick={() => setDeleteItem(null)}>{t('common.cancel')}</Button><Button variant="danger" loading={del.isPending} onClick={() => deleteItem && del.mutate(deleteItem.id, { onSuccess: () => { toast.success(t('market.mine.deleted')); setDeleteItem(null); }, onError: (e) => toast.error(errorMessage(t, e)) })}>{t('common.delete')}</Button></>} />
     </div>
   );

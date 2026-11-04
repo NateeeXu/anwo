@@ -1,10 +1,12 @@
 // /buddy/mine — 「我的搭子」: upcoming / past tabs, hosting / joined filter, pending-request badge.
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { CircleAlert, Inbox, Plus } from 'lucide-react';
+import { CircleAlert, Inbox, Plus, Rocket } from 'lucide-react';
 import { Button, EmptyState, PageHeader, Pagination, SegmentedControl, SkeletonList, Tabs } from '@/components';
 import { NoBuddy } from '@/components/illustrations';
+import { BoostSheet } from '@/features/billing/components/BoostSheet';
 import { Head } from '@/app/Head';
+import { useAuth } from '@/lib/auth';
 import { RequireAuth } from '@/app/guards';
 import { useT } from '@/lib/i18n';
 import { useBuddyMine } from '../api';
@@ -17,6 +19,8 @@ function MineInner() {
   const when = (params.get('when') === 'past' ? 'past' : 'upcoming') as 'upcoming' | 'past';
   const role = (params.get('role') === 'host' || params.get('role') === 'member' ? params.get('role') : 'all') as 'all' | 'host' | 'member';
   const [page, setPage] = useState(1);
+  const [boostId, setBoostId] = useState<string | null>(null);
+  const { user } = useAuth();
   const query = useBuddyMine({ when, role: role === 'all' ? undefined : role, page });
   const set = (k: string, v: string | null) => {
     const next = new URLSearchParams(params);
@@ -85,12 +89,18 @@ function MineInner() {
           <>
             <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {query.data.items.map((post) => (
-                <li key={post.id} className="min-w-0">
+                <li key={post.id} className="flex min-w-0 flex-col gap-2">
                   <BuddyCard post={post} />
+                  {post.author.id === user?.id && (post.status === 'open' || post.status === 'full') && !post.sponsored && (
+                    <Button variant="ghost" size="sm" iconLeft={<Rocket />} className="self-start" onClick={() => setBoostId(post.id)}>
+                      {t('buddy.detail.boost')}
+                    </Button>
+                  )}
                 </li>
               ))}
             </ul>
             <Pagination className="mt-6" page={page} pageSize={24} total={query.data.total} onChange={setPage} loading={query.isFetching} />
+            {boostId && <BoostSheet open onClose={() => setBoostId(null)} entityType="buddy_post" entityId={boostId} surface="owner_panel" />}
           </>
         )}
       </div>

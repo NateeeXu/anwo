@@ -9,6 +9,7 @@ import { NoListings } from '@/components/illustrations';
 import { useAuth } from '@/lib/auth';
 import { useLocale, useT } from '@/lib/i18n';
 import { Head } from '@/app/Head';
+import { BoostSheet } from '@/features/billing/components/BoostSheet';
 import { RequireAuth } from '@/app/guards';
 import { keys, listingsApi } from '../api';
 import { useListingActions } from '../components/useListingActions';
@@ -27,6 +28,7 @@ function MineInner() {
   const [page, setPage] = useState(1);
   const [leadsFor, setLeadsFor] = useState<Listing | null>(null);
   const [statsFor, setStatsFor] = useState<Listing | null>(null);
+  const [boostFor, setBoostFor] = useState<Listing | null>(null);
   const params = { status: tab === 'all' ? undefined : tab, page, pageSize: 20 };
   const q = useQuery({ queryKey: keys.mine(params), queryFn: () => listingsApi.mine(params) });
   const actions = useListingActions();
@@ -49,7 +51,7 @@ function MineInner() {
     items.push('separator');
     items.push({ key: 'leads', label: t('listings.mine.action.leads'), icon: <MessageCircle className="size-4" />, onSelect: () => setLeadsFor(l) });
     items.push({ key: 'stats', label: t('listings.mine.action.stats'), icon: <ChartColumn className="size-4" />, onSelect: () => setStatsFor(l) });
-    if (l.status === 'active' && !l.activeBoost) items.push({ key: 'boost', label: t('listings.mine.action.boost'), icon: <Rocket className="size-4" />, onSelect: () => navigate(`/pricing?boost=listing:${l.id}`) });
+    if (l.status === 'active' && !l.activeBoost) items.push({ key: 'boost', label: t('listings.mine.action.boost'), icon: <Rocket className="size-4" />, onSelect: () => setBoostFor(l) });
     items.push('separator');
     items.push({ key: 'delete', label: t('listings.mine.action.delete'), icon: <Trash2 className="size-4" />, danger: true, onSelect: () => actions.askDelete(l) });
     return items;
@@ -116,6 +118,7 @@ function MineInner() {
       {actions.dialogs}
       <LeadsModal listing={leadsFor} open={!!leadsFor} onClose={() => setLeadsFor(null)} />
       <StatsModal listing={statsFor} open={!!statsFor} onClose={() => setStatsFor(null)} />
+      {boostFor && <BoostSheet open onClose={() => setBoostFor(null)} entityType="listing" entityId={boostFor.id} surface="owner_panel" />}
     </div>
   );
 }
