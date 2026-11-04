@@ -108,7 +108,7 @@ await step('read the code in /dev/mailbox and verify', async () => {
   await box.goto(`/dev/mailbox?email=${encodeURIComponent(EMAIL)}`);
   await shot(box, 'dev-mailbox');
   const mail = await api(box, 'GET', `/api/dev/mailbox?email=${encodeURIComponent(EMAIL)}`);
-  const items = Array.isArray(mail) ? mail : mail.items;
+  const items = Array.isArray(mail) ? mail : mail.emails ?? mail.items ?? [];
   const code = items.find((m) => m.code)?.code;
   if (!code) throw new Error('no code in the mailbox');
   await box.close();
@@ -124,11 +124,11 @@ await step('read the code in /dev/mailbox and verify', async () => {
 
 await step('pick campus', async () => {
   await sp.goto('/welcome');
-  await sp.getByRole('textbox').first().fill('Northwestern');
+  await sp.getByRole('combobox', { name: /搜索学校或城市/ }).fill('Northwestern');
   await settle(sp, 400);
   await sp.getByRole('option', { name: /Northwestern/ }).first().click();
   await shot(sp, 'pick-campus');
-  await sp.locator('button:not([disabled])', { hasText: /Northwestern|开始|进入|继续/ }).last().click();
+  await sp.getByRole('button', { name: /就是这里|继续/ }).last().click();
   await sp.waitForURL((u) => !u.pathname.startsWith('/welcome'), { timeout: 15000 });
 });
 
@@ -160,7 +160,7 @@ await step('open a listing and message the host', async () => {
   if (!l) throw new Error('host has no active listing');
   hostListingId = l.id;
   await sp.goto(`/listings/${l.id}`);
-  await sp.waitForSelector('h1', { timeout: 15000 });
+  await sp.waitForSelector('#main h1', { timeout: 15000 });
   await shot(sp, 'listing-detail');
   await sp.getByRole('button', { name: '联系房东' }).first().click();
   const dlg = sp.getByRole('dialog');
@@ -225,7 +225,7 @@ await step('join a buddy group', async () => {
   const post = list.items.find((p) => p.status === 'open' && !p.myMembership && !p.requiresApproval && !p.verifiedOnly);
   if (!post) throw new Error('no joinable buddy post');
   await sp.goto(`/buddy/${post.id}`);
-  await sp.waitForSelector('h1', { timeout: 15000 });
+  await sp.waitForSelector('#main h1', { timeout: 15000 });
   await sp.getByRole('button', { name: '加入', exact: true }).first().click();
   const dlg = sp.getByRole('dialog');
   const agree = dlg.getByRole('checkbox');
@@ -252,7 +252,7 @@ await step('post a sublet and boost it through the mock checkout', async () => {
   const id = created.id ?? created.listing?.id;
   if (created.status !== 'active') await api(sp, 'POST', `/api/listings/${id}/publish`);
   await sp.goto(`/listings/${id}`);
-  await sp.waitForSelector('h1', { timeout: 15000 });
+  await sp.waitForSelector('#main h1', { timeout: 15000 });
   await sp.getByRole('button', { name: '推广此房源' }).first().click();
   const sheet = sp.getByRole('dialog');
   await sheet.getByRole('radio', { name: /3 天/ }).first().click();
@@ -272,7 +272,7 @@ await step('post a sublet and boost it through the mock checkout', async () => {
 
 await step('wallet', async () => {
   await sp.goto('/wallet');
-  await sp.waitForSelector('h1', { timeout: 15000 });
+  await sp.waitForSelector('#main h1', { timeout: 15000 });
   await shot(sp, 'wallet');
 });
 await S.browser.close();
@@ -284,7 +284,7 @@ watch(M.page, 'mobile');
 await step('newcomer kit partner click (mobile)', async () => {
   await loginApi(M.page, EMAIL);
   await M.page.goto('/kit');
-  await M.page.waitForSelector('h1', { timeout: 15000 });
+  await M.page.waitForSelector('#main h1', { timeout: 15000 });
   await shot(M.page, 'kit-mobile');
   const link = M.page.locator('a[rel="sponsored noopener"]').first();
   const href = await link.getAttribute('href');
@@ -302,11 +302,11 @@ watch(A.page, 'admin');
 await step('admin dashboard (desktop)', async () => {
   await loginApi(A.page, 'admin@example.edu');
   await A.page.goto('/admin');
-  await A.page.waitForSelector('h1', { timeout: 15000 });
+  await A.page.waitForSelector('#main h1', { timeout: 15000 });
   await settle(A.page, 1000);
   await shot(A.page, 'admin-dashboard');
   await A.page.goto('/admin/revenue');
-  await A.page.waitForSelector('h1', { timeout: 15000 });
+  await A.page.waitForSelector('#main h1', { timeout: 15000 });
   await shot(A.page, 'admin-revenue');
 });
 await A.browser.close();
@@ -315,7 +315,7 @@ watch(AM.page, 'admin-mobile');
 await step('admin dashboard (mobile · EN · dark)', async () => {
   await loginApi(AM.page, 'admin@example.edu');
   await AM.page.goto('/admin');
-  await AM.page.waitForSelector('h1', { timeout: 15000 });
+  await AM.page.waitForSelector('#main h1', { timeout: 15000 });
   await shot(AM.page, 'admin-mobile-en-dark');
 });
 await AM.browser.close();
