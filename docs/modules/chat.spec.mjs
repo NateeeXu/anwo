@@ -114,7 +114,7 @@ await shot(page, KEY, 'thread-group-desktop');
 await page.goto('/chat?tab=unread');
 await page.waitForSelector('a[href^="/chat/chatseed-"]');
 const unreadRows = await page.locator('a[href^="/chat/chatseed-"]').count();
-const initialUnread = inbox.items.filter((c) => c.unreadCount > 0).length;
+const initialUnread = inbox.items.filter((c) => c.unreadCount > 0 && c.id.startsWith('chatseed-')).length; // integrated DB: buddy groups are unread too
 assert(unreadRows >= initialUnread - 2, `未读 tab lists ${unreadRows} threads (two were just opened and read)`);
 await page.getByRole('tab', { name: /归档|Archived/ }).click();
 await page.waitForTimeout(800);

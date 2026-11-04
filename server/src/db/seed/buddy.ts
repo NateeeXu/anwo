@@ -534,12 +534,13 @@ export default async function seed(_db: DatabaseSync): Promise<void> {
   const ids = POSTS.map((p) => postId(p.key));
   q.tx(() => {
     // idempotent: wipe previous buddy seed (posts cascade members/events; group chats + their messages; bell notifications)
-    const oldConvs = q.all<{ id: string }>("SELECT id FROM conversations WHERE context_type = 'buddy_post'").map((r) => r.id);
+    // (rows owned by the chat seed — ids prefixed `chatseed-` — are left alone so the chat demo group threads survive)
+    const oldConvs = q.all<{ id: string }>("SELECT id FROM conversations WHERE context_type = 'buddy_post' AND id NOT LIKE 'chatseed-%'").map((r) => r.id);
     for (const c of oldConvs) q.run('DELETE FROM conversations WHERE id = ?', [c]);
-    q.run("DELETE FROM notifications WHERE entity_type = 'buddy_post'");
-    q.run("DELETE FROM events WHERE entity_type = 'buddy_post'");
-    q.run('DELETE FROM buddy_posts');
-    q.run("DELETE FROM reports WHERE entity_type = 'buddy_post'");
+    q.run("DELETE FROM notifications WHERE entity_type = 'buddy_post' AND (entity_id IS NULL OR entity_id NOT LIKE 'chatseed-%')");
+    q.run("DELETE FROM events WHERE entity_type = 'buddy_post' AND (entity_id IS NULL OR entity_id NOT LIKE 'chatseed-%')");
+    q.run("DELETE FROM buddy_posts WHERE id NOT LIKE 'chatseed-%'");
+    q.run("DELETE FROM reports WHERE entity_type = 'buddy_post' AND entity_id NOT LIKE 'chatseed-%'");
 
     POSTS.forEach((p, i) => {
       const id = ids[i]!;
