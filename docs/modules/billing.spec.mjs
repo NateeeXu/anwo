@@ -219,7 +219,10 @@ step = 'boost-click'
   if (sp) {
     const before = (await a.api(`/api/billing/boosts/${sp.boostId}/stats`)).data?.boost?.clicks ?? 0
     const v = await session({ email: 'bob@u.northwestern.edu' })
-    await v.page.goto(`/listings/${sp.id}?src=sponsored&boost=${sp.boostId}`); await settle(v.page)
+    // the detail page fetches GET /api/listings/:id?boost=<id> (Detail.tsx); call it directly — the page itself loads
+    // OSM tiles, which the offline sandbox cannot reach
+    const det = await v.api(`/api/listings/${sp.id}?boost=${sp.boostId}`)
+    ok(det.status === 200, 'sponsored detail loads')
     await finish(v.browser)
     const after = (await a.api(`/api/billing/boosts/${sp.boostId}/stats`)).data?.boost?.clicks ?? 0
     ok(after >= before + 1, `boosts.clicks increments on a sponsored click (${before} → ${after})`)
