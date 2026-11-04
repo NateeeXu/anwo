@@ -21,7 +21,8 @@ import { createReport } from '../../lib/reports';
 import { getCampus } from '../../lib/campuses';
 import { loadUsersPublic } from '../../lib/users';
 import { isPro } from '../../lib/trust';
-import { openConversation, postContextCard, postMessage, isBlockedEither } from '../../lib/conversations';
+import { openConversation, postContextCard, isBlockedEither } from '../../lib/conversations';
+import { sendMessage as sendChatMessage } from '../chat/service';
 import { nowIso, nowMs, DAY } from '../../lib/time';
 import { config } from '../../config';
 import {
@@ -419,6 +420,8 @@ router.post('/:id/contact', requireAuth, writes, async (req, res) => {
   const cap = me.trust_level >= 2 ? 50 : me.trust_level >= 1 ? 20 : 5;
   const started = q.count('SELECT COUNT(*) FROM conversations WHERE created_by = ? AND created_at >= ?', [me.id, since]);
   const { conversation, created } = openConversation({ kind: 'direct', memberIds: [me.id, row.owner_id], campusId: row.campus_id, context: { type: 'listing', id }, createdBy: me.id });
+  // contact goes through the chat service: admin locks, verified-only and the daily message cap apply here too
+  if (conversation.is_locked === 1) throw new ApiError('FORBIDDEN', 'This conversation is locked');
   if (created && started >= cap) {
     q.run('DELETE FROM conversations WHERE id = ?', [conversation.id]);
     throw new ApiError('QUOTA_EXCEEDED', 'Daily new conversation cap reached', { data: { limit: cap, current: started } });
@@ -427,7 +430,7 @@ router.post('/:id/contact', requireAuth, writes, async (req, res) => {
     const card = listingContextCard(id);
     if (card) postContextCard(conversation.id, me.id, card);
   }
-  if (body.message) postMessage(conversation.id, me.id, 'text', body.message);
+  if (body.message) sendChatMessage({ conversationId: conversation.id, senderId: me.id, kind: 'text', body: body.message });
   const lead = recordLead({ listingId: id, userId: me.id, conversationId: conversation.id, source: 'message' });
   logEvent(req, 'listing.contact_click', { entityType: 'listing', entityId: id, campusId: row.campus_id, props: { created, leadCreated: lead.created } });
   if (created) logEvent(req, 'chat.start', { entityType: 'conversation', entityId: conversation.id, props: { context: 'listing', listingId: id } });

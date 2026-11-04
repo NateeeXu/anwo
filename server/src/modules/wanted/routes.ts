@@ -16,7 +16,8 @@ import { logEvent, recentlyLogged } from '../../lib/events';
 import { createReport } from '../../lib/reports';
 import { notify } from '../../lib/notify';
 import { audit } from '../../lib/audit';
-import { contextCardFor, isBlockedEither, openConversation, postContextCard, postMessage } from '../../lib/conversations';
+import { contextCardFor, isBlockedEither, openConversation, postContextCard } from '../../lib/conversations';
+import { sendMessage as sendChatMessage } from '../chat/service';
 import { nowIso, HOUR } from '../../lib/time';
 import { logger } from '../../lib/logger';
 import * as listingsService from '../listings/service';
@@ -414,13 +415,15 @@ router.post('/:id/matches/:listingId/contact', requireAuth, requireTrust(1), (re
   const host = q.get<{ verified_only_messaging: number; banned: number }>('SELECT verified_only_messaging, banned FROM users WHERE id = ?', [l.owner_id]);
   if (host?.verified_only_messaging === 1 && (req.user!.trust_level ?? 0) < 1) throw new ApiError('VERIFIED_ONLY');
   const { conversation, created } = openConversation({ kind: 'direct', memberIds: [req.user!.id, l.owner_id], campusId: l.campus_id, context: { type: 'listing', id: l.id }, createdBy: req.user!.id });
+  // contact goes through the chat service: admin locks, verified-only and the daily message cap apply here too
+  if (conversation.is_locked === 1) throw new ApiError('FORBIDDEN', 'This conversation is locked');
   if (created) {
     const card = contextCardFor('listing', l.id);
     if (card) postContextCard(conversation.id, req.user!.id, card);
     const wcard = contextCardFor('wanted', w.id);
     if (wcard) postContextCard(conversation.id, req.user!.id, wcard);
   }
-  if (body.message) postMessage(conversation.id, req.user!.id, 'text', body.message);
+  if (body.message) sendChatMessage({ conversationId: conversation.id, senderId: req.user!.id, kind: 'text', body: body.message });
   q.run("UPDATE matches SET status = 'contacted', conversation_id = ?, updated_at = ? WHERE id = ?", [conversation.id, nowIso(), m.id]);
   recordLeadSafe({ listingId: l.id, userId: req.user!.id, conversationId: conversation.id, source: 'message' });
   logEvent(req, 'listing.contact_click', { entityType: 'listing', entityId: l.id, props: { via: 'wanted_match', wantedId: w.id, score: m.score } });
@@ -446,6 +449,8 @@ router.post('/:id/offer', requireAuth, requireTrust(1), (req, res) => {
   if (existing && existing.offered_by_host === 1) throw new ApiError('CONFLICT', 'You already offered this listing', { data: { conversationId: existing.conversation_id } });
 
   const { conversation, created } = openConversation({ kind: 'direct', memberIds: [hostId, w.user_id], campusId: l.campus_id, context: { type: 'listing', id: l.id }, createdBy: hostId });
+  // contact goes through the chat service: admin locks, verified-only and the daily message cap apply here too
+  if (conversation.is_locked === 1) throw new ApiError('FORBIDDEN', 'This conversation is locked');
   if (created) {
     const lc = contextCardFor('listing', l.id);
     if (lc) postContextCard(conversation.id, hostId, lc);
@@ -454,7 +459,7 @@ router.post('/:id/offer', requireAuth, requireTrust(1), (req, res) => {
   }
   const t = nowIso();
   const intro = body.message?.trim();
-  postMessage(conversation.id, hostId, 'text', intro || (req.user!.locale === 'en' ? `Hi! I saw your request “${w.title}” — my place might fit. Happy to share details.` : `你好！看到你的求租「${w.title}」，我这边有一套房源可能合适，欢迎了解。`));
+  sendChatMessage({ conversationId: conversation.id, senderId: hostId, kind: 'text', body: intro || (req.user!.locale === 'en' ? `Hi! I saw your request “${w.title}” — my place might fit. Happy to share details.` : `你好！看到你的求租「${w.title}」，我这边有一套房源可能合适，欢迎了解。`) });
 
   q.tx(() => {
     if (existing) {

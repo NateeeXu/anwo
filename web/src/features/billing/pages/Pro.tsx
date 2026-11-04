@@ -152,6 +152,7 @@ function ProDashboard({ data }: { data: SubscriptionData }) {
   const cancel = useCancelSubscription();
   const resume = useResumeSubscription();
   const changePlan = useChangePlan();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<'overview' | 'leads' | 'billing'>('overview');
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [planModal, setPlanModal] = useState(false);
@@ -194,6 +195,7 @@ function ProDashboard({ data }: { data: SubscriptionData }) {
               <MoneyLine label={sub.plan.interval === 'year' ? t('billing.pro.perYear') : t('billing.pricing.pro.perMonth')} cents={sub.plan.priceCents} />
               <p className="text-caption text-ink-3">{t('billing.pro.renewsOn', { date: formatDate(sub.currentPeriodEnd) })}{sub.paymentMethod ? ` · ${sub.paymentMethod.brand} •••• ${sub.paymentMethod.last4}` : ''}</p>
               <p className="text-caption text-ink-3">{t('billing.pro.seats', { n: sub.seats })}</p>
+              {sub.pendingPlan && <p className="text-caption text-ink-2">{t('billing.pro.planScheduled', { plan: planName(sub.pendingPlan), date: formatDate(sub.currentPeriodEnd) })}</p>}
               <div className="mt-2 flex flex-col gap-2">
                 <Button variant="secondary" size="sm" onClick={() => setPlanModal(true)}>{t('billing.pro.changePlan')}</Button>
                 {!endsSoon && <Button variant="ghost" size="sm" onClick={() => setConfirmCancel(true)}>{t('billing.pro.cancel')}</Button>}
@@ -211,7 +213,7 @@ function ProDashboard({ data }: { data: SubscriptionData }) {
         <ul className="flex flex-col gap-2">
           {data.plans.map((p: PlanDto) => (
             <li key={p.id}>
-              <button type="button" disabled={p.id === sub.planId || changePlan.isPending} onClick={() => changePlan.mutate(p.id, { onSuccess: () => { setPlanModal(false); toast.success(t('billing.pro.planChanged')); }, onError: (e) => toast.error(errorMessage(t, e)) })} className={cn('flex w-full items-center justify-between rounded-card border px-3 py-2 text-left text-small', p.id === sub.planId ? 'border-accent bg-accent-soft text-ink' : 'border-line bg-surface text-ink hover:border-line-strong')}>
+              <button type="button" disabled={p.id === sub.planId || changePlan.isPending} onClick={() => changePlan.mutate(p.id, { onSuccess: (r) => { setPlanModal(false); if (r.order) navigate(`/checkout/${r.order.id}`); else toast.success(r.pendingPlan ? t('billing.pro.planScheduled', { plan: planName(r.pendingPlan), date: formatDate(r.currentPeriodEnd) }) : t('billing.pro.planChanged')); }, onError: (e) => toast.error(errorMessage(t, e)) })} className={cn('flex w-full items-center justify-between rounded-card border px-3 py-2 text-left text-small', p.id === sub.planId ? 'border-accent bg-accent-soft text-ink' : 'border-line bg-surface text-ink hover:border-line-strong')}>
                 <span>{planName(p)}</span><span className="tnum">{formatMoney(p.priceCents)}</span>
               </button>
             </li>

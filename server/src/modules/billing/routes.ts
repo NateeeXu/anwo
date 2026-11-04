@@ -1,6 +1,7 @@
 // server/src/modules/billing/routes.ts — OWNED BY THE `billing` MODULE AGENT. Mounted at /api/billing (API.md §11).
 // Sections: catalog · wallet/promo/payment methods · orders + mock Stripe · boosts · Landlord Pro · Secure Payment (escrows) ·
 // referrals · Newcomer Kit partners · sponsor leads · admin. Static paths are declared before `/:id` routes.
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Router, type Request } from 'express';
 import { z } from 'zod';
 import type { ListingCard, UserPublic } from '@shared/types';
@@ -639,23 +640,31 @@ router.get('/partners/:slug/go', (req, res) => {
   const target = partner.affiliate_url.replace(/\{\{clickId\}\}/g, clickId).replace(/\{\{campusId\}\}/g, encodeURIComponent(campusId ?? 'none')).replace(/\{\{assocTag\}\}/g, 'anwo-20');
   res.redirect(302, target);
 });
+/** Per-partner postback secret: partners.postback_secret, or one derived from the server secret (shown to admins). */
+function partnerPostbackSecret(p: PartnerRow & { postback_secret?: string | null }): string {
+  return p.postback_secret || createHmac('sha256', config.jwtSecret).update(`partner-postback:${p.id}`).digest('hex');
+}
+// Server-to-server conversion postback. Authenticated by `X-Anwo-Signature` = hex HMAC-SHA256(secret, `${clickId}.${payoutCents ?? ''}`)
+// (CSRF-exempt because networks cannot send X-Requested-With; the signature is the authentication). Unknown click ids
+// are rejected instead of creating rows.
 router.post('/partners/:slug/converted', (req, res) => {
   const { slug } = parseParams(req, slugParam);
   const body = parseBody(req, PartnerConvertedInput);
   const partner = loadPartner(slug);
   if (!partner) throw notFound('Partner');
+  checkRate(`postback:${partner.id}`, 300, 60_000);
+  const sig = Buffer.from(String(req.get('x-anwo-signature') ?? '').trim(), 'hex');
+  const want = Buffer.from(createHmac('sha256', partnerPostbackSecret(partner)).update(`${body.clickId}.${body.payoutCents ?? ''}`).digest('hex'), 'hex');
+  if (sig.length !== want.length || !timingSafeEqual(sig, want)) throw new ApiError('UNAUTHORIZED', 'Invalid postback signature');
   const click = q.get<{ id: string; converted: number; campus_id: string | null }>('SELECT id, converted, campus_id FROM partner_clicks WHERE id = ? AND partner_id = ?', [body.clickId, partner.id]);
+  if (!click) throw notFound('Click');
   const payout = body.payoutCents ?? partner.payout_cents;
   const t = nowIso();
-  if (click) {
-    if (click.converted === 1) return ok(res, { ok: true, duplicate: true });
-    q.run('UPDATE partner_clicks SET converted = 1, converted_at = ?, payout_cents = ? WHERE id = ?', [t, payout, click.id]);
-    q.run("INSERT INTO partner_conversions (id, partner_id, click_id, network_ref, payout_cents, status, source, campus_id, occurred_at) VALUES (?, ?, ?, ?, ?, 'pending', 'postback', ?, ?)", [uid(), partner.id, click.id, `postback:${click.id}`, payout, click.campus_id, t]);
-  } else {
-    q.run("INSERT OR IGNORE INTO partner_conversions (id, partner_id, click_id, network_ref, payout_cents, status, source, campus_id, occurred_at) VALUES (?, ?, NULL, ?, ?, 'pending', 'postback', NULL, ?)", [uid(), partner.id, `postback:${body.clickId}`, payout, t]);
-  }
-  logEvent(req, 'affiliate.conversion', { entityType: 'partner', entityId: partner.id, props: { slug: partner.slug, payoutCents: payout, source: 'postback', status: click ? 'matched' : 'unmatched' } });
-  ok(res, { ok: true, matched: !!click });
+  if (click.converted === 1) return ok(res, { ok: true, duplicate: true });
+  q.run('UPDATE partner_clicks SET converted = 1, converted_at = ?, payout_cents = ? WHERE id = ?', [t, payout, click.id]);
+  q.run("INSERT INTO partner_conversions (id, partner_id, click_id, network_ref, payout_cents, status, source, campus_id, occurred_at) VALUES (?, ?, ?, ?, ?, 'pending', 'postback', ?, ?)", [uid(), partner.id, click.id, `postback:${click.id}`, payout, click.campus_id, t]);
+  logEvent(req, 'affiliate.conversion', { entityType: 'partner', entityId: partner.id, props: { slug: partner.slug, payoutCents: payout, source: 'postback', status: 'matched' } });
+  ok(res, { ok: true, matched: true });
 });
 router.post('/partners/:slug/report', requireAuth, writes, (req, res) => {
   const { slug } = parseParams(req, slugParam);
@@ -843,6 +852,13 @@ admin.delete('/partners/:id', writes, (req, res) => {
   q.run('UPDATE partners SET is_active = 0, updated_at = ? WHERE id = ?', [nowIso(), before.id]);
   audit(req, { action: 'partner.update', entityType: 'partner', entityId: before.id, before: { isActive: true }, after: { isActive: false }, reason: 'deactivated' });
   ok(res, null);
+});
+admin.get('/partners/:id/postback-secret', (req, res) => {
+  const { id } = parseParams(req, idParam);
+  const p = loadPartner(id);
+  if (!p) throw notFound('Partner');
+  audit(req, { action: 'partner.view_postback_secret', entityType: 'partner', entityId: p.id });
+  ok(res, { secret: partnerPostbackSecret(p), signs: '${clickId}.${payoutCents}', header: 'X-Anwo-Signature' });
 });
 admin.get('/partners/:id/clicks', (req, res) => {
   const { id } = parseParams(req, idParam);

@@ -14,7 +14,7 @@ import { DAY, HOUR, nowIso, nowMs } from '../../lib/time';
 import { loadUsersPublic, loadUserPublic } from '../../lib/users';
 import { buddyCards, itemCards, listingCards, type BuddyCardRow, type ItemCardRow, type ListingCardRow } from '../../lib/cards';
 import { recordClick, recordImpressions, sponsoredSlotCount, mergeSponsored, type PickSponsoredInput, type SponsoredPick } from '../../lib/sponsored';
-import { contextCardFor, postContextCard, postSystemMessage, openConversation as openRawConversation } from '../../lib/conversations';
+import { contextCardFor, isBlockedEither, postContextCard, postSystemMessage, openConversation as openRawConversation } from '../../lib/conversations';
 import { getCampus } from '../../lib/campuses';
 import { hasSupplyProof } from '../verify/service';
 import { recomputeTrust } from '../../lib/trust';
@@ -1030,6 +1030,18 @@ export function createEscrow(user: AuthUser, input: { listingId: string; counter
   const payerId = input.role === 'payer' ? user.id : input.counterpartyId;
   const payeeId = input.role === 'payer' ? input.counterpartyId : user.id;
   if (payeeId !== listing.owner_id && user.role !== 'admin') throw new ApiError('FORBIDDEN', 'The payee must be the listing host');
+  // a proposal opens a thread and notifies the other side: same rules as messaging (blocks, a cap on open proposals)
+  // and a host asking for money (role payee) must already be talking to that tenant — no "pay me a deposit" requests
+  // pushed at strangers. A tenant paying the listing's host needs no prior thread (it is the listing's contact path).
+  if (isBlockedEither(payerId, payeeId)) throw new ApiError('BLOCKED', 'You cannot start a Secure Payment with this user');
+  if (user.role !== 'admin') {
+    const talked = input.role === 'payer' ? true : !!q.get("SELECT 1 FROM conversations c JOIN conversation_members a ON a.conversation_id = c.id AND a.user_id = ? JOIN conversation_members b ON b.conversation_id = c.id AND b.user_id = ? WHERE c.kind = 'direct' AND c.is_locked = 0 LIMIT 1", [payerId, payeeId]);
+    if (!talked) throw new ApiError('FORBIDDEN', 'Message each other about this listing before proposing a Secure Payment', { data: { reason: 'no_conversation' } });
+    const recipient = q.get<{ verified_only_messaging: number }>('SELECT verified_only_messaging FROM users WHERE id = ?', [input.counterpartyId]);
+    if (recipient?.verified_only_messaging === 1 && user.trust_level < 1) throw new ApiError('VERIFIED_ONLY', 'This user accepts verified users only');
+    const openByMe = q.count("SELECT COUNT(*) FROM escrows WHERE created_by = ? AND status = 'proposed'", [user.id]);
+    if (openByMe >= 5) throw new ApiError('QUOTA_EXCEEDED', 'Too many open Secure Payment proposals', { data: { limit: 5, current: openByMe } });
+  }
   const open = q.get<{ id: string }>("SELECT id FROM escrows WHERE listing_id = ? AND move_in_date = ? AND status IN ('proposed','accepted','funded','in_inspection','disputed')", [input.listingId, input.moveInDate]);
   if (open) throw new ApiError('CONFLICT', 'An open Secure Payment already exists for this listing and move-in date', { data: { escrowId: open.id } });
   const quote = quoteEscrowFee(input.amountCents, input.feePayer, input.rail);
