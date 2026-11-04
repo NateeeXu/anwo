@@ -28,12 +28,14 @@ import { recomputeTrust } from '../../lib/trust';
 import { DAY, nowIso, nowMs } from '../../lib/time';
 import { loadUsersPublic } from '../../lib/users';
 import { hasSupplyProof } from '../verify/service';
+import { config } from '../../config';
+import { mockStripe, verifyMockWebhook } from './mockStripe';
 import type { AuthUser } from '../../lib/types';
 import {
   activePlans, bindBillingHooks, boostStats, cancelBoost, cancelOrder, cancelSubscription, createEscrow, createOrder, currentBoost, currentSubscription, entityCard, entityEligibility, escrowPlan,
   estimatedReach, expiringSoon, hasUsedTrial, isProUser, latestPayment, ledgerAppend, listPartners, listPaymentMethods, loadBoost, loadEntity, loadEscrow, loadOrder, loadPartner, loadPlan, payOrder,
   payeeEligible, planLock, quoteEscrowFee, recordClick, redeemWalletPromo, referralSummary, refundOrder, repriceOrder, requireEscrow, requireOrder, requirePlan, resumeSubscription, revenueSummary,
-  savePaymentMethod, settleOrder, sponsoredCards, toBoostDto, toEscrowDto, toLedgerDto, toOrderDto, toPartnerDto, toPaymentMethodDto, toPlanDto, toPromoDto, toSubscriptionDto,
+  savePaymentMethod, settleOrder, sponsoredCards, toPartyOrderDto, toBoostDto, toEscrowDto, toLedgerDto, toOrderDto, toPartnerDto, toPaymentMethodDto, toPlanDto, toPromoDto, toSubscriptionDto,
   transitionEscrow, validatePromo, walletBalance, PARTNER_SELECT, type BoostRow, type EscrowRow, type LedgerRow, type OrderRow, type PartnerRow, type PaymentMethodRow, type PlanRow, type PromoRow, type SubscriptionRow,
 } from './service';
 
@@ -180,18 +182,18 @@ router.post('/orders', requireAuth, writes, (req, res) => {
     if (isPack) metadata.fulfils = ['boost.listing.basic.14d', 'boost.bundle.basic.7d'];
     logEvent(req, 'boost.tier_selected', { entityType: e.type, entityId: e.id, props: { planKey: plan.key, addons: addons.map((a) => a.key) } });
     const order = createOrder(user, { kind: 'boost', plan, entityType: e.type, entityId: e.id, campusId: e.campusId, subtotalCents: subtotal, addons, promoCode: body.promoCode, useWallet: body.useWallet, metadata, surface: body.surface }, req);
-    return ok(res, toOrderDto(order), 201);
+    return ok(res, toOrderDto(order, { checkout: true }), 201);
   }
   if (body.kind === 'subscription') {
     const result = startSubscription(user, { planId: body.planId ?? 'pro.monthly', trial: body.trial, promoCode: body.promoCode }, req);
-    return ok(res, toOrderDto(result.order), 201);
+    return ok(res, toOrderDto(result.order, { checkout: true }), 201);
   }
   // escrow_deposit
   if (!body.escrowId) throw new ApiError('VALIDATION', 'escrowId is required', { fields: { escrowId: 'required' } });
   const escrow = requireEscrow(body.escrowId);
   if (escrow.payer_id !== user.id) throw new ApiError('FORBIDDEN', 'Only the payer funds a Secure Payment');
   const order = createEscrowOrder(user, escrow, body.promoCode, req);
-  ok(res, toOrderDto(order), 201);
+  ok(res, toOrderDto(order, { checkout: true }), 201);
 });
 function requireEntityForBoost(user: AuthUser, type: 'listing' | 'market_item' | 'buddy_post', id: string) {
   const e = loadEntity(type, id);
@@ -278,14 +280,17 @@ router.post('/orders/:id/cancel', requireAuth, (req, res) => {
   assertOwner(req, o.user_id);
   ok(res, toOrderDto(cancelOrder(o)));
 });
-router.post('/mock-stripe/webhook', (req, res) => {
+// Mock provider webhook: mounted only outside production (or with BILLING_MOCK=1) and only for events signed with the
+// mock webhook secret (`Mock-Stripe-Signature`, see mockStripe.signMockWebhook). Unsigned events are rejected.
+if (config.billingMock) router.post('/mock-stripe/webhook', (req, res) => {
   const body = parseBody(req, WebhookInput);
-  const pay = q.get<{ id: string; order_id: string; status: string }>('SELECT id, order_id, status FROM payments WHERE provider_intent_id = ?', [body.intentId]);
+  if (!verifyMockWebhook(body.type, body.intentId, req.get('mock-stripe-signature'))) throw new ApiError('UNAUTHORIZED', 'Invalid webhook signature');
+  const pay = q.get<{ id: string; order_id: string; status: string; provider: string }>("SELECT id, order_id, status, provider FROM payments WHERE provider_intent_id = ? AND provider = 'mock_stripe'", [body.intentId]);
   if (!pay) throw notFound('Payment intent');
   const o = requireOrder(pay.order_id);
   if (body.type === 'payment_intent.succeeded' && ['awaiting_payment', 'failed'].includes(o.status)) {
     const t = nowIso();
-    q.run("UPDATE payments SET status = 'succeeded', succeeded_at = ?, updated_at = ? WHERE id = ?", [t, t, pay.id]);
+    q.run("UPDATE payments SET status = 'succeeded', provider_charge_id = COALESCE(provider_charge_id, ?), succeeded_at = ?, updated_at = ? WHERE id = ?", [mockStripe.chargeFor(body.intentId), t, t, pay.id]);
     settleOrder(o, { ...(latestPayment(o.id)!), status: 'succeeded' }, req);
   } else if (body.type === 'payment_intent.payment_failed' && o.status === 'awaiting_payment') {
     q.run("UPDATE payments SET status = 'failed', failure_code = ?, updated_at = ? WHERE id = ?", [body.failureCode ?? 'card_declined', nowIso(), pay.id]);
@@ -377,7 +382,7 @@ router.get('/subscription', requireAuth, (req, res) => {
 router.post('/subscription', requireAuth, writes, (req, res) => {
   const body = parseBody(req, SubscribeInput);
   const r = startSubscription(me(req), body, req);
-  ok(res, { subscription: r.subscription ? toSubscriptionDto(r.subscription) : null, order: toOrderDto(r.order) }, 201);
+  ok(res, { subscription: r.subscription ? toSubscriptionDto(r.subscription) : null, order: toOrderDto(r.order, { checkout: true }) }, 201);
 });
 router.post('/subscription/cancel', requireAuth, writes, (req, res) => {
   const body = parseBody(req, CancelSubscriptionInput);
@@ -530,7 +535,9 @@ router.get('/escrows/:id/receipt', requireAuth, (req, res) => {
   const e = requireEscrow(id);
   const user = requireParty(req, e);
   const order = e.order_id ? loadOrder(e.order_id) : undefined;
-  ok(res, { escrow: toEscrowDto(e, user), order: order ? toOrderDto(order, { withPayments: true }) : null, generatedAt: nowIso(), testMode: true });
+  // the payee (or anyone but the payer) sees amounts and status only — never the payer's card or provider ids
+  const orderDto = order ? (order.user_id === user.id ? toOrderDto(order, { withPayments: true }) : user.role === 'admin' ? toOrderDto(order, { withPayments: true, admin: true }) : toPartyOrderDto(order)) : null;
+  ok(res, { escrow: toEscrowDto(e, user), order: orderDto, generatedAt: nowIso(), testMode: true });
 });
 router.post('/escrows/:id/accept', requireAuth, writes, (req, res) => {
   const { id } = parseParams(req, idParam);
@@ -720,7 +727,7 @@ admin.get('/orders', (req, res) => {
   const total = q.count(`SELECT COUNT(*) FROM orders o JOIN users u ON u.id = o.user_id WHERE ${where.join(' AND ')}`, params);
   const rows = q.all<OrderRow & { email: string }>(`SELECT o.*, u.email FROM orders o JOIN users u ON u.id = o.user_id WHERE ${where.join(' AND ')} ORDER BY o.created_at DESC LIMIT ? OFFSET ?`, [...params, limit, offset]);
   const users = userCards(rows.map((r) => r.user_id));
-  paginated(res, { items: rows.map((r) => ({ ...toOrderDto(r), user: users.get(r.user_id) ?? null, email: r.email })), total, page: p.page, pageSize: p.pageSize });
+  paginated(res, { items: rows.map((r) => ({ ...toOrderDto(r, { admin: true }), user: users.get(r.user_id) ?? null, email: r.email })), total, page: p.page, pageSize: p.pageSize });
 });
 admin.post('/orders/:id/refund', writes, (req, res) => {
   const { id } = parseParams(req, idParam);
@@ -728,7 +735,7 @@ admin.post('/orders/:id/refund', writes, (req, res) => {
   const o = requireOrder(id);
   const after = refundOrder(o, body.amountCents, me(req).id, body.reason, req);
   audit(req, { action: 'order.refund', entityType: 'order', entityId: id, before: { status: o.status }, after: { status: after.status, amountCents: body.amountCents ?? o.total_cents }, reason: body.reason });
-  ok(res, toOrderDto(after, { withPayments: true }));
+  ok(res, toOrderDto(after, { withPayments: true, admin: true }));
 });
 admin.get('/escrows', (req, res) => {
   const p = parseQuery(req, AdminEscrowsQuery);

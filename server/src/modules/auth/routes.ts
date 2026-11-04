@@ -4,11 +4,11 @@ import { z } from 'zod';
 import { EmailSchema, PasswordSchema } from '@shared/schemas/common';
 import { q, uid } from '../../db';
 import {
-  clearSessionCookie, hashPassword, loadUser, loadUserByEmail, requireAuth, setCampusCookie, setSessionCookie, signSession, verifyPassword,
+  bumpSessionVersion, clearSessionCookie, hashPassword, loadUser, loadUserByEmail, requireAuth, setCampusCookie, setSessionCookie, signSession, verifyPassword,
 } from '../../lib/auth';
 import { ApiError } from '../../lib/errors';
 import { ok, parseBody } from '../../lib/http';
-import { rateLimit } from '../../lib/ratelimit';
+import { checkRate, rateLimit } from '../../lib/ratelimit';
 import { toUserMe } from '../../lib/users';
 import { referralCode } from '../../lib/ids';
 import { nowIso } from '../../lib/time';
@@ -88,6 +88,8 @@ router.post('/register', authLimit, async (req, res) => {
 
 router.post('/login', authLimit, async (req, res) => {
   const body = parseBody(req, z.object({ email: EmailSchema, password: z.string().min(1).max(72) }));
+  // per-account throttle, independent of the client IP (password spraying from many addresses)
+  checkRate(`login:${body.email.trim().toLowerCase()}`, 10, 15 * 60_000);
   const user = loadUserByEmail(body.email);
   if (!user || !(await verifyPassword(body.password, user.password_hash))) throw new ApiError('INVALID_CREDENTIALS', 'Email or password is incorrect');
   setSessionCookie(res, await signSession(user));
@@ -98,6 +100,13 @@ router.post('/login', authLimit, async (req, res) => {
 });
 
 router.post('/logout', requireAuth, (_req, res) => {
+  clearSessionCookie(res);
+  ok(res, null);
+});
+/** Revokes every session of this account (all devices), including the current one. */
+router.post('/logout-all', requireAuth, (req, res) => {
+  bumpSessionVersion(req.user!.id);
+  kickUser(req.user!.id);
   clearSessionCookie(res);
   ok(res, null);
 });
@@ -139,6 +148,7 @@ router.post('/reset-password', authLimit, async (req, res) => {
   if (!user) throw new ApiError('CODE_INVALID', 'Incorrect code');
   verifyEmailCode(body.email, 'password_reset', body.code);
   q.run('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?', [await hashPassword(body.password), nowIso(), user.id]);
+  bumpSessionVersion(user.id); // a stolen session cookie stops working after a reset
   kickUser(user.id);
   ok(res, null);
 });
@@ -148,6 +158,10 @@ router.post('/change-password', requireAuth, authLimit, async (req, res) => {
   const row = q.get<{ password_hash: string }>('SELECT password_hash FROM users WHERE id = ?', [req.user!.id])!;
   if (!(await verifyPassword(body.currentPassword, row.password_hash))) throw new ApiError('INVALID_CREDENTIALS', 'Current password is incorrect');
   q.run('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?', [await hashPassword(body.newPassword), nowIso(), req.user!.id]);
+  // log out every other session, then re-issue this one with the new session version
+  bumpSessionVersion(req.user!.id);
+  kickUser(req.user!.id);
+  setSessionCookie(res, await signSession(req.user!));
   ok(res, null);
 });
 

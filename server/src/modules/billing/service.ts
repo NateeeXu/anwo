@@ -436,9 +436,10 @@ export function syncPausedBoosts(): void {
 }
 
 // ====================================================================== orders & payments
-export function toPaymentDto(r: PaymentRow): Payment {
+/** Provider ids never leave the server except: the client secret on the checkout (order create) response, and the intent id for admins. */
+export function toPaymentDto(r: PaymentRow, reveal: { clientSecret?: boolean; intentId?: boolean } = {}): Payment {
   return {
-    id: r.id, orderId: r.order_id, provider: r.provider, providerIntentId: r.provider_intent_id, clientSecret: r.client_secret, status: r.status, amountCents: r.amount_cents,
+    id: r.id, orderId: r.order_id, provider: r.provider, providerIntentId: reveal.intentId ? r.provider_intent_id : null, clientSecret: reveal.clientSecret ? r.client_secret : null, status: r.status, amountCents: r.amount_cents,
     refundedCents: r.refunded_cents, methodBrand: r.method_brand, methodLast4: r.method_last4, failureCode: r.failure_code, failureMessage: r.failure_message, succeededAt: r.succeeded_at, createdAt: r.created_at,
   };
 }
@@ -453,7 +454,7 @@ export function requireOrder(id: string): OrderRow {
 export function latestPayment(orderId: string): PaymentRow | undefined {
   return q.get<PaymentRow>('SELECT * FROM payments WHERE order_id = ? ORDER BY created_at DESC LIMIT 1', [orderId]);
 }
-export function toOrderDto(r: OrderRow, opts: { withPayments?: boolean } = {}): OrderDto {
+export function toOrderDto(r: OrderRow, opts: { withPayments?: boolean; checkout?: boolean; admin?: boolean; party?: boolean } = {}): OrderDto {
   const plan = r.plan_id ? loadPlan(r.plan_id) : undefined;
   const meta = parseJson<Record<string, unknown>>(r.metadata_json, {});
   const addons = (Array.isArray(meta.addons) ? (meta.addons as string[]) : []).map((k) => loadPlan(k)).filter((p): p is PlanRow => !!p).map(toPlanDto);
@@ -462,10 +463,15 @@ export function toOrderDto(r: OrderRow, opts: { withPayments?: boolean } = {}): 
   return {
     id: r.id, kind: r.kind, status: r.status, planId: r.plan_id, plan: plan ? toPlanDto(plan) : undefined, entityType: r.entity_type, entityId: r.entity_id,
     subtotalCents: r.subtotal_cents, discountCents: r.discount_cents, creditCents: r.credit_cents, feeCents: r.fee_cents, totalCents: r.total_cents,
-    promoCode: promo, payment: pay ? toPaymentDto(pay) : undefined, metadata: meta, paidAt: r.paid_at, fulfilledAt: r.fulfilled_at, createdAt: r.created_at,
+    promoCode: promo, payment: pay && !opts.party ? toPaymentDto(pay, { clientSecret: opts.checkout, intentId: opts.admin }) : undefined, metadata: meta, paidAt: r.paid_at, fulfilledAt: r.fulfilled_at, createdAt: r.created_at,
     userId: r.user_id, campusId: r.campus_id, addons,
-    payments: opts.withPayments ? q.all<PaymentRow>('SELECT * FROM payments WHERE order_id = ? ORDER BY created_at', [r.id]).map(toPaymentDto) : undefined,
+    payments: opts.withPayments && !opts.party ? q.all<PaymentRow>('SELECT * FROM payments WHERE order_id = ? ORDER BY created_at', [r.id]).map((p) => toPaymentDto(p, { intentId: opts.admin })) : undefined,
   };
+}
+/** The order as the other party of a Secure Payment sees it on the receipt: amounts and status only (no card, no provider ids). */
+export function toPartyOrderDto(r: OrderRow): OrderDto {
+  const dto = toOrderDto(r, { party: true });
+  return { ...dto, metadata: {}, promoCode: undefined, creditCents: 0 };
 }
 export type OrderDraft = { kind: OrderRow['kind']; plan: PlanRow | null; entityType?: string | null; entityId?: string | null; campusId?: string | null; subtotalCents: number; feeCents?: number; addons?: PlanRow[]; promoCode?: string; useWallet?: boolean; metadata?: Record<string, unknown>; surface?: string };
 export type PricedOrder = { subtotal: number; discount: number; credit: number; fee: number; total: number; promo: PromoRow | null; walletAllowed: boolean };
@@ -538,6 +544,8 @@ export function payOrder(user: AuthUser, order: OrderRow, method: { card?: CardL
     q.insert('payments', pay as unknown as Record<string, string | number | null>);
     q.run('UPDATE orders SET payment_id = ?, status = ?, updated_at = ? WHERE id = ?', [pay.id, 'awaiting_payment', t, order.id]);
   }
+  const blocker = settleBlocker(order);
+  if (blocker) throw blocker;
   logEvent(req, 'checkout.pay', { entityType: 'order', entityId: order.id, props: { kind: order.kind, totalCents: order.total_cents, provider: 'mock_stripe' } });
   let brand: string | null = null;
   let last4: string | null = null;
@@ -570,10 +578,30 @@ export function payOrder(user: AuthUser, order: OrderRow, method: { card?: CardL
     return settleOrder(order, updated, req);
   });
 }
-/** Payment succeeded → wallet debit → paid → fulfil (same transaction). */
+/** Limits re-checked when an order is paid (several open orders must not each redeem a once-per-user promo code or
+ *  spend the same wallet credit). Called before charging and again inside settlement. */
+export function settleBlocker(order: OrderRow): ApiError | null {
+  if (order.promo_code_id) {
+    const promo = q.get<PromoRow>('SELECT * FROM promo_codes WHERE id = ?', [order.promo_code_id]);
+    const used = promo ? q.count('SELECT COUNT(*) FROM promo_redemptions WHERE promo_code_id = ? AND user_id = ? AND order_id IS NOT ?', [promo.id, order.user_id, order.id]) : 0;
+    if (!promo || used >= promo.per_user_limit) return new ApiError('PROMO_INVALID', 'This promo code has already been used — cancel this order and check out again', { data: { reason: 'already_used', orderId: order.id } });
+    if (promo.max_redemptions !== null && promo.redeemed_count >= promo.max_redemptions) return new ApiError('PROMO_INVALID', 'This promo code has run out — cancel this order and check out again', { data: { reason: 'exhausted', orderId: order.id } });
+  }
+  if (order.credit_cents > 0 && walletBalance(order.user_id) < order.credit_cents) return new ApiError('CONFLICT', 'Your wallet balance changed — review the order again', { data: { reason: 'wallet_changed', orderId: order.id } });
+  return null;
+}
+/** Payment succeeded → wallet debit → paid → fulfil (same transaction).
+ *  Refuses unless the stored payment proves the money arrived: a provider charge id, or a $0 wallet payment for a $0 order. */
 export function settleOrder(order: OrderRow, pay: PaymentRow, req: Request | null): OrderRow {
   const t = nowIso();
   return q.tx(() => {
+    const fresh = q.get<PaymentRow>('SELECT * FROM payments WHERE id = ?', [pay.id]);
+    const charged = !!fresh && fresh.order_id === order.id && fresh.status === 'succeeded' && (!!fresh.provider_charge_id || (fresh.provider === 'wallet' && fresh.amount_cents === 0 && order.total_cents === 0));
+    if (!charged) throw new ApiError('PAYMENT_FAILED', 'Payment not confirmed by the provider', { data: { orderId: order.id } });
+    const current = requireOrder(order.id);
+    if (!['awaiting_payment', 'failed', 'pending'].includes(current.status)) throw invalidState(current.status, 'paid');
+    const blocker = settleBlocker(order);
+    if (blocker) throw blocker;
     if (order.credit_cents > 0) ledgerAppend(order.user_id, -order.credit_cents, 'order_payment', { refType: 'order', refId: order.id, note: order.kind, req });
     if (order.promo_code_id) q.run('INSERT INTO promo_redemptions (id, promo_code_id, user_id, order_id, amount_cents, created_at) VALUES (?, ?, ?, ?, ?, ?)', [uid(), order.promo_code_id, order.user_id, order.id, order.discount_cents, t]);
     q.run("UPDATE orders SET status = 'paid', paid_at = ?, updated_at = ? WHERE id = ?", [t, t, order.id]);

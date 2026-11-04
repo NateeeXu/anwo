@@ -35,10 +35,17 @@ export async function verifyPassword(plain: string, hash: string): Promise<boole
 }
 
 // ------------------------------------------------------------------ JWT session
-export type SessionPayload = { sub: string; role: string; iat: number; exp: number };
+export type SessionPayload = { sub: string; role: string; iat: number; exp: number; sv: number };
+function sessionVersionOf(userId: string): number {
+  return q.get<{ session_version: number | null }>('SELECT session_version FROM users WHERE id = ?', [userId])?.session_version ?? 0;
+}
+/** Invalidates every session of the user (password change / reset, "log out everywhere"); re-sign the current one after. */
+export function bumpSessionVersion(userId: string): void {
+  q.run('UPDATE users SET session_version = COALESCE(session_version, 0) + 1, updated_at = ? WHERE id = ?', [nowIso(), userId]);
+}
 export async function signSession(user: Pick<UserRow, 'id' | 'role'>, days = config.sessionDays): Promise<string> {
   const iat = Math.floor(nowMs() / 1000);
-  return new SignJWT({ role: user.role })
+  return new SignJWT({ role: user.role, sv: sessionVersionOf(user.id) })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(user.id)
     .setIssuedAt(iat)
@@ -50,7 +57,7 @@ export async function verifySession(token: string | undefined | null): Promise<S
   try {
     const { payload } = await jwtVerify(token, secret, { algorithms: ['HS256'], currentDate: new Date(nowMs()) });
     if (!payload.sub) return null;
-    return { sub: payload.sub, role: String(payload.role ?? 'student'), iat: Number(payload.iat), exp: Number(payload.exp) };
+    return { sub: payload.sub, role: String(payload.role ?? 'student'), iat: Number(payload.iat), exp: Number(payload.exp), sv: Number(payload.sv ?? 0) };
   } catch {
     return null;
   }
@@ -75,7 +82,7 @@ export function cookieOf(req: Request, name: string): string | undefined {
 
 // ------------------------------------------------------------------ user loading
 const USER_COLUMNS =
-  'id, email, name, role, trust_level, locale, campus_id, bio, avatar_upload_id, phone, phone_verified_at, email_verified_at, edu_email, id_verified_at, payment_verified_at, wechat_id, gender, grad_year, program, languages_json, banned, banned_reason, banned_at, referral_code, referred_by, verified_only_messaging, email_digest_opt_in, pro_until, wallet_balance_cents, listing_quota, last_seen_at, created_at, updated_at, deleted_at';
+  'id, email, name, role, trust_level, locale, campus_id, bio, avatar_upload_id, phone, phone_verified_at, email_verified_at, edu_email, id_verified_at, payment_verified_at, wechat_id, gender, grad_year, program, languages_json, banned, banned_reason, banned_at, referral_code, referred_by, verified_only_messaging, email_digest_opt_in, pro_until, wallet_balance_cents, listing_quota, session_version, last_seen_at, created_at, updated_at, deleted_at';
 export function loadUser(id: string): AuthUser | undefined {
   return q.get<AuthUser>(`SELECT ${USER_COLUMNS} FROM users WHERE id = ? AND deleted_at IS NULL`, [id]);
 }
@@ -99,6 +106,7 @@ async function resolveUser(req: Request): Promise<AuthUser | undefined> {
   if (!session) return undefined;
   const user = loadUser(session.sub);
   if (!user) return undefined;
+  if ((user.session_version ?? 0) !== session.sv) return undefined; // revoked (password changed, logged out everywhere)
   req.user = user;
   touchLastSeen(user.id);
   return user;
