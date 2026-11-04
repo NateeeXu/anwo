@@ -160,6 +160,7 @@ router.get('/', (req, res) => {
       campusId: b.scope.scope === 'campus' ? b.scope.campusId : null,
       city: b.scope.city ?? null,
       state: b.scope.state ?? null,
+      nationwide: b.scope.scope === 'nationwide',
       slots,
       tier: p.pageSize <= 8 ? 'max' : undefined,
     });

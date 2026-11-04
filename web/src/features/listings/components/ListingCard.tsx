@@ -11,6 +11,7 @@ import { useCampus } from '@/lib/campus';
 import { useLocale, useT } from '@/lib/i18n';
 import { cn } from '@/lib/cn';
 import { SaveButton } from './SaveButton';
+import { NearestStopChip } from '@/features/shuttle/components/NearestStopChip';
 
 export type ListingCardProps = {
   listing: ListingCardDto;
@@ -54,16 +55,19 @@ export const ListingCard = forwardRef<HTMLElement, ListingCardProps>(function Li
   const hover = { onMouseEnter: () => onHover?.(l.id), onMouseLeave: () => onHover?.(null), onFocus: () => onHover?.(l.id), onBlur: () => onHover?.(null) };
 
   const commute = (
-    <p className="flex min-w-0 items-center gap-2 text-small text-ink-3">
+    <p className="flex min-w-0 items-center gap-2 overflow-hidden text-small text-ink-3">
       {l.commuteWalkMin != null && l.commuteWalkMin <= 45 && (
         <span className="flex items-center gap-1 whitespace-nowrap"><Footprints className="size-3.5 shrink-0" aria-hidden />{t('listings.card.walk', { n: l.commuteWalkMin })}</span>
       )}
       {l.commuteWalkMin != null && l.commuteWalkMin > 45 && l.distanceToCampusM != null && (
         <span className="flex items-center gap-1 whitespace-nowrap"><Bike className="size-3.5 shrink-0" aria-hidden />{t('listings.card.fromCampus', { d: formatDistance(l.distanceToCampusM) })}</span>
       )}
-      {l.nearShuttle && (
+      {l.nearShuttle && l.nearestStop ? (
+        // shuttle module's chip, pre-resolved by the server (no per-card fetch); plain text because the card is a link
+        <NearestStopChip campusId={l.campusId} stop={l.nearestStop} distanceM={l.nearestStop.distanceM} asText className="min-w-0" />
+      ) : l.nearShuttle ? (
         <span className="flex items-center gap-1 whitespace-nowrap rounded-pill bg-sunken px-1.5 py-px text-caption text-ink-2"><Bus className="size-3.5 shrink-0" aria-hidden />{l.commuteShuttleMin != null ? t('listings.card.shuttle', { n: l.commuteShuttleMin }) : t('listings.card.nearShuttle')}</span>
-      )}
+      ) : null}
     </p>
   );
 

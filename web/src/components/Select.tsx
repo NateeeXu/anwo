@@ -196,7 +196,7 @@ function SelectInner<V extends string>(
       style={mobile ? undefined : { position: 'fixed', top: pos?.top ?? -9999, left: pos?.left ?? -9999, width: triggerRef.current?.offsetWidth, maxHeight: Math.min(320, pos?.maxHeight ?? 320) }}
       className={cn(
         'flex flex-col outline-none',
-        !mobile && 'z-layer-dropdown min-w-[200px] overflow-hidden rounded-card border border-line bg-surface shadow-md animate-fade-in',
+        !mobile && 'z-layer-popover min-w-[200px] overflow-hidden rounded-card border border-line bg-surface shadow-md animate-fade-in',
       )}
     >
       {searchable && (

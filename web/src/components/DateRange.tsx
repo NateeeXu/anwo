@@ -306,7 +306,7 @@ export const DateRange = forwardRef<HTMLDivElement, DateRangeProps>(function Dat
             role="dialog"
             aria-label={typeof label === 'string' ? label : t('ui.pickDates')}
             style={{ position: 'fixed', top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}
-            className="z-layer-dropdown rounded-card border border-line bg-surface p-4 shadow-md animate-fade-in"
+            className="z-layer-popover rounded-card border border-line bg-surface p-4 shadow-md animate-fade-in"
           >
             {calendar(false)}
           </div>

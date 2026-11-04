@@ -185,7 +185,7 @@ export function DropdownMenu({ trigger, items, align = 'start', label, open: ope
             tabIndex={-1}
             onKeyDown={onKey}
             style={{ position: 'fixed', top: pos?.top ?? -9999, left: pos?.left ?? -9999, maxHeight: pos?.maxHeight }}
-            className={cn('z-layer-dropdown min-w-[200px] overflow-y-auto rounded-card border border-line bg-surface p-1 shadow-md outline-none animate-fade-in', className)}
+            className={cn('z-layer-popover min-w-[200px] overflow-y-auto rounded-card border border-line bg-surface p-1 shadow-md outline-none animate-fade-in', className)}
           >
             {list(false)}
           </div>

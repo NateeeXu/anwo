@@ -59,7 +59,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   refresh: async () => {
     try {
-      const u = await api<UserMe>('/api/auth/me')
+      // `optional=1`: anonymous visitors get 200 null instead of a 401 (no console noise on every signed-out page load)
+      const u = await api<UserMe | null>('/api/auth/me', { query: { optional: 1 } })
+      if (!u) {
+        set({ user: null, status: 'anon' })
+        return null
+      }
       get().setUser(u)
       return u
     } catch (e) {

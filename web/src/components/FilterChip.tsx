@@ -82,7 +82,7 @@ export const FilterChip = forwardRef<HTMLButtonElement, FilterChipProps>(functio
             role="dialog"
             aria-label={typeof menuTitle === 'string' ? menuTitle : typeof children === 'string' ? children : undefined}
             style={{ position: 'fixed', top: pos?.top ?? -9999, left: pos?.left ?? -9999, maxHeight: pos?.maxHeight }}
-            className="z-layer-dropdown min-w-[240px] overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-md animate-fade-in"
+            className="z-layer-popover min-w-[240px] overflow-y-auto rounded-card border border-line bg-surface p-4 shadow-md animate-fade-in"
           >
             {content}
           </div>

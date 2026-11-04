@@ -146,6 +146,8 @@ export type ListingCard = {
   campus: CampusLite;
   isVerifiedListing: boolean;
   nearShuttle: boolean;
+  /** nearest active shuttle stop when within 400 m (set by lib/cards.listingCards; renders shuttle's NearestStopChip) */
+  nearestStop?: { id: string; name: string; nameZh: string | null; distanceM: number } | null;
   distanceToCampusM: number | null;
   commuteWalkMin: number | null;
   commuteShuttleMin: number | null;

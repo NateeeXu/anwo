@@ -6,7 +6,7 @@ import { useT } from '../../lib/i18n';
 import { cn } from '../../lib/cn';
 import { loginPath } from '../guards';
 import { usePostSheet, useShellStore } from './shellStore';
-import { useUnread } from './useUnread';
+import { useUnreadMessages } from '../../features/chat/hooks';
 
 export function BottomTabs() {
   const t = useT();
@@ -14,7 +14,8 @@ export function BottomTabs() {
   const { open } = usePostSheet();
   const { status, user } = useAuth();
   const hide = useShellStore((s) => s.hideTabs);
-  const unread = useUnread();
+  // 消息 badge: chat's own unread source (live via chat.conversation totalUnread, 30 s polling fallback)
+  const unreadMessages = useUnreadMessages();
   if (hide) return null;
 
   const mePath = status === 'authed' && user ? '/settings' : loginPath('/settings');
@@ -22,7 +23,7 @@ export function BottomTabs() {
     { key: 'home', to: '/', label: t('nav.home'), Icon: House, active: pathname === '/' },
     { key: 'map', to: '/map', label: t('nav.map'), Icon: Map, active: pathname.startsWith('/map') },
     { key: 'post' },
-    { key: 'chat', to: '/chat', label: t('nav.chat'), Icon: MessageCircle, active: pathname.startsWith('/chat'), count: unread.messages },
+    { key: 'chat', to: '/chat', label: t('nav.chat'), Icon: MessageCircle, active: pathname.startsWith('/chat'), count: unreadMessages },
     { key: 'me', to: mePath, label: t('nav.me'), Icon: UserRound, active: pathname.startsWith('/settings') || pathname.startsWith('/u/') },
   ] as const;
 

@@ -2,6 +2,7 @@ import { forwardRef, useId, type HTMLAttributes, type ReactNode } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useT } from '@/lib/i18n'
+import { useIsMobile } from '@/lib/hooks'
 import { Checkbox } from './Checkbox'
 import { Skeleton } from './Skeleton'
 
@@ -41,6 +42,7 @@ function TableInner<Row>(
   ref: React.ForwardedRef<HTMLDivElement>,
 ) {
   const t = useT()
+  const isMobile = useIsMobile()
   const id = useId()
   const keyOf = (r: Row) => (typeof rowKey === 'function' ? rowKey(r) : String(r[rowKey]))
   const sel = new Set(selected instanceof Set ? selected : (selected ?? []))
@@ -64,8 +66,8 @@ function TableInner<Row>(
 
   return (
     <div ref={ref} className={cn('w-full', className)} aria-busy={loading || undefined} {...rest}>
-      {/* desktop table */}
-      <div className={cn('hidden overflow-x-auto rounded-card border border-line bg-surface md:block', stickyHeader && 'max-h-[70dvh] overflow-y-auto')}>
+      {/* desktop table (only one layout is mounted so role/aria lookups are unambiguous) */}
+      {!isMobile && <div className={cn('hidden overflow-x-auto rounded-card border border-line bg-surface md:block', stickyHeader && 'max-h-[70dvh] overflow-y-auto')}>
         <table className="w-full border-collapse text-body">
           {caption && <caption className="sr-only">{caption}</caption>}
           <thead className={cn('bg-sunken', stickyHeader && 'sticky top-0 z-[1]')}>
@@ -137,9 +139,9 @@ function TableInner<Row>(
           </tbody>
         </table>
         {!loading && rows.length === 0 && <div className="border-t border-line">{empty ?? <p className="px-3 py-10 text-center text-small text-ink-3">{t('ui.noData')}</p>}</div>}
-      </div>
+      </div>}
       {/* mobile stacked cards */}
-      <div className="flex flex-col gap-3 md:hidden">
+      {isMobile && <div className="flex flex-col gap-3 md:hidden">
         {loading
           ? Array.from({ length: Math.min(3, skeletonRows) }).map((_, i) => <Skeleton key={i} variant="row" className="rounded-card border border-line bg-surface px-4" />)
           : rows.map((r, i) => {
@@ -172,7 +174,7 @@ function TableInner<Row>(
               )
             })}
         {!loading && rows.length === 0 && (empty ?? <p className="py-10 text-center text-small text-ink-3">{t('ui.noData')}</p>)}
-      </div>
+      </div>}
     </div>
   )
 }

@@ -216,6 +216,7 @@ html[lang^="zh"] { --lh-body: 1.65; }
   --z-dropdown: 40;   /* menus, popovers, campus switcher     */
   --z-overlay:  50;   /* scrim                                */
   --z-modal:    60;   /* modal, sheet, drawer                 */
+  --z-popover:  65;   /* portaled menus/listboxes/popovers — also usable inside a modal */
   --z-toast:    70;
   --z-tooltip:  80;
 }

@@ -36,7 +36,12 @@ function TabsInner<K extends string>(
       const el = root.querySelector<HTMLElement>(`[data-key="${CSS.escape(value)}"]`)
       if (!el) return setInk(null)
       setInk({ left: el.offsetLeft, width: el.offsetWidth })
-      el.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+      // keep the active tab visible by scrolling the tab strip only (scrollIntoView would also scroll the window)
+      const scroller = root.scrollWidth > root.clientWidth ? root : root.parentElement && root.parentElement.scrollWidth > root.parentElement.clientWidth ? root.parentElement : null
+      if (scroller) {
+        const left = el.offsetLeft - (scroller === root ? 0 : root.offsetLeft)
+        if (left < scroller.scrollLeft || left + el.offsetWidth > scroller.scrollLeft + scroller.clientWidth) scroller.scrollTo({ left: Math.max(0, left - 16) })
+      }
     }
     measure()
     const ro = new ResizeObserver(measure)

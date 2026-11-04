@@ -1,8 +1,11 @@
 // Desktop top nav (DESIGN.md §6.1) and the mobile top bar (§6.2).
-import { ChevronLeft, Plus, Search } from 'lucide-react';
+import { ChevronLeft, MessageCircle, Plus, Search } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { Lockup, Mark } from '../../components/brand';
 import { Button } from '../../components';
+import { useAuth } from '../../lib/auth';
+import { cn } from '../../lib/cn';
+import { useUnreadMessages } from '../../features/chat/hooks';
 import { useT } from '../../lib/i18n';
 import { CampusSwitcher } from './CampusSwitcher';
 import { GlobalSearch } from './GlobalSearch';
@@ -29,10 +32,35 @@ export function TopNav() {
           {t('nav.post')}
         </Button>
         <LangToggle className="hidden lg:block" />
+        <ChatButton />
         <NotificationBell />
         <UserMenu />
       </div>
     </header>
+  );
+}
+
+/** Desktop 消息 entry with the chat module's unread badge (the bottom tab plays this role on mobile). */
+function ChatButton() {
+  const t = useT();
+  const { status } = useAuth();
+  const { pathname } = useLocation();
+  const count = useUnreadMessages();
+  if (status !== 'authed') return null;
+  return (
+    <Link
+      to="/chat"
+      aria-label={count ? t('nav.chatWithCount', { count }) : t('nav.chat')}
+      aria-current={pathname.startsWith('/chat') ? 'page' : undefined}
+      className={cn('relative flex size-10 shrink-0 items-center justify-center rounded-ctl transition-colors duration-token-fast hover:bg-sunken hover:text-ink', pathname.startsWith('/chat') ? 'text-ink' : 'text-ink-2')}
+    >
+      <MessageCircle className="size-5" strokeWidth={1.75} aria-hidden />
+      {count > 0 && (
+        <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-pill bg-accent px-1 text-[10px] font-semibold leading-none text-on-accent tnum">
+          {count > 99 ? '99+' : count}
+        </span>
+      )}
+    </Link>
   );
 }
 

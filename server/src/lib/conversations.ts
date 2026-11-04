@@ -137,7 +137,7 @@ export function contextCardFor(type: ContextCard['type'], id: string): ContextCa
     }
     case 'escrow': {
       const r = q.get<{ amount_cents: number; status: string; listing_title: string | null }>('SELECT e.amount_cents, e.status, l.title AS listing_title FROM escrows e LEFT JOIN listings l ON l.id = e.listing_id WHERE e.id = ?', [id]);
-      return r ? { type, id, title: r.listing_title ?? 'Deposit escrow', subtitle: r.status, priceCents: r.amount_cents, link: `/billing/escrows/${id}`, status: r.status } : null;
+      return r ? { type, id, title: r.listing_title ?? 'Secure Payment · 安心付', subtitle: r.status, priceCents: r.amount_cents, link: `/escrow/${id}`, status: r.status } : null;
     }
     default:
       return null;

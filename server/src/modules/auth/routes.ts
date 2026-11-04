@@ -102,8 +102,11 @@ router.post('/logout', requireAuth, (_req, res) => {
   ok(res, null);
 });
 
-router.get('/me', requireAuth, (req, res) => {
-  ok(res, toUserMe(req.user!));
+// `?optional=1` answers 200 `null` for anonymous visitors (the web app's boot probe), so a signed-out page load does not
+// log a 401 in the browser console. Without the flag the contract is unchanged (401 UNAUTHORIZED).
+router.get('/me', (req, res, next) => {
+  if (!req.user && req.query.optional === '1') return ok(res, null);
+  return requireAuth(req, res, () => ok(res, toUserMe(req.user!)));
 });
 
 router.post('/request-edu-code', requireAuth, rateLimit({ name: 'edu-code', limit: 5, windowMs: 10 * 60_000 }), (req, res) => {

@@ -19,6 +19,8 @@ export type PickSponsoredInput = {
   excludeIds?: string[];
   slots: number;
   tier?: 'max';
+  /** nationwide results: only `boosts.nationwide = 1` (Nationwide Spotlight) picks qualify when no campus/city is given */
+  nationwide?: boolean;
 };
 
 const ENTITY_TABLE: Record<PickSponsoredInput['entityType'], { table: string; status: string; cityCol: string | null }> = {
@@ -46,12 +48,15 @@ const TIER_RANK = "CASE b.tier WHEN 'max' THEN 3 WHEN 'plus' THEN 2 ELSE 1 END";
 export function pickSponsored(input: PickSponsoredInput): SponsoredPick[] {
   if (input.slots <= 0) return [];
   const meta = ENTITY_TABLE[input.entityType];
-  const where: string[] = ['b.entity_type = ?', meta.status];
+  // paused boosts (2+ open reports, billing job) never show; columns from migration 18_billing.sql
+  const where: string[] = ['b.entity_type = ?', meta.status, 'b.paused_at IS NULL'];
   const params: (string | number)[] = [input.entityType];
   if (input.tier) { where.push('b.tier = ?'); params.push(input.tier); }
-  // boosted entities only appear within their own campus, or in nationwide results for their city
+  // boosted entities only appear within their own campus, or in nationwide results for their city;
+  // Nationwide Spotlight boosts (b.nationwide = 1) also appear in any nationwide result
   if (input.campusId) { where.push('e.campus_id = ?'); params.push(input.campusId); }
-  else if (input.city && input.state && meta.cityCol) { where.push(`e.${meta.cityCol} = ? AND e.state = ?`); params.push(input.city, input.state); }
+  else if (input.city && input.state && meta.cityCol) { where.push(`((e.${meta.cityCol} = ? AND e.state = ?) OR b.nationwide = 1)`); params.push(input.city, input.state); }
+  else if (input.nationwide) where.push('b.nationwide = 1');
   else return [];
   if (input.excludeIds?.length) { where.push(`b.entity_id NOT IN (${input.excludeIds.map(() => '?').join(', ')})`); params.push(...input.excludeIds); }
   const rows = q.all<{ id: string; tier: SponsoredPick['tier']; boost_id: string }>(

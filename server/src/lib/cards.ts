@@ -19,7 +19,7 @@ export type ListingCardRow = {
   id: string; owner_id: string; campus_id: string; title: string; price_cents: number; deposit_cents: number; bedrooms: number; bathrooms: number;
   property_type: string; listing_type: string; furnished: string; available_from: string; available_to: string | null; city: string; state: string;
   neighborhood: string | null; lat: number; lng: number; hide_exact_address: number; cover_upload_id: string | null; photo_count: number; status: string;
-  is_verified_listing: number; nearest_stop_m: number | null; distance_to_campus_m: number | null; commute_walk_min: number | null;
+  is_verified_listing: number; nearest_stop_id?: string | null; nearest_stop_m: number | null; distance_to_campus_m: number | null; commute_walk_min: number | null;
   commute_shuttle_min: number | null; save_count: number; view_count: number; published_at: string | null; boosted_until: string | null;
   cover_url?: string | null; owner_trust_level?: number; distance_m?: number | null;
 };
@@ -33,6 +33,8 @@ export type CardCtx = {
   boostTier?: 'basic' | 'plus' | 'max';
   /** exact coordinates (owner/admin/escrow party) */
   exact?: boolean;
+  /** resolved nearest shuttle stop (listings) */
+  nearestStop?: ListingCard['nearestStop'];
   myMembership?: BuddyCard['myMembership'];
 };
 
@@ -52,6 +54,7 @@ export function toListingCard(r: ListingCardRow, ctx: CardCtx = {}): ListingCard
   };
   if (ctx.boostTier) card.boostTier = ctx.boostTier;
   if (ctx.saved !== undefined) card.saved = ctx.saved;
+  if (ctx.nearestStop !== undefined) card.nearestStop = ctx.nearestStop;
   if (r.distance_m !== undefined && r.distance_m !== null) card.distanceM = Math.round(r.distance_m);
   return card;
 }
@@ -71,8 +74,17 @@ export function listingCards(rows: ListingCardRow[], opts: { viewerId?: string |
     const ids = rows.map((r) => r.id);
     for (const s of q.all<{ listing_id: string }>(`SELECT listing_id FROM listing_saves WHERE user_id = ? AND listing_id IN (${placeholders(ids.length)})`, [opts.viewerId, ...ids])) saved.add(s.listing_id);
   }
+  const stops = new Map<string, { id: string; name: string; name_zh: string | null }>();
+  const stopIds = [...new Set(rows.filter((r) => r.nearest_stop_id && r.nearest_stop_m !== null && r.nearest_stop_m <= 400).map((r) => r.nearest_stop_id!))];
+  if (stopIds.length) {
+    for (const s of q.all<{ id: string; name: string; name_zh: string | null }>(`SELECT id, name, name_zh FROM shuttle_stops WHERE id IN (${placeholders(stopIds.length)}) AND is_active = 1`, stopIds)) stops.set(s.id, s);
+  }
   return rows.map((r) =>
     toListingCard(r, {
+      nearestStop: (() => {
+        const s = r.nearest_stop_id && r.nearest_stop_m !== null && r.nearest_stop_m <= 400 ? stops.get(r.nearest_stop_id) : undefined;
+        return s ? { id: s.id, name: s.name, nameZh: s.name_zh, distanceM: Math.round(r.nearest_stop_m!) } : null;
+      })(),
       owner: owners.get(r.owner_id) ?? null,
       coverUrl: r.cover_upload_id ? covers.get(r.cover_upload_id) ?? null : null,
       saved: opts.viewerId ? saved.has(r.id) : undefined,
