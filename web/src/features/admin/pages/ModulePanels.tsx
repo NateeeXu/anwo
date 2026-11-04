@@ -35,14 +35,14 @@ export const PANELS: Record<string, Panel> = {
 
 /** Keeps a crashing module panel from taking the admin shell down. */
 class PanelBoundary extends Component<{ children: ReactNode; fallback: (reset: () => void) => ReactNode }, { error: Error | null }> {
-  state = { error: null as Error | null };
+  override state = { error: null as Error | null };
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.warn('admin panel crashed', error, info.componentStack);
   }
-  render() {
+  override render() {
     return this.state.error ? this.props.fallback(() => this.setState({ error: null })) : this.props.children;
   }
 }

@@ -159,7 +159,3 @@ export function ModerationTable({ entityType, titleKey, embedded }: { entityType
     </div>
   );
 }
-
-export default function ListingsModeration() {
-  return <ModerationTable entityType="listing" titleKey="admin.nav.listings" />;
-}

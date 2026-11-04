@@ -1,4 +1,2 @@
-// Admin panel for "admin" — owned by the admin module agent; replace freely.
-// Contract: default-export a React component (rendered inside the admin shell under /admin/admin)
-// or null when the module has no admin panel. The admin module agent imports this file by path.
+// The admin module's own pages are the /admin shell itself (see routes.tsx), so there is no extra panel to mount.
 export default null;
